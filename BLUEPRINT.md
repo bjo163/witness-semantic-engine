@@ -12,17 +12,17 @@
 
 The words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT**, **MAY**, and **OPTIONAL** are normative requirements.
 
-Witness Semantic Engine (WSE/WSI) is spec-first. Code, prompts, models, databases, workers, APIs, and UIs are subordinate to this contract.
+Witness Semantic Engine (WSI) is spec-first. Code, prompts, models, databases, workers, APIs, and UIs are subordinate to this contract.
 
 ---
 
-# PART I — MISSION AND BOUNDARY
+# PART I — MISSION AND OWNERSHIP
 
 ## 1. Purpose
 
-WSI is a downstream semantic-analysis engine. It does **not** own scripture/corpus ingestion, editions, source artifacts, canonical text, rights, or primary textual provenance.
+WSI is a downstream semantic-analysis engine. It does **not** own scripture/corpus ingestion, editions, source artifacts, canonical text, source rights, or primary textual provenance.
 
-WSI consumes addressable source resources from a Source Provider and produces auditable analysis objects:
+WSI consumes addressable resources from a Source Provider and produces auditable semantic-analysis objects:
 
 ```text
 SOURCE PROVIDER RESOURCE(S)
@@ -50,13 +50,13 @@ RESPONSE / CORRECTION
 POSITIVE DIRECTION
 ```
 
-The primary unit of semantic analysis is a **Frame/Proposition**, not a keyword and not a verse.
+The primary semantic unit is a **Frame/Proposition**, not a keyword, verse, ayah, book, or corpus.
 
 ## 2. Ownership boundary
 
 ### Source Provider owns
 
-A Source Provider is authoritative for its own resource identities and source records. In the current MoonWitness ecosystem, `rocksoul-rgbl` owns:
+The provider is authoritative for its own source identities and source records. In the current MoonWitness ecosystem, `rocksoul-rgbl` owns:
 
 ```text
 corpus/dataset identity
@@ -64,18 +64,18 @@ work
 expression
 edition
 artifact
-passage/fragment/content
+passage / fragment / content
 citation/reference schemes
 variants and textual alignments
 exact source text
-source acquisition provenance
+source-acquisition provenance
 rights/license metadata
 source checksums
 ```
 
 ### WSI owns
 
-WSI owns only downstream semantic-analysis objects:
+WSI owns downstream analysis only:
 
 ```text
 source bindings
@@ -101,15 +101,13 @@ positive direction
 cross-analysis semantic mappings
 ```
 
-### Non-negotiable rule
+### Core invariant
 
 ```text
-SOURCE PROVIDER DATA
-!=
-WSI ANALYSIS DATA
+SOURCE PROVIDER DATA != WSI ANALYSIS DATA
 ```
 
-WSI MUST NOT copy source ownership into its own ontology merely for convenience.
+WSI MUST NOT duplicate source ownership for convenience.
 
 ---
 
@@ -117,7 +115,7 @@ WSI MUST NOT copy source ownership into its own ontology merely for convenience.
 
 ## 3. Provider neutrality
 
-WSI MUST NOT contain corpus-specific branches such as:
+WSI MUST NOT contain corpus-specific semantic branches such as:
 
 ```text
 if corpus == quran
@@ -125,43 +123,39 @@ if corpus == torah
 if corpus == gospels
 ```
 
-Nor should it require one source repository forever.
+Instead WSI consumes a **Source Provider Contract**.
 
-Instead, WSI consumes a **Source Provider Contract**.
-
-The first and preferred integration is:
+The first provider integration is:
 
 ```text
 provider = rocksoul-rgbl
 namespace = mw
 ```
 
-A future provider MAY be used if it can satisfy the same minimum contract.
+A future provider MAY be supported if it satisfies the same minimum interface.
 
 ## 4. Minimum provider capability
 
-A provider integration MUST be able to resolve:
+A provider integration MUST resolve:
 
 ```text
 stable resource ID
 resource kind/type
 pinned provider revision or immutable release
-content associated with the resource
-language/script metadata when available
+content or content linkage
+language/script when available
 source provenance
-source integrity/checksum information when available
-resource relationships needed to interpret scope
+source integrity/checksum when available
+resource relationships required to interpret scope
 ```
 
-WSI stores a reference to this information; it does not redefine it.
+WSI stores references to this information; it does not redefine it.
 
 ## 5. Source Binding
 
-Every WSI analysis record MUST contain one or more Source Bindings.
+Every analysis MUST contain one or more Source Bindings.
 
-A Source Binding identifies the external snapshot against which analysis was performed.
-
-Minimum conceptual fields:
+A Source Binding pins external resources to the provider snapshot against which analysis was performed.
 
 ```text
 binding_id
@@ -180,7 +174,7 @@ Example:
   "id": "S1",
   "provider": "rocksoul-rgbl",
   "provider_contract": "moonwitness-corpus/v0.1",
-  "provider_revision": "<git-sha-or-release>",
+  "provider_revision": "df00706c98e21fb3fb0146b8389b0f2978f3d833",
   "primary_resource_id": "mw:passage:quran:37:30",
   "resource_ids": [
     "mw:passage:quran:37:30",
@@ -190,36 +184,38 @@ Example:
 }
 ```
 
+A moving ref such as `main` or `latest` is insufficient as the sole revision for reviewed/locked analysis.
+
 ## 6. Analysis Target
 
-A WSI record MUST explicitly identify its analysis target using a provider resource reference.
+Every WSI record identifies one primary external target:
 
 ```text
 analysis_target = source_binding_id + resource_id
 ```
 
-An analysis target can be a verse-like passage, paragraph, fragment, manuscript segment, commentary passage, or another addressable provider resource.
+A target may be a passage, paragraph, fragment, manuscript segment, content object, commentary passage, or another addressable resource.
 
-WSI MUST NOT assume all targets are verses/ayahs.
+WSI MUST NOT assume the universal target type is `verse` or `ayah`.
 
 ## 7. No canonical source copy
 
-Canonical primary text MUST NOT be duplicated into WSI records.
+Canonical primary text MUST NOT be duplicated into WSI as source authority.
 
-WSI MAY retain a small quote anchor for evidence resolution, but such text is:
+WSI MAY retain a small quote selector for evidence resolution, but:
 
 ```text
-ANCHOR / SELECTOR
-not SOURCE AUTHORITY
+QUOTE = ANCHOR
+QUOTE != SOURCE AUTHORITY
 ```
 
-If the quote conflicts with the pinned provider resource, the provider resource wins and the WSI analysis becomes stale/invalid until reviewed.
+If an anchor conflicts with the pinned provider resource, the provider wins and the WSI analysis becomes stale until reviewed.
 
 ---
 
-# PART III — EVIDENCE AND ANCHORING
+# PART III — EVIDENCE
 
-## 8. Evidence model
+## 8. Evidence dimensions
 
 Every semantic assertion MUST be traceable to evidence.
 
@@ -234,9 +230,7 @@ selector
 notes
 ```
 
-### Source class
-
-Initial values:
+### Evidence source classes
 
 ```text
 PRIMARY_TEXT
@@ -249,7 +243,7 @@ MODEL_SUGGESTION
 HUMAN_ANALYSIS
 ```
 
-### Derivation type
+### Derivation types
 
 ```text
 DIRECT
@@ -259,11 +253,9 @@ INTERPRETIVE
 DERIVED
 ```
 
-These dimensions are independent.
+These are independent dimensions.
 
-## 9. Selector model
-
-Evidence MAY point to a whole resource or a subresource anchor.
+## 9. Selectors
 
 Initial selector types:
 
@@ -274,13 +266,15 @@ CHAR_RANGE
 TOKEN_IDS
 ```
 
-Selectors are provider-relative. WSI MUST NOT pretend a locally generated token number is globally stable unless the tokenizer identity/version is recorded.
+Selectors are provider-relative.
+
+Locally generated token numbers MUST NOT be assumed stable unless tokenizer identity/version is recorded.
 
 ---
 
-# PART IV — ANALYSIS OBJECTS
+# PART IV — ANALYSIS MODEL
 
-## 10. Lexical / contextual sense
+## 10. Lexical/contextual sense
 
 A lexical form is not a concept.
 
@@ -302,13 +296,11 @@ ROOT != CONCEPT
 TRANSLATION STRING != CONCEPT ID
 ```
 
-A sense MAY remain unmapped to a universal WSI concept.
+A sense MAY remain unmapped.
 
-## 11. Utterance and discourse scope
+## 11. Discourse scope
 
-WSI SHOULD represent utterance scope when meaning depends on speaker, addressee, quotation, narration, or reported speech.
-
-A discourse role is not a semantic role.
+Utterance scope SHOULD be represented when meaning depends on speaker, addressee, quotation, narration, or reported speech.
 
 ```text
 SPEAKER != AGENT
@@ -319,19 +311,19 @@ ADDRESSEE != PATIENT
 
 Participants are analysis-local discourse/semantic referents.
 
-A participant may point to an external entity ID when one exists, but unresolved identity is valid.
+A participant MAY reference an external entity when available, but unresolved identity is valid.
 
 ```text
-surface_reference
+surface_reference = WE
 resolved_identity = null
 resolution_status = UNRESOLVED
 ```
 
-is a valid state.
+Contextual identity MUST NOT overwrite the source surface form.
 
 ## 13. Semantic frames
 
-Frames are the canonical structural unit of WSI.
+Frames are the primary structural unit.
 
 Initial frame classes:
 
@@ -343,11 +335,11 @@ EVENT
 ATTRIBUTE
 ```
 
-A frame contains:
+A frame may contain:
 
 ```text
 predicate/relation candidate
-role bindings
+semantic-role bindings
 concept mappings
 polarity
 modality
@@ -357,11 +349,9 @@ confidence
 review status
 ```
 
-### N-ary requirement
+### N-ary frames
 
-Frames MUST support more than subject-predicate-object.
-
-Example:
+Frames MUST support more than triples.
 
 ```text
 GIVE
@@ -371,9 +361,9 @@ GIVE
   LOCATION   → P4
 ```
 
-This is why a WSI Frame is not reducible to one generic triple.
+Therefore a WSI Frame MUST NOT be reduced to one subject-predicate-object assertion.
 
-## 14. Relation and concept separation
+## 14. Concept/relation separation
 
 ```text
 CONCEPT = AUTHORITY
@@ -381,17 +371,15 @@ RELATION = AUTHORITY_OVER
 POLARITY = NEGATED
 ```
 
-WSI MUST NOT create giant semantic IDs such as:
+Do not create:
 
 ```text
 NO_AUTHORITY_OVER_YOU
 ```
 
+as a canonical concept.
+
 ## 15. Polarity
-
-Polarity is a proposition property.
-
-Initial values:
 
 ```text
 AFFIRMED
@@ -399,11 +387,9 @@ NEGATED
 UNDETERMINED
 ```
 
+Polarity is a proposition property.
+
 ## 16. Modality
-
-Modality is separate from speech act.
-
-Initial values:
 
 ```text
 ASSERTED
@@ -415,9 +401,9 @@ COUNTERFACTUAL
 UNDETERMINED
 ```
 
-## 17. Speech act
+Modality is not speech act.
 
-Initial values:
+## 17. Speech act
 
 ```text
 STATEMENT
@@ -428,6 +414,7 @@ OATH
 REQUEST
 PROMISE
 WARNING
+SUPPLICATION
 OTHER
 UNDETERMINED
 ```
@@ -436,11 +423,11 @@ UNDETERMINED
 
 # PART V — ASSESSMENTS
 
-## 18. Assessment is separate from Frame
+## 18. Evaluative judgement is separate
 
-An evaluative judgement MUST NOT be silently embedded as if it were intrinsic source structure.
+Evaluative judgement MUST NOT be silently embedded as intrinsic source structure.
 
-Therefore `SOURCE_DIRECTION` is represented as an **Assessment** targeting a Frame or analysis record.
+Therefore `SOURCE_DIRECTION` is an **Assessment** targeting a Frame or analysis record.
 
 Wrong:
 
@@ -454,15 +441,11 @@ Preferred:
 FRAME F2
   ↓
 ASSESSMENT A2
-  type   = SOURCE_DIRECTION
-  result = NEGATIVE
+  assessment_type = SOURCE_DIRECTION
+  result          = NEGATIVE
 ```
 
-This makes the epistemic boundary explicit.
-
 ## 19. Direction vocabulary
-
-Initial direction values:
 
 ```text
 POSITIVE
@@ -472,17 +455,15 @@ MIXED
 UNDETERMINED
 ```
 
-Direction is not polarity, modality, or speech act.
-
 ```text
 POLARITY != DIRECTION
 MODALITY != DIRECTION
 SPEECH_ACT != DIRECTION
 ```
 
-## 20. Assessment provenance
+## 20. Assessment contract
 
-Every assessment SHOULD record:
+An assessment SHOULD record:
 
 ```text
 target
@@ -494,45 +475,42 @@ confidence
 review_status
 ```
 
-A whole-record direction summary is optional and derived from frame-level assessments.
+A record-level direction summary is optional and derived from more local assessments.
 
 ---
 
-# PART VI — CONCEPT ONTOLOGY
+# PART VI — ONTOLOGY
 
-## 21. Stable concept identity
+## 21. Language-neutral concept identity
 
-Canonical concept IDs are language-neutral.
+Examples:
 
 ```text
 wsi:concept/authority
 wsi:concept/transgression
 ```
 
-Labels are presentation metadata.
-
 ```text
 CONCEPT ID = IDENTITY
 LABEL = PRESENTATION
+LEXICAL FORM = SOURCE-LANGUAGE EVIDENCE
 ```
 
-English is not a hidden master language.
+English, Arabic, Hebrew, Greek, Indonesian, or another language MUST NOT become the hidden ontology identity.
 
-## 22. Conservative concept mapping
+## 22. Conservative mapping
 
-Cross-language equality MUST NOT be inferred from translated words.
+Cross-language equivalence MUST NOT be inferred from translation-string equality.
 
-Arabic, Hebrew, Greek, Pali, Sanskrit, English, Indonesian, or any other expression can map to the same concept only after contextual sense review.
+A contextual sense maps to a universal concept only after evidence-supported review.
 
 Unmapped is preferable to false equivalence.
 
 ---
 
-# PART VII — REVIEW, CONFIDENCE, AND PROVENANCE
+# PART VII — REVIEW, CONFIDENCE, PROVENANCE
 
-## 23. Review states
-
-Initial lifecycle:
+## 23. Review lifecycle
 
 ```text
 CANDIDATE
@@ -543,13 +521,13 @@ DISPUTED
 DEPRECATED
 ```
 
-`LOCKED` applies to an analysis assertion/object after review. It does not lock a corpus and does not mean theological infallibility.
+`LOCKED` is an analysis review state. It does not lock a corpus and does not mean theological infallibility.
 
 ## 24. Confidence
 
-Confidence is operational research confidence, not truth percentage.
+Confidence is operational research confidence, never theological truth percentage.
 
-It MUST reference a versioned policy and retain component scores.
+It MUST be policy-versioned and decomposable:
 
 ```text
 policy_id
@@ -562,31 +540,29 @@ aggregate
 
 WSI provenance describes how analysis was produced.
 
-It MUST NOT duplicate source-acquisition provenance already owned by the Source Provider.
+It MUST NOT duplicate provider source-acquisition provenance.
 
-Minimum WSI provenance:
+Minimum fields:
 
 ```text
 framework_version
 contract_version
 registry_version
 ontology_version
-analyzer/extractor version
+analyzer_version
 created_at
 created_by
 ```
 
-For AI-produced candidates, record model/policy/generation metadata when available.
+AI-produced candidates SHOULD record model/policy metadata when available.
 
 ---
 
-# PART VIII — WITNESS CONTRACT
+# PART VIII — WITNESS
 
 ## 26. Witness Pattern
 
 A Witness Pattern is a stable derived pattern identity.
-
-Example:
 
 ```text
 wsi:witness-pattern/boundary-violation
@@ -594,9 +570,7 @@ wsi:witness-pattern/boundary-violation
 
 ## 27. Witness Label
 
-A label is localized human-facing presentation.
-
-Example:
+A Witness Label is localized presentation.
 
 ```text
 OFFSIDE
@@ -607,24 +581,24 @@ Therefore:
 ```text
 OFFSIDE != SOURCE TRANSLATION
 OFFSIDE != CANONICAL CONCEPT
-OFFSIDE != UNIVERSAL WITNESS ID
+OFFSIDE != WITNESS PATTERN ID
 ```
 
 ## 28. Witness derivation
 
 Production Witness generation SHOULD consume reviewed/locked Frames and Assessments.
 
-Research preview MAY consume `RESEARCHED` input but downstream output MUST remain provisional.
-
-Valid output:
+Research preview MAY consume `RESEARCHED` input, but its downstream results remain provisional.
 
 ```text
 WITNESS = UNRESOLVED
 ```
 
-## 29. Response / correction
+is valid.
 
-A Witness may lead to a response such as:
+## 29. Response/correction
+
+Possible responses include:
 
 ```text
 RETURN
@@ -637,38 +611,37 @@ RESTORE
 UNRESOLVED
 ```
 
-The response is derived and MUST NOT be represented as source wording unless independently present in a source frame.
+A response is derived and MUST NOT be projected backward into source wording.
 
 ## 30. Positive direction
-
-Positive Direction is a downstream target state.
 
 ```text
 POSITIVE_DIRECTION != SOURCE_DIRECTION ASSESSMENT
 ```
 
-Negative source condition example:
+Example:
 
 ```text
 TRANSGRESSION frame
-→ SOURCE_DIRECTION assessment: NEGATIVE
-→ Witness Pattern: BOUNDARY_VIOLATION
-→ label: OFFSIDE
-→ response: RETURN / ALIGN
-→ target concept: BOUNDARY_ALIGNMENT
+→ SOURCE_DIRECTION = NEGATIVE
+→ BOUNDARY_VIOLATION
+→ OFFSIDE
+→ RETURN / ALIGN
+→ BOUNDARY_ALIGNMENT
 ```
 
-A positive direction MAY remain unresolved.
+Positive Direction MAY remain unresolved.
 
 ---
 
 # PART IX — RGBL INTEROPERABILITY
 
-## 31. RGBL as the first provider
+## 31. RGBL as first Source Provider
 
-`rocksoul-rgbl` is the first Source Provider integration because it already owns generic, provenance-first text resources including:
+`rocksoul-rgbl` already owns provenance-first generic source objects including:
 
 ```text
+ENTITY
 RESOURCE
 ASSERTION
 EVIDENCE
@@ -689,27 +662,28 @@ ALIGNMENT
 VARIANT
 ```
 
-WSI SHOULD reuse RGBL canonical IDs directly instead of inventing duplicate scripture objects.
+WSI SHOULD reuse RGBL IDs rather than invent duplicate source objects.
 
-## 32. Example RGBL binding
+## 32. Real RGBL Qur'an identifiers
 
-For the pinned Tanzil Uthmani dataset, RGBL exposes resource identities such as:
+The pinned Tanzil Uthmani recipe exposes identifiers such as:
 
 ```text
 mw:work:quran
 mw:expression:quran:ar-uthmani-tanzil-1.1
 mw:edition:quran:tanzil-1.1-uthmani
+mw:artifact:quran:tanzil-1.1-uthmani
 mw:passage:quran:37:30
 mw:content:quran:37:30:ar-uthmani
 ```
 
-WSI references those IDs. It does not copy ownership of them.
+These remain owned by RGBL.
 
-## 33. Language analyzers are plugins, not corpus adapters
+## 33. Linguistic plugins replace corpus adapters
 
-After source identity is delegated to providers, corpus-specific ingestion adapters no longer belong in WSI.
+Because source/corpus ingestion lives upstream, WSI does not need Qur'an/Torah/Psalms/Gospels ingestion adapters.
 
-WSI MAY instead use linguistic plugins:
+WSI MAY use language-analysis plugins instead:
 
 ```text
 Arabic analyzer
@@ -720,15 +694,13 @@ Sanskrit analyzer
 Generic/fallback analyzer
 ```
 
-A language analyzer consumes resolved content and emits candidate linguistic analysis. It MUST NOT become source authority.
+A linguistic plugin is an analysis tool, never source authority.
 
 ---
 
 # PART X — MACHINE CONTRACT v0.2
 
-## 34. Canonical record
-
-The v0.2 analysis record contains:
+## 34. Record structure
 
 ```text
 record_id
@@ -743,40 +715,30 @@ discourse_relations[]
 concept_refs[]
 assessments[]
 witnesses[]
-analysis_provenance
+provenance
 review
 ```
 
-It does NOT contain canonical source text, edition records, corpus records, passage records, or source rights metadata.
+WSI v0.2 deliberately does NOT contain canonical corpus/work/edition/passage/content records.
 
-## 35. ID policy
+## 35. Identity policy
 
-WSI-owned IDs MUST identify WSI analysis objects only.
-
-External provider IDs MUST remain external IDs.
-
-Good:
+WSI-owned IDs identify WSI-owned objects only.
 
 ```text
 wsi:analysis/<opaque-id>
 wsi:concept/authority
 wsi:relation/authority-over
 wsi:witness-pattern/boundary-violation
+```
+
+External source IDs remain external:
+
+```text
 mw:passage:quran:37:30
 ```
 
-Wrong:
-
-```text
-wsi:passage:quran:37:30
-wsi:edition:quran:...
-```
-
-when RGBL already owns those identities.
-
 ## 36. Validation passes
-
-A record is usable only after distinct validation layers:
 
 ```text
 1. JSON_SCHEMA
@@ -791,7 +753,7 @@ JSON validity is not semantic correctness.
 
 ---
 
-# PART XI — CORE INVARIANTS
+# PART XI — INVARIANTS
 
 ## 37. Required invariants
 
@@ -831,25 +793,7 @@ I27 LOCK_IS_ASSERTION_REVIEW_STATE_NOT_CORPUS_AUTHORITY
 
 ## 38. As-Saffat 37:30
 
-As-Saffat 37:30 remains a **non-normative worked example**.
-
-It tests:
-
-```text
-external source binding
-participant separation
-negated relation
-state frame
-discourse relation
-concept mapping
-direction assessment
-Witness derivation
-positive direction
-```
-
-It MUST NOT define the universal schema by itself.
-
-Conceptual analysis:
+As-Saffat 37:30 is a **non-normative worked example** only.
 
 ```text
 TARGET: mw:passage:quran:37:30
@@ -871,24 +815,22 @@ F2
 → BOUNDARY_ALIGNMENT
 ```
 
+It tests the contract; it does not define the universal contract.
+
 ---
 
 # PART XIII — IMPLEMENTATION
 
 ## 39. Language strategy
 
-Because RGBL is TypeScript-based and already exposes corpus/core/repository/SDK infrastructure, WSI SHOULD consider a hybrid architecture.
-
 ### TypeScript
 
 Preferred for:
 
 ```text
-RGBL integration
-source resolution
+RGBL/source-provider integration
 canonical WSI object model
-schema validation
-registry validation
+schema + registry validation
 orchestration
 CLI/API
 Witness pipeline
@@ -910,15 +852,13 @@ research evaluation
 
 ### Rust
 
-Optional later only when a demonstrated performance/type-safety need justifies it.
-
-The machine contract remains language-independent.
+Optional later only when demonstrated performance/type-safety needs justify it.
 
 ## 40. Planned module boundaries
 
 ```text
 source_provider/
-rgb l_connector/   # implementation name should be `rgbl_connector` without space
+rgbl_connector/
 linguistics/
 senses/
 discourse/
@@ -941,74 +881,60 @@ validation/
 export/
 ```
 
-The accidental visual spacing above is documentary only; the actual module name MUST be `rgbl_connector/`.
+The machine contract remains implementation-language independent.
 
 ---
 
 # PART XIV — ROADMAP
 
-## 41. Milestone 0 — repository foundation
+## 41. Milestone 0 — Repository foundation
 
 README, Blueprint, release governance, branch model.
 
-## 42. Milestone 1 — interoperability contract
-
-Deliver:
+## 42. Milestone 1 — Interoperability contract
 
 ```text
 Source Provider Contract
-RGBL source-binding implementation spec
-WSI analysis JSON Schema v0.2
+RGBL binding specification
+WSI JSON Schema v0.2
 ID grammar
 registries
-worked example bound to real RGBL IDs
+worked example using real RGBL IDs
 ```
 
-## 43. Milestone 2 — deterministic validator
+## 43. Milestone 2 — Deterministic validator
 
-Validate:
-
-```text
-schema
-registry references
-source-binding resolution
-evidence selectors
-cross-object references
-state transitions
-review rules
-```
+Validate schema, registries, source bindings, selectors, cross-object references, state transitions, and review rules.
 
 ## 44. Milestone 3 — RGBL connector
 
-Read provider resources through a stable SDK/API/repository interface and pin provider revisions.
+Resolve RGBL resources through a stable SDK/API/repository interface and pin provider revisions.
 
-## 45. Milestone 4 — linguistic plugins + golden analyses
+## 45. Milestone 4 — Linguistic plugins + golden analyses
 
-Build language-specific analysis plugins and a stratified golden analysis set independent of scripture identity.
+Build language-specific plugins and a stratified analysis set independent of scripture identity.
 
-## 46. Milestone 5 — semantic frame engine
+## 46. Milestone 5 — Semantic frame engine
 
-Candidate generation, concept linking, assessments, provenance, and review workflows.
+Candidate generation, sense resolution, concept linking, assessments, provenance, and review workflows.
 
 ## 47. Milestone 6 — Witness engine
 
-Witness Pattern registry, localized labels, response/correction, positive-direction derivation.
+Witness Pattern matching, localized labels, response/correction, and positive-direction derivation.
 
-## 48. Milestone 7 — scale across RGBL resources
+## 48. Milestone 7 — Scale
 
-Run the same semantic contract over any eligible RGBL-addressable textual resources without adding corpus-specific core branches.
+Apply one WSI semantic contract to eligible resources across RGBL without introducing corpus-specific semantic branches.
 
 ---
 
 # PART XV — FINAL DISCIPLINE
 
-WSI MUST remember:
-
 ```text
 DO NOT INGEST THE WORLD TWICE.
 DO NOT DUPLICATE SOURCE AUTHORITY.
 DO NOT TURN AN EXTERNAL PASSAGE INTO A WSI PASSAGE OBJECT.
-DO NOT STORE A QUOTE ANCHOR AS IF IT WERE CANONICAL SOURCE TEXT.
+DO NOT STORE A QUOTE ANCHOR AS CANONICAL SOURCE TEXT.
 DO NOT STORE A LEMMA AS A CONCEPT.
 DO NOT STORE A PARTICIPANT AS A CONCEPT.
 DO NOT STORE A RELATION AS A CONCEPT.
