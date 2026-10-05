@@ -2,6 +2,21 @@
 
 > **Downstream semantic analysis for source resources: frames → assessments → Witness → positive direction.**
 
+## Project status
+
+Current development position:
+
+```text
+Machine Contract: v0.2.0
+Blueprint:       3.0-draft
+Milestone 0:     DONE
+Milestone 1:     IMPLEMENTED / REVIEW PENDING
+Milestone 2:     IMPLEMENTED / REVIEW PENDING
+Milestone 3:     NEXT — live RGBL connector
+```
+
+The canonical milestone tracker is [`ROADMAP.md`](ROADMAP.md). Architecture remains normative in [`BLUEPRINT.md`](BLUEPRINT.md).
+
 ## What this repository owns
 
 Witness Semantic Engine (WSI) does **not** own canonical scripture/corpus text.
@@ -200,28 +215,51 @@ review
 See:
 
 - [`BLUEPRINT.md`](BLUEPRINT.md)
+- [`ROADMAP.md`](ROADMAP.md)
 - [`spec/README.md`](spec/README.md)
 - [`spec/SOURCE-PROVIDER-CONTRACT.md`](spec/SOURCE-PROVIDER-CONTRACT.md)
+- [`spec/VALIDATION.md`](spec/VALIDATION.md)
 - [`spec/ID-GRAMMAR.md`](spec/ID-GRAMMAR.md)
 
-## Validation layers
+## Deterministic validator
+
+Milestone 2 adds an offline deterministic validator. It deliberately does **not** fetch canonical source content.
+
+Validation passes:
 
 ```text
 1. JSON Schema
 2. WSI registry integrity
-3. Source-binding resolution
-4. Evidence-selector resolution
+3. Source-binding resolution against pinned offline provider indexes
+4. Evidence-selector validation
 5. WSI semantic invariants
 6. Review policy
 ```
 
-A structurally valid JSON file is not automatically a correct semantic analysis.
+Install dependencies and run all checks:
+
+```bash
+npm install
+npm run check
+```
+
+Validate golden candidates only:
+
+```bash
+npm run validate
+```
+
+Validate one analysis record:
+
+```bash
+npm run validate -- path/to/analysis.json
+```
+
+The offline provider index is only a reproducibility aid; RGBL remains source authority. Full source/content verification is Milestone 3.
 
 ## Implementation direction
 
 The contract remains language-independent.
-
-Recommended architecture after the RGBL integration review:
 
 ### TypeScript
 
