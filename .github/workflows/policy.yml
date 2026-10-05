@@ -35,8 +35,14 @@ jobs:
           required=(
             README.md
             BLUEPRINT.md
+            ROADMAP.md
             VERSION
             CHANGELOG.md
+            package.json
+            tsconfig.json
+            spec/wsi-record.schema.json
+            spec/SOURCE-PROVIDER-CONTRACT.md
+            spec/VALIDATION.md
             .github/CODEOWNERS
             .github/pull_request_template.md
           )
@@ -53,6 +59,19 @@ jobs:
             echo "::error::VERSION must contain a plain SemVer value (X.Y.Z); found: $version"
             exit 1
           fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install validator dependencies
+        shell: bash
+        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
+
+      - name: Run deterministic WSI checks
+        shell: bash
+        run: npm run check
 
       - name: Enforce dev to main promotion path
         if: github.event_name == 'pull_request'

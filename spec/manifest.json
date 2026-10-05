@@ -2,11 +2,20 @@
   "contract_name": "WSI Machine Contract",
   "contract_version": "0.2.0",
   "status": "research-draft",
-  "blueprint_revision": "3.0-draft",
+  "blueprint_revision": "3.1-draft",
   "schema_dialect": "https://json-schema.org/draft/2020-12/schema",
   "canonical_schema": "spec/wsi-record.schema.json",
   "source_provider_contract": "spec/SOURCE-PROVIDER-CONTRACT.md",
+  "validation_spec": "spec/VALIDATION.md",
   "id_grammar": "spec/ID-GRAMMAR.md",
+  "validator": {
+    "implementation": "src/validation/validator.ts",
+    "cli": "src/cli.ts",
+    "mode": "offline-deterministic",
+    "provider_indexes": [
+      "spec/providers/rocksoul-rgbl.v0.1.json"
+    ]
+  },
   "registries": [
     "registries/controlled-vocabularies.json",
     "registries/concepts.json",
