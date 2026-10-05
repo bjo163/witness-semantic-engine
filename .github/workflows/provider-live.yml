@@ -44,6 +44,9 @@ jobs:
       - name: Typecheck provider and linguistic integration
         run: npm run typecheck
 
+      - name: Run deterministic unit tests
+        run: npm run test
+
       - name: Run live provider integration tests
         env:
           RGBL_REPO_PATH: ${{ github.workspace }}/.providers/rocksoul-rgbl
