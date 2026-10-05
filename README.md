@@ -8,12 +8,14 @@ Current development position:
 
 ```text
 Machine Contract: v0.2.0
-Blueprint:       3.0-draft
+Blueprint:       3.1-draft
 Milestone 0:     DONE
 Milestone 1:     IMPLEMENTED / REVIEW PENDING
-Milestone 2:     IMPLEMENTED / REVIEW PENDING
+Milestone 2:     IMPLEMENTED / REVIEW PENDING — CI GREEN
 Milestone 3:     NEXT — live RGBL connector
 ```
+
+Milestone 2 has passed the `dev` CI acceptance suite (`typecheck → tests → golden validation → repository policy`). Promotion to `main` remains pending review.
 
 The canonical milestone tracker is [`ROADMAP.md`](ROADMAP.md). Architecture remains normative in [`BLUEPRINT.md`](BLUEPRINT.md).
 
