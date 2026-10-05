@@ -1,7 +1,7 @@
 # Witness Semantic Engine — Blueprint
 
 **Status:** normative research/engineering blueprint  
-**Blueprint revision:** `3.1-draft`  
+**Blueprint revision:** `3.2-draft`  
 **Machine Contract:** `0.2.0`  
 **Architecture:** source-provider-neutral downstream semantic analysis engine  
 **First Source Provider integration:** `rocksoul-rgbl`
@@ -202,11 +202,36 @@ EVIDENCE ANCHOR != SOURCE AUTHORITY
 
 If an anchor conflicts with the pinned provider content, provider content wins and the WSI analysis becomes stale until reviewed.
 
+## 9. Runtime SourceProvider boundary
+
+The machine-level provider boundary MUST remain transport-neutral.
+
+Conceptually a runtime provider supports:
+
+```text
+verifyRevision(revision)
+currentRevision()
+resolveResource(revision, resourceId, hints?)
+```
+
+WSI semantic code MUST NOT depend directly on:
+
+```text
+provider repository layout
+provider HTTP route layout
+provider database tables
+provider SDK implementation classes
+```
+
+A repository, SDK, API, or database connector MAY implement the same logical interface.
+
+Provider-specific metadata MAY be used as a resolution hint, but a hint MUST NOT become semantic identity.
+
 ---
 
 # PART III — EVIDENCE
 
-## 9. Evidence dimensions
+## 10. Evidence dimensions
 
 Every semantic assertion MUST be traceable to evidence.
 
@@ -246,7 +271,7 @@ DERIVED
 
 These dimensions are independent.
 
-## 10. Selectors
+## 11. Selectors
 
 Initial selectors:
 
@@ -261,11 +286,15 @@ Selectors are provider-relative.
 
 A local token number MUST NOT be treated as globally stable unless the tokenizer/analyzer identity is recorded in analysis provenance.
 
+A `TEXT_QUOTE` used as live primary-source proof MUST match the pinned provider representation literally. Unicode normalization, fuzzy matching, stemming, translation, or reconstructed spelling MUST NOT silently substitute for source proof.
+
+If a normalized linguistic form is needed, store it in the analysis layer while retaining an exact provider-relative evidence anchor.
+
 ---
 
 # PART IV — ANALYSIS MODEL
 
-## 11. Lexical/contextual sense
+## 12. Lexical/contextual sense
 
 A lexical form is not a concept.
 
@@ -289,7 +318,7 @@ TRANSLATION STRING != CONCEPT ID
 
 A sense MAY remain unmapped.
 
-## 12. Discourse scope
+## 13. Discourse scope
 
 Utterance scope SHOULD be represented when meaning depends on speaker, addressee, narration, quotation, or reported speech.
 
@@ -300,7 +329,7 @@ ADDRESSEE != PATIENT
 
 Nested utterances MAY be represented explicitly.
 
-## 13. Participants
+## 14. Participants
 
 Participants are analysis-local discourse/semantic referents.
 
@@ -314,7 +343,7 @@ resolution_status = UNRESOLVED
 
 Contextual resolution MUST NOT overwrite the source surface reference.
 
-## 14. Semantic Frames
+## 15. Semantic Frames
 
 Frames are the canonical structural unit of WSI.
 
@@ -356,7 +385,7 @@ GIVE
 
 A Frame MUST NOT be reduced to one generic subject-predicate-object triple when information would be lost.
 
-## 15. Concept / relation separation
+## 16. Concept / relation separation
 
 ```text
 CONCEPT  = AUTHORITY
@@ -370,7 +399,7 @@ Do not canonicalize composites such as:
 NO_AUTHORITY_OVER_YOU
 ```
 
-## 16. Polarity
+## 17. Polarity
 
 Initial values:
 
@@ -382,7 +411,7 @@ UNDETERMINED
 
 Polarity is a proposition property.
 
-## 17. Modality
+## 18. Modality
 
 Initial values:
 
@@ -398,7 +427,7 @@ UNDETERMINED
 
 Modality is not speech act.
 
-## 18. Speech act
+## 19. Speech act
 
 Initial values:
 
@@ -420,7 +449,7 @@ UNDETERMINED
 
 # PART V — ASSESSMENTS
 
-## 19. Evaluation is separate from Frame structure
+## 20. Evaluation is separate from Frame structure
 
 An evaluative judgement MUST NOT be silently embedded as intrinsic semantic structure.
 
@@ -442,7 +471,7 @@ ASSESSMENT A2
   result          = NEGATIVE
 ```
 
-## 20. Direction vocabulary
+## 21. Direction vocabulary
 
 ```text
 POSITIVE
@@ -458,7 +487,7 @@ MODALITY != DIRECTION
 SPEECH_ACT != DIRECTION
 ```
 
-## 21. Assessment contract
+## 22. Assessment contract
 
 An Assessment SHOULD contain:
 
@@ -478,7 +507,7 @@ A whole-record direction summary is OPTIONAL and derived from local assessments.
 
 # PART VI — ONTOLOGY
 
-## 22. Language-neutral identity
+## 23. Language-neutral identity
 
 Canonical concept IDs are machine identities:
 
@@ -497,7 +526,7 @@ LEXICAL FORM = SOURCE-LANGUAGE EVIDENCE
 
 No natural language is the hidden ontology master language.
 
-## 23. Conservative concept mapping
+## 24. Conservative concept mapping
 
 Cross-language equivalence MUST NOT be inferred from identical translation strings.
 
@@ -509,7 +538,7 @@ Unmapped is preferable to false equivalence.
 
 # PART VII — CONFIDENCE, PROVENANCE, REVIEW
 
-## 24. Confidence
+## 25. Confidence
 
 Confidence is operational research confidence, never theological truth percentage.
 
@@ -522,7 +551,7 @@ components
 aggregate
 ```
 
-## 25. Analysis provenance
+## 26. Analysis provenance
 
 WSI provenance describes how analysis was produced.
 
@@ -542,7 +571,7 @@ created_by
 
 AI-generated candidates SHOULD record model/policy metadata when available.
 
-## 26. Review lifecycle
+## 27. Review lifecycle
 
 Initial lifecycle:
 
@@ -571,7 +600,7 @@ permanent ontology immutability
 
 # PART VIII — WITNESS
 
-## 27. Witness Pattern
+## 28. Witness Pattern
 
 A Witness Pattern is a stable derived pattern identity:
 
@@ -579,7 +608,7 @@ A Witness Pattern is a stable derived pattern identity:
 wsi:witness-pattern/boundary-violation
 ```
 
-## 28. Witness Label
+## 29. Witness Label
 
 A Witness Label is localized human-facing presentation:
 
@@ -595,7 +624,7 @@ OFFSIDE != CANONICAL CONCEPT
 OFFSIDE != WITNESS PATTERN ID
 ```
 
-## 29. Witness derivation
+## 30. Witness derivation
 
 Production Witness generation SHOULD consume reviewed/locked Frames and relevant Assessments.
 
@@ -607,7 +636,7 @@ WITNESS = UNRESOLVED
 
 is valid.
 
-## 30. Response / correction
+## 31. Response / correction
 
 Possible responses include:
 
@@ -624,7 +653,7 @@ UNRESOLVED
 
 A response is derived and MUST NOT be projected backward into source wording.
 
-## 31. Positive Direction
+## 32. Positive Direction
 
 ```text
 POSITIVE_DIRECTION != SOURCE_DIRECTION ASSESSMENT
@@ -646,7 +675,7 @@ A positive direction MAY remain unresolved.
 
 # PART IX — RGBL INTEROPERABILITY
 
-## 32. RGBL as first Source Provider
+## 33. RGBL as first Source Provider
 
 `rocksoul-rgbl` already owns generic provenance-first source objects including:
 
@@ -674,7 +703,7 @@ VARIANT
 
 WSI SHOULD reuse RGBL canonical IDs directly instead of creating duplicate scripture/source objects.
 
-## 33. Example RGBL identifiers
+## 34. Example RGBL identifiers
 
 For the pinned Tanzil Uthmani dataset, RGBL exposes identifiers such as:
 
@@ -689,7 +718,47 @@ mw:content:quran:37:30:ar-uthmani
 
 These remain RGBL-owned identities.
 
-## 34. Linguistic plugins replace corpus adapters
+## 35. RGBL reference connector
+
+The first runtime transport is `RgblRepositoryProvider`.
+
+It resolves resources from a local RGBL Git checkout using the exact revision pinned by the analysis rather than a moving branch.
+
+Conceptually:
+
+```text
+WSI Source Binding
+  ↓
+pinned RGBL Git commit
+  ↓
+RGBL resource partitions
+  ↓
+canonical resource ID
+  ↓
+provider content used only for source verification
+```
+
+The repository connector is a **reference transport**, not a permanent storage coupling. Future RGBL SDK/API/database connectors MAY implement the same `SourceProvider` interface.
+
+The M3 acceptance suite resolves both:
+
+```text
+mw:passage:quran:37:30
+mw:content:quran:37:30:ar-uthmani
+```
+
+and a structurally separate resource:
+
+```text
+mw:passage:hinduism:bhagavad-gita:1:1
+mw:content:hinduism:bhagavad-gita:1:1:sa
+```
+
+through the same interface.
+
+This tests interoperability only; it is not a theological-equivalence assertion.
+
+## 36. Linguistic plugins replace corpus adapters
 
 WSI does not need scripture-specific ingestion adapters.
 
@@ -710,7 +779,7 @@ A language analyzer is an analysis tool, never source authority.
 
 # PART X — MACHINE CONTRACT v0.2
 
-## 35. Canonical record
+## 37. Canonical record
 
 ```text
 record_id
@@ -731,7 +800,7 @@ review
 
 WSI deliberately does not contain canonical corpus/work/edition/passage/content records.
 
-## 36. Identity policy
+## 38. Identity policy
 
 WSI-owned IDs identify WSI-owned objects only.
 
@@ -750,11 +819,11 @@ mw:passage:quran:37:30
 
 ---
 
-# PART XI — DETERMINISTIC VALIDATION
+# PART XI — VALIDATION AND LIVE SOURCE PROOF
 
-## 37. Validation passes
+## 39. Deterministic validation passes
 
-The canonical validation order is:
+The canonical offline validation order is:
 
 ```text
 1. JSON_SCHEMA
@@ -767,7 +836,7 @@ The canonical validation order is:
 
 JSON validity is not semantic correctness.
 
-## 38. Offline deterministic validator
+## 40. Offline deterministic validator
 
 Milestone 2 implements an offline validator in TypeScript.
 
@@ -793,42 +862,47 @@ Pinned provider indexes under `spec/providers/` are reproducibility indexes only
 PROVIDER INDEX != SOURCE AUTHORITY
 ```
 
-Milestone 2 technical acceptance has passed on `dev`:
+Milestone 2 technical acceptance has passed on `dev`.
+
+## 41. Live provider resolution
+
+Milestone 3 implements live Source Provider verification as a separate runtime/CI layer.
+
+It proves:
 
 ```text
-TypeScript typecheck   PASS
-validator tests        PASS
-golden validation      PASS
-repository policy      PASS
-```
-
-Promotion/review remains the final gate before this milestone is stable on `main`.
-
-## 39. Live provider resolution
-
-Live provider verification belongs to Milestone 3.
-
-It will augment validation with checks such as:
-
-```text
-provider revision exists
-resource exists at pinned revision
-resource kind matches
-content resolves
-TEXT_QUOTE exists in provider content
+pinned revision exists
+bound provider resources exist
+analysis target resolves
+TEXT_QUOTE matches provider content literally
 CHAR_RANGE resolves against provider content
-source integrity metadata can be confirmed
+claimed RESOLVED binding remains demonstrably resolved
 ```
 
-The live connector MUST NOT redefine semantic invariants.
+`TOKEN_IDS` are not treated as live-verifiable until a provider transport exposes a compatible tokenizer-stable index.
 
-See [`spec/VALIDATION.md`](spec/VALIDATION.md).
+A moving provider `HEAD` MUST NOT by itself make a pinned analysis stale:
+
+```text
+CURRENT PROVIDER HEAD != PINNED ANALYSIS REVISION
+```
+
+If the pinned revision remains resolvable, it remains the reproducibility authority for that analysis.
+
+If required resources or selectors fail at the pinned snapshot while the binding claims `RESOLVED`, WSI emits a stale-binding finding and requires explicit review rather than silently mutating the record.
+
+M3 live acceptance has passed on `dev` for both Qur'an 37:30 and Bhagavad Gita 1:1.
+
+See:
+
+- [`spec/VALIDATION.md`](spec/VALIDATION.md)
+- [`spec/RGBL-CONNECTOR.md`](spec/RGBL-CONNECTOR.md)
 
 ---
 
 # PART XII — CORE INVARIANTS
 
-## 40. Required invariants
+## 42. Required invariants
 
 ```text
 I01 WSI_DOES_NOT_OWN_PRIMARY_SOURCE
@@ -861,13 +935,16 @@ I27 LOCK_IS_ASSERTION_REVIEW_STATE_NOT_CORPUS_AUTHORITY
 I28 PROVIDER_INDEX_IS_NOT_PROVIDER_AUTHORITY
 I29 OFFLINE_VALIDATION_MUST_NOT_REQUIRE_NETWORK
 I30 LIVE_PROVIDER_RESOLUTION_MUST_NOT_CHANGE_SEMANTIC_RULES
+I31 PROVIDER_TRANSPORT_MUST_NOT_DEFINE_SEMANTIC_IDENTITY
+I32 EXACT_PRIMARY_SOURCE_ANCHOR_MUST_MATCH_PINNED_PROVIDER_CONTENT
+I33 PROVIDER_HEAD_MOVEMENT_ALONE_DOES_NOT_INVALIDATE_PINNED_ANALYSIS
 ```
 
 ---
 
 # PART XIII — WORKED EXAMPLE POLICY
 
-## 41. As-Saffat 37:30
+## 43. As-Saffat 37:30
 
 As-Saffat 37:30 is a **non-normative worked example** only.
 
@@ -893,13 +970,15 @@ F2
 
 It tests the contract; it does not define the universal contract.
 
+The exact source anchors for this candidate are live-verified against the pinned RGBL/Tanzil representation. Analytic `surface`, `lemma`, or gloss fields MAY remain linguistically normalized, but exact primary-text evidence selectors MUST preserve provider text as represented at the pinned revision.
+
 Future goldens MUST include structurally and linguistically different provider resources so the architecture is not optimized around this one example.
 
 ---
 
 # PART XIV — IMPLEMENTATION STRATEGY
 
-## 42. TypeScript
+## 44. TypeScript
 
 Preferred for:
 
@@ -913,9 +992,9 @@ review tooling
 Witness pipeline
 ```
 
-The deterministic validator is implemented in TypeScript beginning in Milestone 2.
+The deterministic validator and first live Source Provider connector are implemented in TypeScript.
 
-## 43. Python
+## 45. Python
 
 Preferred for optional linguistic/research workers:
 
@@ -928,17 +1007,18 @@ embeddings/reranking experiments
 research evaluation
 ```
 
-## 44. Rust
+Python workers MUST communicate through versioned analysis contracts rather than become a second source-of-truth model.
+
+## 46. Rust
 
 Optional later only when demonstrated performance/type-safety needs justify it.
 
 The Machine Contract remains implementation-language independent.
 
-## 45. Module boundaries
+## 47. Module boundaries
 
 ```text
-source_provider/
-rgbl_connector/
+source-provider/
 linguistics/
 senses/
 discourse/
@@ -961,11 +1041,13 @@ validation/
 export/
 ```
 
+Provider-specific transports remain implementations behind `source-provider/`, not semantic branches.
+
 ---
 
 # PART XV — VERSIONING AND MILESTONES
 
-## 46. Pre-1.0 release policy
+## 48. Pre-1.0 release policy
 
 The repository remains in initial-development `0.x` status until the architecture is deliberately declared stable.
 
@@ -982,13 +1064,13 @@ A breaking research-contract change MUST NOT automatically imply architectural `
 
 Detailed live milestone status is maintained in [`ROADMAP.md`](ROADMAP.md).
 
-## 47. M0 — Repository foundation
+## 49. M0 — Repository foundation
 
 **Status: DONE**
 
 Repository governance, branch model, release/version plumbing, README, and Blueprint foundation.
 
-## 48. M1 — Provider-bound Machine Contract
+## 50. M1 — Provider-bound Machine Contract
 
 **Status: IMPLEMENTED / REVIEW PENDING**
 
@@ -1003,7 +1085,7 @@ registries
 worked example using real RGBL IDs
 ```
 
-## 49. M2 — Deterministic validator
+## 51. M2 — Deterministic validator
 
 **Status: IMPLEMENTED / REVIEW PENDING — CI GREEN**
 
@@ -1025,35 +1107,68 @@ CI npm run check gate
 
 Technical acceptance is green; review/promotion to `main` is the remaining milestone gate.
 
-## 50. M3 — Live RGBL connector
+## 52. M3 — Live RGBL connector
+
+**Status: IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN**
+
+Delivered on `dev`:
+
+```text
+generic SourceProvider runtime interface
+repository-backed RGBL reference connector
+pinned revision proof
+canonical resource resolution
+literal TEXT_QUOTE proof
+CHAR_RANGE proof
+stale-binding detection
+verify-source CLI
+live provider CI
+Qur'an + non-Qur'an integration fixtures
+```
+
+Live verification exposed and corrected non-exact Uthmani evidence anchors in the worked example, demonstrating that the source-proof layer is enforcing the Source Provider boundary rather than merely accepting locally plausible strings.
+
+## 53. M4 — Linguistic plugins + stratified golden analyses
 
 **Status: NEXT**
 
-Resolve RGBL resources through a stable SDK/API/repository interface and verify provider content/selectors against pinned revisions.
+Define a language-neutral analyzer contract, add reference analyzers/adapters, and build a structurally diverse golden set independent of scripture identity.
 
-## 51. M4 — Linguistic plugins + stratified golden analyses
-
-**Status: PLANNED**
-
-Build language-specific analysis plugins and a structurally diverse golden set independent of scripture identity.
-
-## 52. M5 — Semantic frame engine
+## 54. M5 — Semantic frame engine
 
 **Status: PLANNED**
 
-Candidate generation, contextual-sense resolution, concept linking, assessments, confidence, provenance, and review workflows.
+Candidate generation, contextual-sense resolution, participant/role extraction, relation/concept linking, assessments, confidence, provenance, and review workflows.
 
-## 53. M6 — Witness engine
+## 55. M6 — Witness engine
 
 **Status: PLANNED**
 
 Witness Pattern matching, localization, response/correction, and positive-direction derivation.
 
-## 54. M7 — Scale
+## 56. M7 — Scale / reproducible batch processing
 
 **Status: PLANNED**
 
-Apply one semantic contract across eligible Source Provider resources without corpus-specific semantic branches.
+Apply one semantic contract across eligible Source Provider resources without corpus-specific semantic branches, with idempotent jobs, resume/retry behavior, stale queues, and provenance-preserving exports.
+
+Full-Qur'an processing MAY be a major workload but MUST NOT become a separate semantic mode.
+
+## 57. M8 — Production hardening
+
+**Status: PLANNED**
+
+Harden reproducible builds, dependency locking, compatibility/migrations, observability, security, failure isolation, performance, provider-outage behavior, API/CLI stability, and backup/recovery policy.
+
+Operational convenience MUST NOT weaken evidence provenance or source ownership boundaries.
+
+## 58. M9 — Release candidate → v1.0
+
+**Status: PLANNED**
+
+Run a representative multi-language/multi-resource release-candidate suite covering ambiguous/unresolved semantics, nested discourse, provider failures, stale bindings, batch reproducibility, and migration compatibility.
+
+`v1.0` means the supported contracts are production-stable. It does not claim that every language, corpus, or interpretation is solved.
 
 ---
 
@@ -1064,6 +1179,7 @@ DO NOT INGEST THE WORLD TWICE.
 DO NOT DUPLICATE SOURCE AUTHORITY.
 DO NOT TURN AN EXTERNAL PASSAGE INTO A WSI PASSAGE OBJECT.
 DO NOT STORE A QUOTE ANCHOR AS CANONICAL SOURCE TEXT.
+DO NOT NORMALIZE AN EXACT SOURCE ANCHOR AND CALL IT VERBATIM.
 DO NOT STORE A LEMMA AS A CONCEPT.
 DO NOT STORE A PARTICIPANT AS A CONCEPT.
 DO NOT STORE A RELATION AS A CONCEPT.
@@ -1079,7 +1195,7 @@ Instead:
 ```text
 RESOLVE SOURCE
 → PIN PROVIDER REVISION
-→ ANCHOR EVIDENCE
+→ PROVE EVIDENCE ANCHORS
 → ANALYZE LANGUAGE
 → RESOLVE CONTEXTUAL SENSE
 → RESOLVE DISCOURSE
