@@ -13,10 +13,11 @@ Milestone 0:     DONE
 Milestone 1:     IMPLEMENTED / REVIEW PENDING
 Milestone 2:     IMPLEMENTED / REVIEW PENDING — CI GREEN
 Milestone 3:     IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN
-Milestone 4:     NEXT — linguistic plugin contract + stratified goldens
+Milestone 4:     IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN
+Milestone 5:     NEXT — semantic frame engine
 ```
 
-M2 passes deterministic validation CI. M3 now resolves and verifies real resources against the exact RGBL Git revision pinned by each Source Binding; the live suite passes both Qur'an 37:30 evidence anchors and a structurally separate Bhagavad Gita resource through the same provider interface.
+M2 passes deterministic validation CI. M3 resolves and verifies real resources against the exact RGBL Git revision pinned by each Source Binding. M4 now passes one language-neutral `LinguisticAnalyzer` contract across Arabic, Hebrew, Greek, and a Sanskrit generic-fallback profile without introducing scripture-specific semantic branches.
 
 The canonical milestone tracker is [`ROADMAP.md`](ROADMAP.md). Architecture remains normative in [`BLUEPRINT.md`](BLUEPRINT.md).
 
@@ -34,6 +35,8 @@ WSI owns downstream analysis:
 
 ```text
 SOURCE RESOURCE REFERENCE
+  ↓
+LINGUISTIC ANALYSIS CANDIDATE
   ↓
 LEXICAL / CONTEXTUAL SENSE
   ↓
@@ -72,6 +75,7 @@ Owns questions such as:
 
 Owns questions such as:
 
+- What linguistic candidates can be derived from the provider text?
 - What contextual senses are supported?
 - Who/what participates in the proposition?
 - What semantic frames are asserted?
@@ -101,7 +105,7 @@ Example:
 }
 ```
 
-Canonical text remains owned by the provider. WSI may keep quote/selectors only as evidence anchors.
+Canonical text remains owned by the provider. WSI may keep quote/selectors or analysis-local token surfaces only as evidence/analysis anchors.
 
 ## Why this is more universal
 
@@ -109,7 +113,7 @@ WSI does not need a Qur'an adapter, Torah adapter, Psalms adapter, Gospel adapte
 
 If a Source Provider exposes a stable addressable resource, WSI analyzes that resource through the same contract. Corpus-specific ingestion belongs upstream; language-specific analysis belongs in optional linguistic plugins.
 
-The M3 live test deliberately resolves both Qur'an and Bhagavad Gita resources through the same `SourceProvider` interface. This is an interoperability test, not a claim of theological equivalence.
+M3 deliberately resolves both Qur'an and Bhagavad Gita resources through the same `SourceProvider` interface. M4 goes further: Arabic Qur'an, Hebrew OSHB/WLC, Greek SBLGNT, and Sanskrit Bhagavad Gita resources pass the same language-analysis contract. These are interoperability tests, not claims of theological equivalence.
 
 ## Semantic frame, not keyword
 
@@ -163,7 +167,7 @@ mw:passage:quran:37:30
 mw:content:quran:37:30:ar-uthmani
 ```
 
-Its evidence anchors are now verified literally against the pinned RGBL/Tanzil Uthmani source snapshot. It tests the contract; it does not define the universal schema.
+Its evidence anchors are verified literally against the pinned RGBL/Tanzil Uthmani source snapshot. It tests the semantic contract; it does not define the universal schema.
 
 ## Machine Contract
 
@@ -171,9 +175,10 @@ Current research contract:
 
 ```text
 WSI Machine Contract v0.2.0
+Linguistic Analyzer Contract v0.1.0
 ```
 
-Core record:
+Core semantic record:
 
 ```text
 analysis_target
@@ -190,14 +195,17 @@ analysis_provenance
 review
 ```
 
+Linguistic analyzer output is a separate candidate artifact and is **not** automatically promoted into the reviewed semantic record.
+
 See:
 
 - [`BLUEPRINT.md`](BLUEPRINT.md)
 - [`ROADMAP.md`](ROADMAP.md)
 - [`spec/README.md`](spec/README.md)
 - [`spec/SOURCE-PROVIDER-CONTRACT.md`](spec/SOURCE-PROVIDER-CONTRACT.md)
-- [`spec/VALIDATION.md`](spec/VALIDATION.md)
 - [`spec/RGBL-CONNECTOR.md`](spec/RGBL-CONNECTOR.md)
+- [`spec/LINGUISTIC-ANALYZER-CONTRACT.md`](spec/LINGUISTIC-ANALYZER-CONTRACT.md)
+- [`spec/VALIDATION.md`](spec/VALIDATION.md)
 - [`spec/ID-GRAMMAR.md`](spec/ID-GRAMMAR.md)
 
 ## Deterministic validator — M2
@@ -244,11 +252,69 @@ npm run verify:source -- data/golden-candidates/quran/037/030.json \
 
 CI also verifies a non-Qur'an Bhagavad Gita fixture through the same connector.
 
-## What comes next — M4
+## Linguistic Analyzer — M4
 
-M4 defines language-analysis plugin boundaries and builds a stratified golden-analysis set. Language plugins are analysis tools, never source authority.
+M4 defines one provider-neutral language-analysis interface:
 
-Initial targets include Arabic, Hebrew, Greek, and a generic fallback; other languages are added when justified by provider resources and research needs.
+```text
+provider content
+→ LinguisticAnalyzer
+→ linguistic candidate
+→ later semantic/review layer
+```
+
+Each output is bound to the provider/resource/revision plus exact content SHA-256 and analyzer/ruleset version. Token spans use Unicode code points.
+
+Capabilities are explicit:
+
+```text
+TOKENIZATION
+NORMALIZATION
+SENTENCE_SEGMENTATION
+LEMMA
+POS
+MORPHOLOGY
+SYNTAX
+DISCOURSE_CUES
+```
+
+The baseline reference plugins intentionally support only deterministic tokenization + NFC analysis normalization. Unsupported morphology, syntax, lemma, POS, and discourse structure remain `UNSUPPORTED` rather than being guessed.
+
+Reference analyzers:
+
+```text
+Arabic baseline
+Hebrew baseline
+Greek baseline
+Generic fallback
+```
+
+Live linguistic profiles:
+
+```text
+Arabic / Arab   — Qur'an 37:30
+Hebrew / Hebr   — OSHB/WLC Genesis 1:1
+Greek / Grek    — SBLGNT John 1:1
+Sanskrit / Deva — Bhagavad Gita 1:1 via generic fallback
+```
+
+Run the live profile suite with a pinned RGBL checkout:
+
+```bash
+RGBL_REPO_PATH=/path/to/rocksoul-rgbl npm run test:linguistics:live
+```
+
+## What comes next — M5
+
+M5 builds the semantic candidate/frame engine on top of the source + linguistic boundaries already established.
+
+The critical rule is:
+
+```text
+LINGUISTIC OUTPUT != REVIEWED SEMANTIC TRUTH
+```
+
+M5 must generate auditable candidates for senses, participants, roles, frames, relations, polarity/modality/speech act, concepts, assessments, confidence, and provenance while preserving ambiguity and `UNRESOLVED` outcomes.
 
 ## Implementation direction
 
@@ -271,7 +337,6 @@ Optional later for demonstrated performance/type-safety needs.
 WSI does not call itself production-stable merely because one corpus can be processed. The planned path is:
 
 ```text
-M4 linguistic plugins + stratified goldens
 M5 semantic frame engine
 M6 Witness engine
 M7 scale / reproducible batch processing
@@ -287,6 +352,8 @@ WSI must preserve these separations:
 
 - external source identity ≠ WSI identity;
 - source text ≠ analysis;
+- linguistic candidate ≠ reviewed semantic truth;
+- normalized analysis view ≠ provider source replacement;
 - lexeme ≠ sense;
 - sense ≠ universal concept;
 - participant ≠ concept;
@@ -299,7 +366,7 @@ WSI must preserve these separations:
 - response ≠ source assertion;
 - positive direction ≠ source direction;
 - analysis provenance ≠ source-acquisition provenance;
-- `UNRESOLVED` is valid.
+- `UNRESOLVED` and `UNSUPPORTED` are valid outcomes.
 
 ## Development and release model
 
@@ -315,4 +382,4 @@ Conventional Commits drive automated versioning, changelog generation, tags, and
 
 ## Design principle
 
-> **Do not ingest the world twice. Resolve the source, pin it, anchor evidence, analyze, review, then Witness.**
+> **Do not ingest the world twice. Resolve the source, pin it, anchor evidence, analyze language conservatively, review semantics, then Witness.**
