@@ -120,7 +120,6 @@ jobs:
                       continue
                   match = conventional.match(subject)
                   if not match:
-                      # Policy should prevent this on dev. We fail closed on main too.
                       raise SystemExit(f"Non-Conventional Commit reached main: {sha[:8]} {subject}")
                   commit_type = match.group("type")
                   if commit_type not in allowed_types:
@@ -147,12 +146,11 @@ jobs:
               print("No releasable commits found in this main update.")
               raise SystemExit(0)
 
-          if any(r["breaking"] for r in records):
-              bump = "major"
-          elif any(r["type"] == "feat" for r in records):
-              bump = "minor"
-          else:
-              bump = "patch"
+          requested_bump = (
+              "major" if any(r["breaking"] for r in records)
+              else "minor" if any(r["type"] == "feat" for r in records)
+              else "patch"
+          )
 
           version_text = Path("VERSION").read_text(encoding="utf-8").strip()
           version_match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", version_text)
@@ -160,12 +158,22 @@ jobs:
               raise SystemExit(f"Invalid VERSION file: {version_text!r}")
 
           major, minor, patch = map(int, version_match.groups())
-          if bump == "major":
-              major, minor, patch = major + 1, 0, 0
-          elif bump == "minor":
+
+          # Pre-1.0 policy: breaking changes advance the minor version instead of
+          # prematurely declaring API stability with v1.0.0. Once major >= 1,
+          # standard SemVer major-bump behavior applies.
+          if requested_bump == "major" and major == 0:
               minor, patch = minor + 1, 0
+              applied_bump = "minor-pre1-breaking"
+          elif requested_bump == "major":
+              major, minor, patch = major + 1, 0, 0
+              applied_bump = "major"
+          elif requested_bump == "minor":
+              minor, patch = minor + 1, 0
+              applied_bump = "minor"
           else:
               patch += 1
+              applied_bump = "patch"
 
           new_version = f"{major}.{minor}.{patch}"
           tag = f"v{new_version}"
@@ -224,10 +232,10 @@ jobs:
               out.write("release=true\n")
               out.write(f"version={new_version}\n")
               out.write(f"tag={tag}\n")
-              out.write(f"bump={bump}\n")
+              out.write(f"bump={applied_bump}\n")
               out.write(f"notes={notes_path}\n")
 
-          print(f"Release: {version_text} -> {new_version} ({bump})")
+          print(f"Release: {version_text} -> {new_version} ({applied_bump}; requested={requested_bump})")
           PY
 
       - name: Commit release metadata and tag
@@ -276,15 +284,12 @@ jobs:
           main_sha="$(git rev-parse origin/main)"
           dev_sha="$(git rev-parse origin/dev)"
 
-          # Fast-forward is ideal and cannot lose dev work.
           if git merge-base --is-ancestor "$dev_sha" "$main_sha"; then
             echo "dev can be safely fast-forwarded to main."
             git push origin "${main_sha}:refs/heads/dev"
             exit 0
           fi
 
-          # dev has advanced/diverged (common after squash promotion). Merge main
-          # into dev without force. If a conflict occurs, abort and leave dev intact.
           git switch -C dev origin/dev
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
