@@ -793,6 +793,17 @@ Pinned provider indexes under `spec/providers/` are reproducibility indexes only
 PROVIDER INDEX != SOURCE AUTHORITY
 ```
 
+Milestone 2 technical acceptance has passed on `dev`:
+
+```text
+TypeScript typecheck   PASS
+validator tests        PASS
+golden validation      PASS
+repository policy      PASS
+```
+
+Promotion/review remains the final gate before this milestone is stable on `main`.
+
 ## 39. Live provider resolution
 
 Live provider verification belongs to Milestone 3.
@@ -835,7 +846,7 @@ I12 RELATION_IS_NOT_CONCEPT
 I13 POLARITY_IS_NOT_DIRECTION
 I14 MODALITY_IS_NOT_SPEECH_ACT
 I15 DIRECTION_IS_AN_ASSESSMENT
-I16 TRANSLATION_ALONE_CANNOT_CREATE_PRIMARY_SOURCE AUTHORITY
+I16 TRANSLATION_ALONE_CANNOT_CREATE_PRIMARY_SOURCE_AUTHORITY
 I17 COMMENTARY_CANNOT_OVERWRITE_PRIMARY_SOURCE
 I18 CONTEXT_CANNOT_OVERWRITE_SURFACE_REFERENCE
 I19 UNIVERSAL_CONCEPT_MAPPING_MAY_BE_UNRESOLVED
@@ -952,17 +963,32 @@ export/
 
 ---
 
-# PART XV — MILESTONES
+# PART XV — VERSIONING AND MILESTONES
 
-Detailed live status is maintained in [`ROADMAP.md`](ROADMAP.md).
+## 46. Pre-1.0 release policy
 
-## 46. M0 — Repository foundation
+The repository remains in initial-development `0.x` status until the architecture is deliberately declared stable.
+
+Automatic release policy is:
+
+```text
+0.x breaking change → next MINOR
+0.x feature         → next MINOR
+0.x fix/docs/etc.   → next PATCH
+>=1.0 breaking      → next MAJOR
+```
+
+A breaking research-contract change MUST NOT automatically imply architectural `1.0` maturity.
+
+Detailed live milestone status is maintained in [`ROADMAP.md`](ROADMAP.md).
+
+## 47. M0 — Repository foundation
 
 **Status: DONE**
 
 Repository governance, branch model, release/version plumbing, README, and Blueprint foundation.
 
-## 47. M1 — Provider-bound Machine Contract
+## 48. M1 — Provider-bound Machine Contract
 
 **Status: IMPLEMENTED / REVIEW PENDING**
 
@@ -977,9 +1003,9 @@ registries
 worked example using real RGBL IDs
 ```
 
-## 48. M2 — Deterministic validator
+## 49. M2 — Deterministic validator
 
-**Status: IMPLEMENTED / REVIEW PENDING**
+**Status: IMPLEMENTED / REVIEW PENDING — CI GREEN**
 
 Delivered on `dev`:
 
@@ -997,33 +1023,33 @@ offline RGBL provider index
 CI npm run check gate
 ```
 
-M2 becomes project-complete only after CI acceptance and promotion under repository governance.
+Technical acceptance is green; review/promotion to `main` is the remaining milestone gate.
 
-## 49. M3 — Live RGBL connector
+## 50. M3 — Live RGBL connector
 
 **Status: NEXT**
 
 Resolve RGBL resources through a stable SDK/API/repository interface and verify provider content/selectors against pinned revisions.
 
-## 50. M4 — Linguistic plugins + stratified golden analyses
+## 51. M4 — Linguistic plugins + stratified golden analyses
 
 **Status: PLANNED**
 
 Build language-specific analysis plugins and a structurally diverse golden set independent of scripture identity.
 
-## 51. M5 — Semantic frame engine
+## 52. M5 — Semantic frame engine
 
 **Status: PLANNED**
 
 Candidate generation, contextual-sense resolution, concept linking, assessments, confidence, provenance, and review workflows.
 
-## 52. M6 — Witness engine
+## 53. M6 — Witness engine
 
 **Status: PLANNED**
 
 Witness Pattern matching, localization, response/correction, and positive-direction derivation.
 
-## 53. M7 — Scale
+## 54. M7 — Scale
 
 **Status: PLANNED**
 
