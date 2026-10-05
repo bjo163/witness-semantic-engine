@@ -1,196 +1,170 @@
-# WSI Machine Contract v0.1.0
+# WSI Machine Contract v0.2.0
 
-This directory defines the first machine-readable contract for Witness Semantic Indexing (WSI).
+This directory defines the first provider-bound semantic-analysis contract for Witness Semantic Indexing (WSI).
 
-The contract is subordinate to `BLUEPRINT.md`. If implementation code, prompts, models, databases, adapters, or UIs conflict with the Blueprint, the implementation is wrong until the specification is explicitly versioned.
+`BLUEPRINT.md` is normative. This contract implements its current machine-readable boundary.
 
-## Scope
+## Breaking change from v0.1
 
-Version `0.1.0` defines:
+v0.1 mixed source/corpus ownership with WSI analysis objects.
 
-- the canonical semantic-record JSON structure;
-- stable internal identifier rules;
-- controlled vocabulary registries;
-- concept, relation, and Witness Pattern registries;
-- evidence, provenance, confidence, and review fields;
-- separation of source semantics from Witness and positive direction;
-- corpus-agnostic source identity using corpus/work/edition/reference-system context;
-- one worked example used as a golden candidate, not as a universal schema template.
+v0.2 removes canonical source ownership from WSI.
 
-It does **not** yet define:
-
-- a mandatory corpus;
-- a mandatory scripture family;
-- a production source edition;
-- a complete ontology;
-- a complete semantic-role inventory;
-- a production confidence calibration;
-- a full-corpus extractor;
-- a claim that any worked example is locked theological interpretation.
-
-## Universal corpus terminology
-
-The machine contract uses these terms:
+Removed from WSI ownership:
 
 ```text
-SOURCE CORPUS
-CORPUS PROFILE
-CORPUS INSTANCE
-WORK
-EDITION
-REFERENCE SYSTEM
-SOURCE UNIT
-CORPUS ADAPTER
+corpus records
+work records
+edition records
+reference-system records
+source-unit records
+canonical source text
+source checksums/rights as WSI authority
 ```
 
-### Source Corpus
+Replaced by:
 
-The declared body of primary text selected for research.
+```text
+Source Provider Contract
+Source Binding
+Analysis Target
+Evidence selectors
+```
 
-### Corpus Profile
+The current first provider is `rocksoul-rgbl`.
 
-Declarative description of corpus-family structure and adapter requirements.
+## Top-level analysis record
 
-### Corpus Instance
+```text
+record_id
+contract_version
+record_type
+analysis_target
+source_bindings[]
+lexical_senses[]
+utterances[]
+participants[]
+frames[]
+discourse_relations[]
+concept_refs[]
+assessments[]
+witnesses[]
+provenance
+review
+```
 
-The concrete work/edition/reference dataset being analyzed.
+## Source boundary
 
-### Corpus Adapter
+Canonical text is resolved from a provider.
 
-Implementation-specific ingestion/linguistic integration that emits the universal WSI contract.
+Example binding:
 
-The semantic core MUST NOT require any one named corpus profile.
+```json
+{
+  "id": "S1",
+  "provider": "rocksoul-rgbl",
+  "provider_contract": "moonwitness-corpus/v0.1",
+  "provider_revision": "df00706c98e21fb3fb0146b8389b0f2978f3d833",
+  "primary_resource_id": "mw:passage:quran:37:30",
+  "resource_ids": [
+    "mw:passage:quran:37:30",
+    "mw:content:quran:37:30:ar-uthmani"
+  ],
+  "resolution_status": "RESOLVED"
+}
+```
 
-## Corpus neutrality
+WSI may retain quote/selectors for evidence anchoring, but those are not canonical source copies.
 
-The contract is designed so that profiles such as Qur'an, Torah-associated, Psalms-associated, and Gospel-associated corpora can use the same semantic core.
+## Assessment model
 
-A profile may be implemented first for project sequencing reasons, but first implementation does not grant architectural privilege.
+v0.2 removes `source_direction` from Frame structure.
 
-Before the core reaches a stable specification, it should be validated against multiple distinct Corpus Profiles to detect hidden corpus-specific assumptions.
+Direction is modeled as an Assessment:
 
-## Lock semantics
+```text
+FRAME F2
+→ ASSESSMENT A2
+   assessment_type = SOURCE_DIRECTION
+   result = NEGATIVE
+```
 
-`LOCKED` is a semantic assertion/review state.
-
-It is **not** a corpus lock-in mechanism and does not mean that one corpus defines the architecture.
-
-A corpus may simultaneously contain candidate, reviewed, locked, disputed, and unresolved assertions.
+This keeps evaluative judgement separate from proposition structure.
 
 ## Validation pipeline
 
-A record is valid only after distinct checks:
-
 ```text
-1. JSON Schema structure
-2. Registry referential integrity
-3. WSI semantic invariants
-4. Corpus-profile / source-integrity validation
-5. Review / lock policy
+1. JSON_SCHEMA
+2. REGISTRY_REFERENTIAL_INTEGRITY
+3. SOURCE_BINDING_RESOLUTION
+4. EVIDENCE_SELECTOR_RESOLUTION
+5. WSI_SEMANTIC_INVARIANTS
+6. REVIEW_POLICY
 ```
 
-Passing JSON Schema alone does not make a semantic assertion correct.
+Passing JSON Schema alone does not imply semantic correctness.
 
-### 1. JSON Schema
+## Contract files
 
-`wsi-record.schema.json` validates structural shape using JSON Schema Draft 2020-12.
+- `manifest.json` — contract manifest and validation order.
+- `SOURCE-PROVIDER-CONTRACT.md` — provider/source ownership boundary.
+- `ID-GRAMMAR.md` — WSI-owned identifier rules and external-ID rules.
+- `wsi-record.schema.json` — canonical JSON Schema Draft 2020-12 record.
+- `../registries/controlled-vocabularies.json` — controlled values.
+- `../registries/concepts.json` — WSI concept registry seed.
+- `../registries/relations.json` — WSI relation registry seed.
+- `../registries/witness-patterns.json` — Witness Pattern registry seed.
+- `../data/golden-candidates/quran/037/030.json` — non-normative worked example bound to real RGBL resource IDs.
 
-### 2. Registry referential integrity
+## Provider independence
 
-Every referenced concept, relation, Witness Pattern, controlled value, and future mapping type must resolve to the declared versioned registries.
+WSI is not hardcoded to scripture names or to one provider.
 
-### 3. WSI invariants
+The first production integration is RGBL because it already preserves exact text, passage identity, editions, provenance, rights, and multi-tradition resources.
 
-Examples:
-
-```text
-SOURCE_CORPUS != ONTOLOGY
-CORPUS_PROFILE != SEMANTIC_CORE
-PARTICIPANT != CONCEPT
-RELATION != CONCEPT
-POLARITY != DIRECTION
-SOURCE_DIRECTION != POSITIVE_DIRECTION
-WITNESS_LABEL != CANONICAL_CONCEPT
-TRANSLATION_ALONE != DIRECT_PRIMARY_EVIDENCE
-CONTEXT_RESOLUTION_MUST_NOT_OVERWRITE_SURFACE_REFERENCE
-```
-
-### 4. Corpus-profile / source-integrity validation
-
-The adapter/profile layer validates edition identity, reference-system resolution, source-unit integrity, checksums, text-view provenance, and corpus-specific constraints.
-
-Corpus-specific validation must not redefine the universal semantic core.
-
-### 5. Review policy
-
-Semantic assertions use lifecycle states such as `CANDIDATE`, `RESEARCHED`, `REVIEWED`, `LOCKED`, `DISPUTED`, and `DEPRECATED`.
-
-Machine validity and research approval are intentionally separate.
+Another provider may be supported later if it can satisfy the Source Provider Contract.
 
 ## Cross-language rule
 
-Never map words across Arabic, Hebrew, Greek, English, Indonesian, or other languages solely because a translation string matches.
-
-Required conceptual path:
+Never equate lexical items because translations happen to use the same word.
 
 ```text
-surface form
-→ lexeme / lemma
-→ contextual lexical sense
-→ semantic frame role
-→ canonical concept mapping
+external source anchor
+→ lexical/linguistic analysis
+→ contextual sense
+→ frame role
+→ optional universal concept mapping
 ```
+
+Unresolved concept mapping is valid.
 
 ## Witness rule
 
-Witness is downstream from reviewed source semantics:
-
 ```text
-REVIEWED / LOCKED ASSERTION
+REVIEWED/LOCKED FRAME + ASSESSMENTS
 → WITNESS PATTERN
-→ LOCALIZED WITNESS LABEL
+→ LOCALIZED LABEL
 → RESPONSE / CORRECTION
 → POSITIVE DIRECTION
 ```
 
-A label such as `OFFSIDE` is presentation. A machine-stable identity is a Witness Pattern such as `wsi:witness-pattern/boundary-violation`.
-
-## Worked example policy
-
-`../data/golden-candidates/quran/037/030.json` is currently one non-normative worked example / golden candidate.
-
-Its location under a corpus-specific directory is intentional: golden records belong to Corpus Instances/Profiles, while schemas and registries remain universal.
-
-The example MUST NOT imply that Qur'an-specific fields belong in the core schema.
-
-## Files
-
-- `manifest.json` — contract manifest and validation order.
-- `ID-GRAMMAR.md` — identifier rules.
-- `wsi-record.schema.json` — canonical JSON Schema.
-- `../registries/controlled-vocabularies.json` — finite controlled values.
-- `../registries/concepts.json` — concept scheme bootstrap.
-- `../registries/relations.json` — relation registry bootstrap.
-- `../registries/witness-patterns.json` — Witness Pattern bootstrap.
-- `../data/golden-candidates/quran/037/030.json` — one corpus-specific worked example.
+Research previews may use `RESEARCHED` inputs, but downstream objects remain provisional.
 
 ## Version discipline
 
-The following are separate version domains and must not be conflated:
+These remain separate:
 
 ```text
-repository_version
-blueprint_version
-contract_version
-schema_version
-ontology_version
-registry_version
-corpus_profile_version
-corpus_adapter_version
-source_edition_version
-extractor_version
-confidence_policy_version
-witness_policy_version
+repository version
+Blueprint revision
+Machine Contract version
+registry version
+ontology version
+analyzer version
+source-provider contract/version
+source-provider revision
+confidence policy version
+Witness policy version
 ```
 
-The universal contract evolves independently from any one corpus adapter or source edition.
+They MUST NOT be assumed equal.

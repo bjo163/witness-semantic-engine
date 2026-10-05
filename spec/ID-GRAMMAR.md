@@ -1,126 +1,239 @@
-# WSI Identifier Grammar v0.1.0
+# WSI Identifier Grammar
 
-WSI identifiers separate **machine identity** from human labels and external references.
+**Contract version:** `0.2.0`
 
-## Principles
+WSI v0.2 distinguishes **WSI-owned analysis IDs** from **external Source Provider IDs**.
 
-1. IDs are stable identities; labels may change.
-2. External references such as `37:30` or `Gen.1.1` are mappings, not canonical WSI identity by themselves.
-3. Source-unit identity includes corpus and edition context.
-4. Concept IDs are language-neutral.
-5. Witness labels are not used as Witness Pattern IDs.
-6. No semantic meaning should be inferred from an ID beyond the registry/type namespace.
+The goal is to prevent source/corpus identity from being duplicated inside WSI.
 
-## Core namespaces
+---
+
+## 1. General rule
 
 ```text
-wsi:corpus/<slug>
-wsi:work/<slug>
-wsi:edition/<slug>
-wsi:refsys/<slug>
+WSI OWNS WSI ANALYSIS IDENTITIES.
+SOURCE PROVIDERS OWN SOURCE IDENTITIES.
+```
+
+An external ID MUST NOT be rewritten into a WSI ID simply because WSI analyzes it.
+
+Example:
+
+```text
+mw:passage:quran:37:30
+```
+
+remains an RGBL/MoonWitness ID.
+
+Do not create:
+
+```text
+wsi:passage:quran:37:30
+```
+
+---
+
+## 2. WSI analysis record IDs
+
+Recommended grammar:
+
+```text
+wsi:analysis/<opaque-id>
+```
+
+`<opaque-id>` SHOULD be a UUID, ULID, or another stable opaque identifier.
+
+It SHOULD NOT encode a mutable source label, verse number, edition name, language, or concept label.
+
+Example:
+
+```text
+wsi:analysis/7d5cf6d7-93a6-4a1f-ae6b-37c30f1a0001
+```
+
+---
+
+## 3. Stable ontology IDs
+
+### Concept
+
+```text
 wsi:concept/<slug>
-wsi:relation/<slug>
-wsi:witness-pattern/<slug>
-wsi:response/<slug>
-wsi:confidence/<slug>
-```
-
-Slug grammar for v0.1:
-
-```regex
-[a-z0-9][a-z0-9._-]*
 ```
 
 Examples:
 
 ```text
-wsi:corpus/quran
-wsi:work/quran
-wsi:edition/quran-research-example-ar-v0
-wsi:refsys/quran-surah-ayah
+wsi:concept/authority
 wsi:concept/transgression
-wsi:relation/authority-over
-wsi:witness-pattern/boundary-violation
-wsi:response/return-to-boundary
+wsi:concept/boundary-alignment
 ```
 
-## Source units
-
-Canonical internal unit IDs use URN form:
+### Relation
 
 ```text
-urn:wsi:unit:<corpus-slug>:<edition-slug>:<encoded-reference>
+wsi:relation/<slug>
 ```
-
-For v0.1, `<encoded-reference>` must use URI-safe characters and should not depend on punctuation that has ambiguous semantics across systems.
 
 Examples:
 
 ```text
-urn:wsi:unit:quran:quran-research-example-ar-v0:37.30
-urn:wsi:unit:torah:<edition-slug>:Gen.1.1
-urn:wsi:unit:psalms:<edition-slug>:Ps.1.1
-urn:wsi:unit:gospels:<edition-slug>:Mark.1.1
+wsi:relation/authority-over
+wsi:relation/has-state
+wsi:relation/discourse-retraction
 ```
 
-The human/external reference remains separate:
-
-```json
-{
-  "canonical_reference": "37:30",
-  "reference_system_id": "wsi:refsys/quran-surah-ayah"
-}
-```
-
-## Semantic records
+### Witness Pattern
 
 ```text
-urn:wsi:record:<corpus-slug>:<record-key>
+wsi:witness-pattern/<slug>
 ```
 
 Example:
 
 ```text
-urn:wsi:record:quran:37.30
+wsi:witness-pattern/boundary-violation
 ```
 
-A future record key may identify a passage spanning several source units. Therefore a record ID must not be treated as synonymous with one verse forever.
+### Response
 
-## Local IDs inside a record
-
-Local graph nodes use compact identifiers:
+Until a dedicated registry/schema exists, response identifiers MAY use:
 
 ```text
-P1, P2, ...   participants
-U1, U2, ...   utterances
-LS1, LS2, ... lexical senses
-F1, F2, ...   frames
-W1, W2, ...   Witness derivations
+wsi:response/<slug>
 ```
 
-Local IDs are unique only inside one semantic record. Exporters may expand them into globally unique IRIs.
-
-## External identifiers
-
-External standards may be attached as mappings, never as replacements for WSI identity.
-
-Examples include:
+Example:
 
 ```text
-OSIS
-USFM
-publisher edition IDs
-library/catalog IDs
-corpus-specific token IDs
+wsi:response/return-to-boundary
 ```
 
-Any external mapping must identify its namespace/system explicitly.
+---
 
-## Breaking changes
+## 4. Analysis-local IDs
 
-Changing the identity grammar in a way that invalidates previously issued IDs requires:
+Within one WSI record, compact local IDs are allowed.
 
-- a schema/spec version impact review;
-- an explicit migration strategy;
-- preservation of old-to-new mappings;
-- no silent rewriting of locked source or semantic records.
+```text
+S1, S2 ...     source bindings
+LS1, LS2 ...   lexical senses
+U1, U2 ...     utterances
+P1, P2 ...     participants
+F1, F2 ...     frames
+A1, A2 ...     assessments
+W1, W2 ...     Witness instances
+```
+
+Local IDs are scoped to one `wsi:analysis/*` record.
+
+They MUST NOT be treated as globally stable IDs.
+
+---
+
+## 5. External Source Provider IDs
+
+Source Provider IDs are opaque to WSI.
+
+WSI MAY validate provider-specific syntax in the provider connector, but the universal WSI schema SHOULD treat them as non-empty external identifiers.
+
+Examples from RGBL:
+
+```text
+mw:work:quran
+mw:expression:quran:ar-uthmani-tanzil-1.1
+mw:edition:quran:tanzil-1.1-uthmani
+mw:passage:quran:37:30
+mw:content:quran:37:30:ar-uthmani
+```
+
+Their lifecycle and semantics are owned by RGBL, not WSI.
+
+---
+
+## 6. Provider revision IDs
+
+A Source Binding MUST pin a reproducible provider revision.
+
+Examples:
+
+```text
+Git commit SHA
+immutable release/tag digest
+content-addressed snapshot ID
+```
+
+Moving labels such as:
+
+```text
+main
+latest
+current
+```
+
+MUST NOT be sufficient as the sole revision identity for reviewed/locked analysis.
+
+---
+
+## 7. Label changes
+
+Human labels MUST NOT define stable identity.
+
+Changing:
+
+```text
+Transgression → Boundary Transgression
+```
+
+must not automatically change:
+
+```text
+wsi:concept/transgression
+```
+
+unless the concept meaning itself materially changes.
+
+If meaning changes materially, mint a new ID and deprecate the old ID rather than silently redefining it.
+
+---
+
+## 8. No semantic overload in IDs
+
+Do not encode full propositions in IDs.
+
+Wrong:
+
+```text
+wsi:concept/no-authority-over-you
+wsi:concept/bad-transgression
+```
+
+Correct decomposition:
+
+```text
+relation = wsi:relation/authority-over
+concept  = wsi:concept/authority
+polarity = NEGATED
+roles    = HOLDER / TARGET
+```
+
+---
+
+## 9. Future graph export
+
+JSON-LD/RDF exporters MAY expand local objects into global URIs.
+
+Such export IDs MUST remain deterministic and MUST NOT retroactively redefine the canonical JSON identity model.
+
+---
+
+## 10. Identity principle
+
+```text
+SOURCE IDENTITY → OWNED BY SOURCE PROVIDER
+ANALYSIS IDENTITY → OWNED BY WSI
+ONTOLOGY IDENTITY → OWNED BY WSI REGISTRY
+LOCAL GRAPH IDENTITY → SCOPED TO ONE ANALYSIS RECORD
+```
+
+Keeping these namespaces separate is a core WSI invariant.

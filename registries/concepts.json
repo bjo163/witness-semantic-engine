@@ -1,31 +1,49 @@
 {
   "scheme_id": "wsi:concept-scheme/core-v0",
-  "scheme_version": "0.1.0",
+  "scheme_version": "0.2.0",
   "status": "research-draft",
   "concepts": [
     {
       "id": "wsi:concept/authority",
       "class": "SOURCE_SEMANTIC",
       "status": "CANDIDATE",
-      "pref_labels": {"en": "Authority", "id": "Otoritas", "ar": "سُلْطَان"},
-      "definition": "Capacity, right, or power to exercise control or authority in a relation. Exact sense must be established by source-specific lexical and contextual evidence.",
-      "notes": ["The Arabic label grounds the worked example; it does not mean every occurrence of سلطان automatically maps to this concept."]
+      "pref_labels": {
+        "en": "Authority",
+        "id": "Otoritas"
+      },
+      "definition": "Capacity, right, or power to exercise control or authority in a relation, independent of any one source-language lexeme.",
+      "scope_note": "Source-language words map here only through contextual lexical-sense analysis. No Arabic, Hebrew, Greek, or other lexeme is automatically equivalent to this concept.",
+      "notes": [
+        "The As-Saffat 37:30 worked example maps a contextual sense of سُلْطَانٍ to this concept as a research assertion; the lexeme itself is not the ontology identity."
+      ]
     },
     {
       "id": "wsi:concept/transgression",
       "class": "SOURCE_SEMANTIC",
       "status": "CANDIDATE",
-      "pref_labels": {"en": "Transgression", "id": "Melampaui batas", "ar": "طُغْيَان"},
-      "definition": "Exceeding or violating a proper limit, boundary, or norm in the evaluated context.",
-      "notes": ["Cross-language terms must map through lexical-sense analysis, not translation-string matching."]
+      "pref_labels": {
+        "en": "Transgression",
+        "id": "Pelanggaran batas"
+      },
+      "definition": "Exceeding, violating, or crossing a proper limit, constraint, or norm in the evaluated context.",
+      "scope_note": "The exact type of limit or norm is contextual and must not be inferred solely from an English or Indonesian label.",
+      "notes": [
+        "Cross-language terms must map through lexical/contextual sense analysis, not translation-string matching."
+      ]
     },
     {
       "id": "wsi:concept/boundary-alignment",
       "class": "DERIVED_TARGET",
       "status": "CANDIDATE",
-      "pref_labels": {"en": "Boundary alignment", "id": "Keselarasan dengan batas"},
-      "definition": "A derived positive target in which conduct or state is realigned with a valid boundary identified by the Witness derivation.",
-      "notes": ["This is not claimed as a direct lexical concept in As-Saffat 37:30."]
+      "pref_labels": {
+        "en": "Boundary alignment",
+        "id": "Keselarasan dengan batas"
+      },
+      "definition": "A derived positive target in which conduct or state is realigned with a valid boundary identified by a reviewed Witness derivation.",
+      "scope_note": "This concept is a downstream target and must not be back-projected into source text as direct lexical meaning.",
+      "notes": [
+        "This is not claimed as a direct lexical concept in As-Saffat 37:30."
+      ]
     }
   ]
 }

@@ -1,10 +1,11 @@
 {
   "contract_name": "WSI Machine Contract",
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "status": "research-draft",
-  "blueprint_revision": "2.0-draft",
+  "blueprint_revision": "3.0-draft",
   "schema_dialect": "https://json-schema.org/draft/2020-12/schema",
   "canonical_schema": "spec/wsi-record.schema.json",
+  "source_provider_contract": "spec/SOURCE-PROVIDER-CONTRACT.md",
   "id_grammar": "spec/ID-GRAMMAR.md",
   "registries": [
     "registries/controlled-vocabularies.json",
@@ -13,19 +14,29 @@
     "registries/witness-patterns.json"
   ],
   "worked_example": "data/golden-candidates/quran/037/030.json",
+  "first_source_provider": {
+    "name": "rocksoul-rgbl",
+    "repository": "bjo163/rocksoul-rgbl",
+    "provider_contract": "moonwitness-corpus/v0.1"
+  },
   "validation_order": [
     "JSON_SCHEMA",
     "REGISTRY_REFERENTIAL_INTEGRITY",
-    "WSI_INVARIANTS",
+    "SOURCE_BINDING_RESOLUTION",
+    "EVIDENCE_SELECTOR_RESOLUTION",
+    "WSI_SEMANTIC_INVARIANTS",
     "REVIEW_POLICY"
   ],
   "principles": [
-    "SOURCE_IS_IMMUTABLE",
-    "LEXICAL_SENSE_PRECEDES_CROSS_LANGUAGE_CONCEPT_EQUIVALENCE",
-    "PARTICIPANT_RELATION_CONCEPT_POLARITY_MODALITY_DIRECTION_ARE_SEPARATE",
+    "WSI_DOES_NOT_OWN_PRIMARY_SOURCE",
+    "EXTERNAL_SOURCE_IDENTITIES_REMAIN_EXTERNAL",
+    "SOURCE_BINDINGS_PIN_PROVIDER_REVISIONS",
+    "LEXICAL_SENSE_PRECEDES_UNIVERSAL_CONCEPT_MAPPING",
+    "PARTICIPANT_RELATION_CONCEPT_POLARITY_MODALITY_ASSESSMENT_ARE_SEPARATE",
+    "DIRECTION_IS_AN_ASSESSMENT_NOT_INTRINSIC_FRAME_STRUCTURE",
     "WITNESS_IS_DERIVED_NOT_SOURCE",
     "POSITIVE_DIRECTION_IS_DERIVED_NOT_SOURCE_DIRECTION",
     "UNRESOLVED_IS_VALID",
-    "EVERY_CANONICAL_ASSERTION_REQUIRES_PROVENANCE"
+    "EVERY_CANONICAL_ASSERTION_REQUIRES_SOURCE_ANCHORED_EVIDENCE_AND_ANALYSIS_PROVENANCE"
   ]
 }

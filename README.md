@@ -1,228 +1,286 @@
 # Witness Semantic Engine
 
-> **Corpus-agnostic, spec-first semantic research infrastructure for transforming declared source corpora into auditable semantic frames, Witness patterns, and positive-direction outputs.**
+> **Downstream semantic analysis for source resources: frames → assessments → Witness → positive direction.**
 
-[![Status](https://img.shields.io/badge/status-research--design-blue)](#project-status)
-[![Version](https://img.shields.io/badge/version-0.1.0-informational)](VERSION)
-[![Branch model](https://img.shields.io/badge/branches-dev%20%E2%86%92%20main-success)](#development-and-release-model)
+## What this repository owns
 
-## Why this repository exists
+Witness Semantic Engine (WSI) does **not** own canonical scripture/corpus text.
 
-Most text research stops at **source → translation → interpretation**. Witness Semantic Engine (WSE) adds a separate machine-readable layer that asks:
+Its job begins after a source resource already exists in a provenance-aware provider.
 
-1. What exact source corpus, work, edition, and reference system are being analyzed?
-2. What does the source explicitly contain?
-3. What semantic propositions are supported by evidence?
-4. Who or what participates in those propositions?
-5. Which contextual senses and language-neutral concepts are involved?
-6. What polarity, modality, speech act, and evaluative direction are supported?
-7. What pattern can be **witnessed** from reviewed semantics?
-8. What response/correction follows?
-9. What is the resulting **positive direction**?
+Current first provider:
 
-The project keeps those questions structurally separate.
+- [`bjo163/rocksoul-rgbl`](https://github.com/bjo163/rocksoul-rgbl) — canonical source/corpus identity, exact text, editions, passages, content, provenance, rights, variants, and alignments.
 
-## Universal corpus model
-
-WSE does **not** hardcode one scripture as the semantic core.
-
-The normative hierarchy is:
+WSI owns downstream analysis:
 
 ```text
-SOURCE CORPUS
-  └─ CORPUS INSTANCE
-      └─ WORK
-          └─ EDITION
-              └─ REFERENCE SYSTEM
-                  └─ SOURCE UNIT
-```
-
-Three universal infrastructure terms are important:
-
-- **Corpus Profile** — declarative description of a corpus family and its source/reference structure.
-- **Corpus Instance** — the actual edition/work/reference data selected for research.
-- **Corpus Adapter** — implementation code that converts corpus-specific source/linguistic structures into the universal WSI contract.
-
-A profile such as Qur'an, Torah-associated texts, Psalms-associated texts, or Gospel-associated texts is an adapter/profile concern, not a different semantic engine.
-
-The Qur'an may be an early reference implementation, but it is **not** an architectural dependency.
-
-## Core model
-
-```text
-SOURCE CORPUS + PROFILE
+SOURCE RESOURCE REFERENCE
   ↓
-CORPUS INSTANCE / WORK / EDITION / REFERENCE SYSTEM
-  ↓
-IMMUTABLE SOURCE UNIT
-  ↓
-LINGUISTIC EVIDENCE
-  ↓
-LEXICAL SENSE
+LEXICAL / CONTEXTUAL SENSE
   ↓
 DISCOURSE + PARTICIPANTS
   ↓
-SEMANTIC FRAMES / PROPOSITIONS
+SEMANTIC FRAMES
   ↓
-CONCEPTS + RELATIONS
+CONCEPT + RELATION MAPPING
   ↓
-POLARITY + MODALITY + SPEECH ACT
+ASSESSMENTS
   ↓
-SOURCE DIRECTION
-  ↓
-EVIDENCE + CONFIDENCE + REVIEW
-  ↓
-ASSERTION-LEVEL LOCK (optional production state)
+REVIEW
   ↓
 WITNESS PATTERN
   ↓
-LOCALIZED WITNESS LABEL
+WITNESS LABEL
   ↓
 RESPONSE / CORRECTION
   ↓
 POSITIVE DIRECTION
 ```
 
-The **semantic frame**, not the keyword and not the corpus identity, is the primary semantic unit.
+## Repository boundary
 
-## Key distinction: lock is not corpus lock-in
+### RGBL / Source Provider
 
-`LOCKED` is a **review status for semantic assertions/frames**.
+Owns questions such as:
 
-It does not mean a corpus is locked into the architecture, and it does not mean theological certainty.
+- What exact text is this?
+- Which work/expression/edition/artifact does it belong to?
+- Which passage/content resource identifies it?
+- What is the source provenance and checksum?
+- What rights/license govern the source?
 
-A single Source Corpus may contain `CANDIDATE`, `RESEARCHED`, `REVIEWED`, `LOCKED`, `DISPUTED`, and unresolved assertions at the same time.
+### WSI
 
-## Canonical identity vs human labels
+Owns questions such as:
 
-Concept identity is language-neutral:
+- What contextual senses are supported?
+- Who/what participates in the proposition?
+- What semantic frames are asserted?
+- What concepts and relations are defensibly mapped?
+- What polarity/modality/speech act applies?
+- What evaluative direction is supported as an **assessment**?
+- What Witness Pattern can be derived?
+- What response/correction follows?
+- What positive direction can be derived without rewriting source meaning?
 
-```text
-Machine identity:  wsi:concept/transgression
-English label:     TRANSGRESSION
-Indonesian label:  Melampaui batas
-Display key:       [TRANSGRESSION]
+## Source bindings, not source copies
+
+WSI references provider resources rather than creating duplicate scripture objects.
+
+Example:
+
+```json
+{
+  "provider": "rocksoul-rgbl",
+  "provider_contract": "moonwitness-corpus/v0.1",
+  "provider_revision": "df00706c98e21fb3fb0146b8389b0f2978f3d833",
+  "primary_resource_id": "mw:passage:quran:37:30",
+  "resource_ids": [
+    "mw:passage:quran:37:30",
+    "mw:content:quran:37:30:ar-uthmani"
+  ]
+}
 ```
 
-English is a technical label, not ontology identity.
+Canonical text remains owned by the provider. WSI may keep quote/selectors only as evidence anchors.
 
-Source-language lexical forms are evidence for contextual senses; they are not automatically universal concept IDs.
+## Why this is more universal
 
-## Worked example policy
+WSI no longer needs a Qur'an adapter, Torah adapter, Psalms adapter, or Gospel adapter in its semantic core.
 
-As-Saffat 37:30 is kept as a **non-normative worked example / golden candidate**. It tests distinctions such as speaker/addressee, negation, relation, state, source direction, Witness Pattern, and positive-direction derivation.
+If a source provider already exposes a stable addressable resource, WSI analyzes that resource through the same contract.
 
-It must not define the universal schema by itself.
+Corpus-specific ingestion belongs upstream.
 
-The `OFFSIDE` example is a localized Witness label, not a source translation and not a canonical ontology concept.
-
-## Research integrity rules
-
-The engine must preserve these boundaries:
-
-- Source Corpus ≠ ontology.
-- Corpus Profile ≠ semantic core.
-- Edition ≠ abstract revelation.
-- Source text is immutable.
-- Normalization is a derived view.
-- Token ≠ lexeme ≠ lexical sense ≠ concept.
-- Participant ≠ concept.
-- Discourse role ≠ semantic role.
-- Relation ≠ concept.
-- Polarity ≠ direction.
-- Modality ≠ speech act.
-- Translation/commentary ≠ primary source assertion.
-- Witness Pattern ≠ Witness Label ≠ canonical concept.
-- Positive direction ≠ source direction.
-- Cross-corpus semantic similarity ≠ theological equivalence.
-- `UNKNOWN`, `UNRESOLVED`, and `UNDETERMINED` are valid outputs.
-
-See **[BLUEPRINT.md](BLUEPRINT.md)** for the normative architecture.
-
-## Machine contract
-
-The current machine-contract work is under `spec/` and uses:
+Language-specific analysis belongs in optional linguistic plugins:
 
 ```text
-JSON
-+ JSON Schema 2020-12
-+ versioned registries
-+ deterministic semantic invariants
-+ research review states
+Arabic
+Hebrew
+Greek
+Pali
+Sanskrit
+Generic fallback
+...
 ```
 
-Validation is layered:
+## Semantic frame, not keyword
+
+The primary semantic unit is a Frame/Proposition.
+
+Example:
 
 ```text
-1. JSON Schema structure
-2. Registry referential integrity
-3. Semantic invariant validation
-4. Corpus-profile / source-integrity validation
-5. Research review policy
+P1 ── AUTHORITY_OVER [NEGATED] ──▶ P2
+
+P2 ── HAS_STATE ──▶ [TRANSGRESSION]
 ```
 
-Passing JSON Schema does not mean a semantic interpretation is correct.
+A frame can be n-ary and may contain multiple semantic-role bindings.
 
-## Project status
+## Assessment is separate from source structure
 
-**Research / architecture phase.**
+Direction is not embedded as a hidden fact inside a Frame.
 
-The repository is intentionally spec-first. Implementation code must not outrun the source, evidence, identity, provenance, and validation contracts.
+Preferred model:
 
-## Intended implementation path
+```text
+FRAME F2
+  ↓
+ASSESSMENT A2
+  type   = SOURCE_DIRECTION
+  result = NEGATIVE
+```
 
-The specification is implementation-independent.
+This keeps:
 
-1. **Python** — first research implementation, multilingual NLP/adapters, schema validation, ontology experimentation, evaluation.
-2. **Canonical JSON / JSON Schema** — contract shared across implementations.
-3. **JSON-LD / RDF / SKOS / OntoLex / PROV-O / SHACL** — optional interoperability/export layer.
-4. **Rust** — optional typed deterministic core/CLI after contract stabilization.
-5. **TypeScript/JavaScript** — API, semantic explorer, review UI, visualization, annotation workflows.
+```text
+POLARITY != DIRECTION
+MODALITY != DIRECTION
+SPEECH ACT != DIRECTION
+```
 
-The product contract is the specification, not any programming language.
+## Witness boundary
+
+Witness is downstream interpretation/derivation, not translation.
+
+```text
+[TRANSGRESSION]
+  ↓
+BOUNDARY_VIOLATION       # Witness Pattern
+  ↓
+OFFSIDE                  # localized Witness label
+  ↓
+RETURN / ALIGN           # response
+  ↓
+BOUNDARY_ALIGNMENT       # positive-direction target
+```
+
+The source condition is not rewritten to become positive.
+
+## Current worked example
+
+As-Saffat 37:30 remains a **non-normative worked example** only.
+
+The v0.2 golden candidate binds to real RGBL identities:
+
+```text
+mw:passage:quran:37:30
+mw:content:quran:37:30:ar-uthmani
+```
+
+It does not define the schema by itself.
+
+## Machine Contract
+
+Current research contract:
+
+```text
+WSI Machine Contract v0.2.0
+```
+
+Core record:
+
+```text
+analysis_target
+source_bindings
+lexical_senses
+utterances
+participants
+frames
+discourse_relations
+concept_refs
+assessments
+witnesses
+analysis_provenance
+review
+```
+
+See:
+
+- [`BLUEPRINT.md`](BLUEPRINT.md)
+- [`spec/README.md`](spec/README.md)
+- [`spec/SOURCE-PROVIDER-CONTRACT.md`](spec/SOURCE-PROVIDER-CONTRACT.md)
+- [`spec/ID-GRAMMAR.md`](spec/ID-GRAMMAR.md)
+
+## Validation layers
+
+```text
+1. JSON Schema
+2. WSI registry integrity
+3. Source-binding resolution
+4. Evidence-selector resolution
+5. WSI semantic invariants
+6. Review policy
+```
+
+A structurally valid JSON file is not automatically a correct semantic analysis.
+
+## Implementation direction
+
+The contract remains language-independent.
+
+Recommended architecture after the RGBL integration review:
+
+### TypeScript
+
+Use for:
+
+- RGBL/source-provider integration;
+- canonical WSI object model;
+- orchestration;
+- deterministic validation;
+- CLI/API;
+- review tooling;
+- Witness pipeline.
+
+### Python
+
+Use as optional language/research workers for:
+
+- Arabic NLP;
+- Hebrew NLP;
+- Greek NLP;
+- other linguistic pipelines;
+- embeddings/reranking/evaluation experiments.
+
+### Rust
+
+Optional later for demonstrated performance/type-safety needs.
+
+## Research integrity
+
+WSI must preserve these separations:
+
+- external source identity ≠ WSI identity;
+- source text ≠ analysis;
+- lexeme ≠ sense;
+- sense ≠ universal concept;
+- participant ≠ concept;
+- discourse role ≠ semantic role;
+- relation ≠ concept;
+- polarity ≠ direction;
+- assessment ≠ source structure;
+- Witness ≠ translation;
+- Witness label ≠ Witness Pattern;
+- response ≠ source assertion;
+- positive direction ≠ source direction;
+- analysis provenance ≠ source-acquisition provenance;
+- `UNRESOLVED` is valid.
 
 ## Development and release model
 
-Only two long-lived working branches are allowed:
+Only two long-lived branches:
 
 ```text
-dev  ───── promotion PR ─────▶  main
- ↑                              │
- active research                └─ version + changelog + tag + release
+dev → promotion PR → main
 ```
 
-### `dev`
+Conventional Commits drive automated versioning, changelog generation, tags, and GitHub Releases.
 
-Active research and implementation. Conventional Commits and policy validation apply.
+`dev` is the active research branch. `main` is the stable release branch.
 
-### `main`
+## Design principle
 
-Stable integration/release branch. Changes arrive through `dev → main` promotion.
-
-No standard long-lived `feature/*`, `release/*`, or `hotfix/*` branch model is used.
-
-## Commit convention
-
-Examples:
-
-```text
-feat(spec): define corpus profile contract
-feat(adapter): add reference corpus adapter
-fix(schema): preserve source-unit edition identity
-docs(blueprint): clarify corpus-neutral core
-refactor(witness): separate pattern from localized label
-```
-
-## Release automation
-
-On a releasable push to `main`, automation calculates SemVer from Conventional Commits, updates `VERSION` and `CHANGELOG.md`, creates a tag and GitHub Release, and synchronizes `dev` only when safe.
-
-Repository version, schema version, ontology version, corpus-profile version, adapter version, and source-edition version are separate domains.
-
-## Blueprint principle
-
-> **Do not make a source corpus the ontology. Declare the corpus, preserve the edition, resolve the sense, build the frame, attach evidence, review the assertion — then Witness.**
-
----
-
-**Witness Semantic Engine** is currently a research architecture. Core contracts and ontology terms may evolve until the first stable specification release.
+> **Do not ingest the world twice. Resolve the source, pin it, anchor evidence, analyze, review, then Witness.**

@@ -1,123 +1,303 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://wsi.example/spec/0.1.0/wsi-record.schema.json",
-  "title": "Witness Semantic Indexing Record",
-  "description": "WSI Machine Contract v0.1.0. JSON Schema validates structure; registry membership and semantic invariants are separate validation passes.",
+  "$id": "https://wsi.example/spec/0.2.0/wsi-record.schema.json",
+  "title": "Witness Semantic Indexing Analysis Record",
+  "description": "WSI Machine Contract v0.2.0. Canonical source identity is external; WSI stores source bindings and downstream semantic analysis.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["record_id", "contract_version", "record_type", "source", "participants", "frames", "concept_refs", "witnesses", "provenance", "review"],
+  "required": [
+    "record_id",
+    "contract_version",
+    "record_type",
+    "analysis_target",
+    "source_bindings",
+    "participants",
+    "frames",
+    "concept_refs",
+    "assessments",
+    "witnesses",
+    "provenance",
+    "review"
+  ],
   "properties": {
-    "record_id": {"type": "string", "pattern": "^urn:wsi:record:[a-z0-9][a-z0-9._-]*:[A-Za-z0-9._~:-]+$"},
-    "contract_version": {"const": "0.1.0"},
-    "record_type": {"const": "SEMANTIC_RECORD"},
-    "source": {"$ref": "#/$defs/source"},
-    "lexical_senses": {"type": "array", "items": {"$ref": "#/$defs/lexicalSense"}, "default": []},
-    "utterances": {"type": "array", "items": {"$ref": "#/$defs/utterance"}, "default": []},
-    "participants": {"type": "array", "items": {"$ref": "#/$defs/participant"}},
-    "frames": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/frame"}},
-    "discourse_relations": {"type": "array", "items": {"$ref": "#/$defs/discourseRelation"}, "default": []},
-    "concept_refs": {"type": "array", "items": {"$ref": "#/$defs/conceptRef"}},
-    "source_direction_summary": {"type": ["string", "null"], "x-wsi-registry": "directions", "default": null},
-    "witnesses": {"type": "array", "items": {"$ref": "#/$defs/witness"}},
-    "provenance": {"$ref": "#/$defs/provenance"},
-    "review": {"$ref": "#/$defs/review"},
-    "extensions": {"type": "object", "description": "Namespaced experimental fields only; core fields must not be shadowed.", "additionalProperties": true}
+    "record_id": { "$ref": "#/$defs/analysisId" },
+    "contract_version": { "const": "0.2.0" },
+    "record_type": { "const": "SEMANTIC_ANALYSIS" },
+    "analysis_target": { "$ref": "#/$defs/externalTarget" },
+    "source_bindings": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/sourceBinding" }
+    },
+    "lexical_senses": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/lexicalSense" },
+      "default": []
+    },
+    "utterances": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/utterance" },
+      "default": []
+    },
+    "participants": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/participant" }
+    },
+    "frames": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/frame" }
+    },
+    "discourse_relations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/discourseRelation" },
+      "default": []
+    },
+    "concept_refs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/conceptRef" }
+    },
+    "assessments": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/assessment" }
+    },
+    "witnesses": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/witness" }
+    },
+    "provenance": { "$ref": "#/$defs/provenance" },
+    "review": { "$ref": "#/$defs/review" },
+    "extensions": {
+      "type": "object",
+      "description": "Namespaced experimental analysis fields only; source ownership must not be shadowed here.",
+      "additionalProperties": true
+    }
   },
   "$defs": {
-    "conceptId": {"type": "string", "pattern": "^wsi:concept/[a-z0-9][a-z0-9._-]*$"},
-    "relationId": {"type": "string", "pattern": "^wsi:relation/[a-z0-9][a-z0-9._-]*$"},
-    "confidence": {
+    "nonBlankString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": ".*\\S.*"
+    },
+    "analysisId": {
+      "type": "string",
+      "pattern": "^wsi:analysis/[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "conceptId": {
+      "type": "string",
+      "pattern": "^wsi:concept/[a-z0-9][a-z0-9._-]*$"
+    },
+    "relationId": {
+      "type": "string",
+      "pattern": "^wsi:relation/[a-z0-9][a-z0-9._-]*$"
+    },
+    "externalResourceId": { "$ref": "#/$defs/nonBlankString" },
+    "sourceBindingId": {
+      "type": "string",
+      "pattern": "^S[1-9][0-9]*$"
+    },
+    "externalTarget": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["policy_id", "policy_version", "components", "aggregate"],
+      "required": ["source_binding_id", "resource_id"],
       "properties": {
-        "policy_id": {"type": "string", "minLength": 1},
-        "policy_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
-        "components": {"type": "object", "minProperties": 1, "additionalProperties": {"type": "number", "minimum": 0, "maximum": 1}},
-        "aggregate": {"type": "number", "minimum": 0, "maximum": 1}
+        "source_binding_id": { "$ref": "#/$defs/sourceBindingId" },
+        "resource_id": { "$ref": "#/$defs/externalResourceId" }
+      }
+    },
+    "sourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "provider",
+        "provider_contract",
+        "provider_revision",
+        "primary_resource_id",
+        "resource_ids",
+        "resolution_status"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/sourceBindingId" },
+        "provider": { "$ref": "#/$defs/nonBlankString" },
+        "provider_contract": { "$ref": "#/$defs/nonBlankString" },
+        "provider_revision": { "$ref": "#/$defs/nonBlankString" },
+        "repository": { "type": ["string", "null"] },
+        "primary_resource_id": { "$ref": "#/$defs/externalResourceId" },
+        "resource_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/externalResourceId" }
+        },
+        "resolution_status": {
+          "type": "string",
+          "enum": ["RESOLVED", "UNRESOLVED", "STALE", "INACCESSIBLE"]
+        },
+        "metadata": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "selector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["RESOURCE_ONLY", "TEXT_QUOTE", "CHAR_RANGE", "TOKEN_IDS"]
+        },
+        "exact": { "type": ["string", "null"] },
+        "prefix": { "type": ["string", "null"] },
+        "suffix": { "type": ["string", "null"] },
+        "start": { "type": ["integer", "null"], "minimum": 0 },
+        "end": { "type": ["integer", "null"], "minimum": 0 },
+        "token_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonBlankString" },
+          "default": []
+        }
       }
     },
     "evidence": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["source_class", "derivation_type", "spans"],
+      "required": [
+        "source_binding_id",
+        "resource_id",
+        "source_class",
+        "derivation_type",
+        "selector"
+      ],
       "properties": {
-        "source_class": {"type": "string", "x-wsi-registry": "evidence_source_classes"},
-        "derivation_type": {"type": "string", "x-wsi-registry": "derivation_types"},
-        "spans": {
+        "source_binding_id": { "$ref": "#/$defs/sourceBindingId" },
+        "resource_id": { "$ref": "#/$defs/externalResourceId" },
+        "source_class": { "type": "string", "x-wsi-registry": "evidence_source_classes" },
+        "derivation_type": { "type": "string", "x-wsi-registry": "derivation_types" },
+        "selector": { "$ref": "#/$defs/selector" },
+        "notes": {
           "type": "array",
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["unit_id", "text"],
-            "properties": {
-              "unit_id": {"type": "string", "minLength": 1},
-              "text": {"type": "string", "minLength": 1},
-              "token_ids": {"type": "array", "items": {"type": "string"}, "default": []}
-            }
-          }
-        },
-        "notes": {"type": "array", "items": {"type": "string"}, "default": []}
+          "items": { "type": "string" },
+          "default": []
+        }
       }
     },
-    "source": {
+    "confidence": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["corpus_id", "work_id", "edition_id", "reference_system_id", "unit_id", "canonical_reference", "language", "script", "text", "checksum", "source_status"],
+      "required": ["policy_id", "policy_version", "components", "aggregate"],
       "properties": {
-        "corpus_id": {"type": "string", "pattern": "^wsi:corpus/[a-z0-9][a-z0-9._-]*$"},
-        "work_id": {"type": "string", "pattern": "^wsi:work/[a-z0-9][a-z0-9._-]*$"},
-        "edition_id": {"type": "string", "pattern": "^wsi:edition/[a-z0-9][a-z0-9._-]*$"},
-        "reference_system_id": {"type": "string", "pattern": "^wsi:refsys/[a-z0-9][a-z0-9._-]*$"},
-        "unit_id": {"type": "string", "pattern": "^urn:wsi:unit:[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._-]*:[A-Za-z0-9._~-]+$"},
-        "canonical_reference": {"type": "string", "minLength": 1},
-        "language": {"type": "string", "pattern": "^[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*$"},
-        "script": {"type": "string", "pattern": "^[A-Z][a-z]{3}$"},
-        "text": {"type": "string", "minLength": 1},
-        "checksum": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
-        "source_status": {"type": "string", "enum": ["WORKED_EXAMPLE", "INGESTED", "VERIFIED", "LOCKED"]}
+        "policy_id": { "$ref": "#/$defs/nonBlankString" },
+        "policy_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "components": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "aggregate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
       }
     },
     "lexicalSense": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "surface", "sense_gloss", "maps_to_concept_id", "evidence", "confidence"],
+      "required": [
+        "id",
+        "surface",
+        "sense_gloss",
+        "maps_to_concept_id",
+        "evidence",
+        "confidence",
+        "review_status"
+      ],
       "properties": {
-        "id": {"type": "string", "pattern": "^LS[1-9][0-9]*$"},
-        "surface": {"type": "string", "minLength": 1},
-        "lemma": {"type": ["string", "null"]},
-        "root": {"type": ["string", "null"]},
-        "sense_gloss": {"type": "string", "minLength": 1},
-        "maps_to_concept_id": {"$ref": "#/$defs/conceptId"},
-        "evidence": {"$ref": "#/$defs/evidence"},
-        "confidence": {"$ref": "#/$defs/confidence"}
+        "id": { "type": "string", "pattern": "^LS[1-9][0-9]*$" },
+        "surface": { "$ref": "#/$defs/nonBlankString" },
+        "language": { "type": ["string", "null"] },
+        "lemma": { "type": ["string", "null"] },
+        "root": { "type": ["string", "null"] },
+        "sense_gloss": { "$ref": "#/$defs/nonBlankString" },
+        "maps_to_concept_id": {
+          "oneOf": [
+            { "$ref": "#/$defs/conceptId" },
+            { "type": "null" }
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/evidence" }
+        },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "review_status": { "type": "string", "x-wsi-registry": "review_statuses" }
       }
     },
     "utterance": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "parent_utterance_id", "speaker_participant_id", "addressee_participant_ids", "quoted_or_reported", "speech_act"],
+      "required": [
+        "id",
+        "parent_utterance_id",
+        "speaker_participant_id",
+        "addressee_participant_ids",
+        "quoted_or_reported",
+        "speech_act"
+      ],
       "properties": {
-        "id": {"type": "string", "pattern": "^U[1-9][0-9]*$"},
-        "parent_utterance_id": {"type": ["string", "null"]},
-        "speaker_participant_id": {"type": ["string", "null"]},
-        "addressee_participant_ids": {"type": "array", "items": {"type": "string", "pattern": "^P[1-9][0-9]*$"}},
-        "quoted_or_reported": {"type": "boolean"},
-        "speech_act": {"type": "string", "x-wsi-registry": "speech_acts"}
+        "id": { "type": "string", "pattern": "^U[1-9][0-9]*$" },
+        "parent_utterance_id": { "type": ["string", "null"] },
+        "speaker_participant_id": { "type": ["string", "null"] },
+        "addressee_participant_ids": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^P[1-9][0-9]*$" }
+        },
+        "quoted_or_reported": { "type": "boolean" },
+        "speech_act": { "type": "string", "x-wsi-registry": "speech_acts" },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidence" },
+          "default": []
+        }
       }
     },
     "participant": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "surface_reference", "entity_type", "discourse_roles", "resolved_identity", "resolution_status"],
+      "required": [
+        "id",
+        "surface_reference",
+        "entity_type",
+        "discourse_roles",
+        "resolved_identity",
+        "resolution_status"
+      ],
       "properties": {
-        "id": {"type": "string", "pattern": "^P[1-9][0-9]*$"},
-        "surface_reference": {"type": "string", "minLength": 1},
-        "entity_type": {"type": "string", "x-wsi-registry": "entity_types"},
-        "discourse_roles": {"type": "array", "items": {"type": "string", "x-wsi-registry": "discourse_roles"}},
-        "resolved_identity": {"type": ["string", "null"]},
-        "resolution_status": {"type": "string", "enum": ["UNRESOLVED", "CANDIDATE", "RESOLVED", "DISPUTED"]},
-        "resolution_evidence": {"oneOf": [{"$ref": "#/$defs/evidence"}, {"type": "null"}]}
+        "id": { "type": "string", "pattern": "^P[1-9][0-9]*$" },
+        "surface_reference": { "$ref": "#/$defs/nonBlankString" },
+        "entity_type": { "type": "string", "x-wsi-registry": "entity_types" },
+        "discourse_roles": {
+          "type": "array",
+          "items": { "type": "string", "x-wsi-registry": "discourse_roles" }
+        },
+        "resolved_identity": { "type": ["string", "null"] },
+        "resolution_status": {
+          "type": "string",
+          "enum": ["UNRESOLVED", "CANDIDATE", "RESOLVED", "DISPUTED"]
+        },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidence" },
+          "default": []
+        }
       }
     },
     "roleBinding": {
@@ -125,40 +305,82 @@
       "additionalProperties": false,
       "required": ["role", "participant_id"],
       "properties": {
-        "role": {"type": "string", "x-wsi-registry": "semantic_roles"},
-        "participant_id": {"type": "string", "pattern": "^P[1-9][0-9]*$"}
+        "role": { "type": "string", "x-wsi-registry": "semantic_roles" },
+        "participant_id": { "type": "string", "pattern": "^P[1-9][0-9]*$" }
       }
     },
     "frame": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "frame_type", "predicate_relation_id", "role_bindings", "concept_ids", "polarity", "modality", "source_direction", "evidence", "confidence", "review_status"],
+      "required": [
+        "id",
+        "frame_type",
+        "predicate_relation_id",
+        "role_bindings",
+        "concept_ids",
+        "polarity",
+        "modality",
+        "evidence",
+        "confidence",
+        "review_status"
+      ],
       "properties": {
-        "id": {"type": "string", "pattern": "^F[1-9][0-9]*$"},
-        "utterance_id": {"type": ["string", "null"]},
-        "frame_type": {"type": "string", "x-wsi-registry": "frame_types"},
-        "predicate_relation_id": {"$ref": "#/$defs/relationId"},
-        "role_bindings": {"type": "array", "items": {"$ref": "#/$defs/roleBinding"}},
-        "concept_ids": {"type": "array", "items": {"$ref": "#/$defs/conceptId"}},
-        "polarity": {"type": "string", "x-wsi-registry": "polarity"},
-        "modality": {"type": "string", "x-wsi-registry": "modality"},
-        "speech_act": {"type": ["string", "null"], "x-wsi-registry": "speech_acts"},
-        "source_direction": {"type": "string", "x-wsi-registry": "directions"},
-        "evidence": {"$ref": "#/$defs/evidence"},
-        "confidence": {"$ref": "#/$defs/confidence"},
-        "review_status": {"type": "string", "x-wsi-registry": "review_statuses"}
+        "id": { "type": "string", "pattern": "^F[1-9][0-9]*$" },
+        "utterance_id": { "type": ["string", "null"] },
+        "frame_type": { "type": "string", "x-wsi-registry": "frame_types" },
+        "predicate_relation_id": {
+          "oneOf": [
+            { "$ref": "#/$defs/relationId" },
+            { "type": "null" }
+          ]
+        },
+        "role_bindings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/roleBinding" }
+        },
+        "concept_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/conceptId" }
+        },
+        "polarity": { "type": "string", "x-wsi-registry": "polarity" },
+        "modality": { "type": "string", "x-wsi-registry": "modality" },
+        "speech_act": {
+          "type": ["string", "null"],
+          "x-wsi-registry": "speech_acts"
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/evidence" }
+        },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "review_status": { "type": "string", "x-wsi-registry": "review_statuses" }
       }
     },
     "discourseRelation": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["from_frame_id", "relation_id", "to_frame_id", "evidence", "confidence"],
+      "required": [
+        "id",
+        "from_frame_id",
+        "relation_id",
+        "to_frame_id",
+        "evidence",
+        "confidence",
+        "review_status"
+      ],
       "properties": {
-        "from_frame_id": {"type": "string", "pattern": "^F[1-9][0-9]*$"},
-        "relation_id": {"$ref": "#/$defs/relationId"},
-        "to_frame_id": {"type": "string", "pattern": "^F[1-9][0-9]*$"},
-        "evidence": {"$ref": "#/$defs/evidence"},
-        "confidence": {"$ref": "#/$defs/confidence"}
+        "id": { "type": "string", "pattern": "^D[1-9][0-9]*$" },
+        "from_frame_id": { "type": "string", "pattern": "^F[1-9][0-9]*$" },
+        "relation_id": { "$ref": "#/$defs/relationId" },
+        "to_frame_id": { "type": "string", "pattern": "^F[1-9][0-9]*$" },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/evidence" }
+        },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "review_status": { "type": "string", "x-wsi-registry": "review_statuses" }
       }
     },
     "conceptRef": {
@@ -166,19 +388,77 @@
       "additionalProperties": false,
       "required": ["concept_id", "usage", "review_status"],
       "properties": {
-        "concept_id": {"$ref": "#/$defs/conceptId"},
-        "usage": {"type": "string", "enum": ["SOURCE", "CONTEXTUAL", "DERIVED_TARGET"]},
-        "review_status": {"type": "string", "x-wsi-registry": "review_statuses"}
+        "concept_id": { "$ref": "#/$defs/conceptId" },
+        "usage": {
+          "type": "string",
+          "enum": ["SOURCE", "CONTEXTUAL", "DERIVED_TARGET"]
+        },
+        "review_status": { "type": "string", "x-wsi-registry": "review_statuses" }
+      }
+    },
+    "assessmentTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["RECORD", "LEXICAL_SENSE", "PARTICIPANT", "FRAME", "DISCOURSE_RELATION", "WITNESS"]
+        },
+        "id": { "$ref": "#/$defs/nonBlankString" }
+      }
+    },
+    "assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "target",
+        "assessment_type",
+        "result",
+        "method_id",
+        "evidence",
+        "confidence",
+        "review_status"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^A[1-9][0-9]*$" },
+        "target": { "$ref": "#/$defs/assessmentTarget" },
+        "assessment_type": { "type": "string", "x-wsi-registry": "assessment_types" },
+        "result": { "$ref": "#/$defs/nonBlankString" },
+        "method_id": { "$ref": "#/$defs/nonBlankString" },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidence" }
+        },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "review_status": { "type": "string", "x-wsi-registry": "review_statuses" }
       }
     },
     "witness": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "observed_frame_ids", "pattern_id", "labels", "correction", "positive_direction", "confidence", "review_status"],
+      "required": [
+        "id",
+        "observed_frame_ids",
+        "pattern_id",
+        "labels",
+        "response",
+        "positive_direction",
+        "confidence",
+        "review_status"
+      ],
       "properties": {
-        "id": {"type": "string", "pattern": "^W[1-9][0-9]*$"},
-        "observed_frame_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^F[1-9][0-9]*$"}},
-        "pattern_id": {"type": "string", "pattern": "^wsi:witness-pattern/[a-z0-9][a-z0-9._-]*$"},
+        "id": { "type": "string", "pattern": "^W[1-9][0-9]*$" },
+        "observed_frame_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^F[1-9][0-9]*$" }
+        },
+        "pattern_id": {
+          "type": "string",
+          "pattern": "^wsi:witness-pattern/[a-z0-9][a-z0-9._-]*$"
+        },
         "labels": {
           "type": "array",
           "items": {
@@ -186,20 +466,20 @@
             "additionalProperties": false,
             "required": ["language", "label", "type"],
             "properties": {
-              "language": {"type": "string"},
-              "label": {"type": "string", "minLength": 1},
-              "type": {"type": "string", "x-wsi-registry": "witness_label_types"}
+              "language": { "$ref": "#/$defs/nonBlankString" },
+              "label": { "$ref": "#/$defs/nonBlankString" },
+              "type": { "type": "string", "x-wsi-registry": "witness_label_types" }
             }
           }
         },
-        "correction": {
+        "response": {
           "type": "object",
           "additionalProperties": false,
           "required": ["response_id", "label", "status"],
           "properties": {
-            "response_id": {"type": ["string", "null"]},
-            "label": {"type": ["string", "null"]},
-            "status": {"type": "string", "enum": ["RESOLVED", "UNRESOLVED"]}
+            "response_id": { "type": ["string", "null"] },
+            "label": { "type": ["string", "null"] },
+            "status": { "type": "string", "enum": ["RESOLVED", "UNRESOLVED"] }
           }
         },
         "positive_direction": {
@@ -207,37 +487,61 @@
           "additionalProperties": false,
           "required": ["target_concept_id", "direction", "derivation_type", "status"],
           "properties": {
-            "target_concept_id": {"oneOf": [{"$ref": "#/$defs/conceptId"}, {"type": "null"}]},
-            "direction": {"type": ["string", "null"], "enum": ["POSITIVE", null]},
-            "derivation_type": {"type": "string", "enum": ["DERIVED", "INTERPRETIVE"]},
-            "status": {"type": "string", "enum": ["RESOLVED", "UNRESOLVED"]}
+            "target_concept_id": {
+              "oneOf": [
+                { "$ref": "#/$defs/conceptId" },
+                { "type": "null" }
+              ]
+            },
+            "direction": {
+              "type": ["string", "null"],
+              "enum": ["POSITIVE", null]
+            },
+            "derivation_type": {
+              "type": "string",
+              "enum": ["DERIVED", "INTERPRETIVE"]
+            },
+            "status": { "type": "string", "enum": ["RESOLVED", "UNRESOLVED"] }
           }
         },
-        "confidence": {"$ref": "#/$defs/confidence"},
-        "review_status": {"type": "string", "x-wsi-registry": "review_statuses"}
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "review_status": { "type": "string", "x-wsi-registry": "review_statuses" }
       }
     },
     "provenance": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["framework_version", "schema_version", "ontology_version", "extractor_version", "created_at", "created_by"],
+      "required": [
+        "framework_version",
+        "contract_version",
+        "registry_version",
+        "ontology_version",
+        "analyzer_version",
+        "created_at",
+        "created_by"
+      ],
       "properties": {
-        "framework_version": {"type": "string", "minLength": 1},
-        "schema_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
-        "ontology_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
-        "extractor_version": {"type": "string", "minLength": 1},
-        "created_at": {"type": "string", "format": "date-time"},
-        "created_by": {"type": "string", "minLength": 1}
+        "framework_version": { "$ref": "#/$defs/nonBlankString" },
+        "contract_version": { "const": "0.2.0" },
+        "registry_version": { "$ref": "#/$defs/nonBlankString" },
+        "ontology_version": { "$ref": "#/$defs/nonBlankString" },
+        "analyzer_version": { "$ref": "#/$defs/nonBlankString" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "created_by": { "$ref": "#/$defs/nonBlankString" },
+        "model": { "type": ["object", "null"], "additionalProperties": true }
       }
     },
     "review": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "notes"],
+      "required": ["status", "reviewer", "notes"],
       "properties": {
-        "status": {"type": "string", "x-wsi-registry": "review_statuses"},
-        "reviewer": {"type": ["string", "null"]},
-        "notes": {"type": "array", "items": {"type": "string"}}
+        "status": { "type": "string", "x-wsi-registry": "review_statuses" },
+        "reviewer": { "type": ["string", "null"] },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
       }
     }
   }
