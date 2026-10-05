@@ -5,7 +5,7 @@ This file is the project-status source of truth for implementation milestones. A
 ## Status vocabulary
 
 - `DONE` — implemented and promoted to stable project history.
-- `IMPLEMENTED / REVIEW PENDING` — implemented on `dev`, acceptance/review still pending.
+- `IMPLEMENTED / REVIEW PENDING` — implemented on `dev`; technical acceptance may be green, but promotion/review is still pending.
 - `IN PROGRESS` — active work is incomplete.
 - `NEXT` — next planned milestone.
 - `PLANNED` — defined but not started.
@@ -15,7 +15,7 @@ This file is the project-status source of truth for implementation milestones. A
 ```text
 M0  Repository foundation             DONE
 M1  Provider-bound Machine Contract   IMPLEMENTED / REVIEW PENDING
-M2  Deterministic validator           IMPLEMENTED / REVIEW PENDING
+M2  Deterministic validator           IMPLEMENTED / REVIEW PENDING — CI GREEN
 M3  Live RGBL connector               NEXT
 M4  Linguistic plugins + goldens      PLANNED
 M5  Semantic frame engine             PLANNED
@@ -23,7 +23,7 @@ M6  Witness engine                    PLANNED
 M7  Scale across provider resources   PLANNED
 ```
 
-`main` remains the stable branch. Work described as review-pending currently lives on `dev` / the open promotion PR.
+`main` remains the stable branch. Review-pending work currently lives on `dev` / the open promotion PR.
 
 ---
 
@@ -38,6 +38,17 @@ Delivered:
 - Conventional Commits policy;
 - automated version/release/changelog plumbing;
 - README and Blueprint foundation.
+
+Release policy during initial development:
+
+```text
+0.x breaking change → next MINOR
+0.x feature         → next MINOR
+0.x fix/docs/etc.   → next PATCH
+>=1.0 breaking      → next MAJOR
+```
+
+This prevents research-phase breaking changes from prematurely declaring `1.0.0` stability.
 
 ---
 
@@ -57,7 +68,7 @@ Delivered on `dev`:
 - Source Direction moved into Assessment;
 - real RGBL IDs used by the non-normative 37:30 worked example.
 
-Acceptance gate:
+Remaining acceptance gate:
 
 - architecture review;
 - PR promotion to `main`.
@@ -66,7 +77,7 @@ Acceptance gate:
 
 ## M2 — Deterministic validator
 
-**Status:** IMPLEMENTED / REVIEW PENDING
+**Status:** IMPLEMENTED / REVIEW PENDING — CI GREEN
 
 Delivered on `dev`:
 
@@ -82,6 +93,15 @@ Delivered on `dev`:
 - CI hook through `npm run check`;
 - validation architecture documentation.
 
+Technical acceptance completed on `dev`:
+
+```text
+TypeScript typecheck   PASS
+validator tests        PASS
+golden validation      PASS
+repository policy      PASS
+```
+
 Important boundary:
 
 ```text
@@ -89,13 +109,10 @@ M2 validates provider bindings offline.
 M2 does not fetch or own canonical provider content.
 ```
 
-Acceptance gate:
+Remaining acceptance gate:
 
-- typecheck succeeds in CI;
-- tests succeed;
-- golden candidate validates;
-- repository policy succeeds;
-- review/promotion to `main`.
+- review;
+- promotion to `main`.
 
 ---
 
@@ -125,6 +142,11 @@ Non-goals:
 - Qur'an-specific semantic branches;
 - language analysis;
 - Witness generation.
+
+Acceptance requirement before the connector abstraction is considered stable:
+
+- verify the existing 37:30 binding against RGBL content;
+- validate at least one structurally different non-Qur'an RGBL resource through the same interface.
 
 ---
 
@@ -212,7 +234,7 @@ Scale readiness requires:
 
 ## Immediate next work
 
-After M2 review passes:
+After the current promotion review:
 
 1. define the runtime `SourceProvider` interface;
 2. choose the stable RGBL access path (SDK, repository package, or API);
