@@ -1,6 +1,6 @@
 # WSI Machine Contract v0.2.0
 
-This directory defines the first provider-bound semantic-analysis contract for Witness Semantic Indexing (WSI).
+This directory defines the provider-bound semantic-analysis contract for Witness Semantic Engine (WSI).
 
 `BLUEPRINT.md` is normative. This contract implements its current machine-readable boundary.
 
@@ -91,7 +91,9 @@ FRAME F2
 
 This keeps evaluative judgement separate from proposition structure.
 
-## Validation pipeline
+## Validation pipeline — M2
+
+Offline deterministic validation runs:
 
 ```text
 1. JSON_SCHEMA
@@ -104,10 +106,41 @@ This keeps evaluative judgement separate from proposition structure.
 
 Passing JSON Schema alone does not imply semantic correctness.
 
+## Live source proof — M3
+
+The runtime `SourceProvider` boundary now has a reference RGBL implementation.
+
+The live layer verifies the external facts that ordinary offline CI deliberately does not fetch:
+
+```text
+pinned provider revision exists
+resource ID exists at that revision
+analysis target resolves
+TEXT_QUOTE matches provider content literally
+CHAR_RANGE resolves against provider text
+claimed RESOLVED binding is not stale
+```
+
+Reference implementation:
+
+```text
+src/source-provider/types.ts
+src/source-provider/rgbl-repository.ts
+src/source-provider/verify.ts
+spec/RGBL-CONNECTOR.md
+.github/workflows/provider-live.yml
+```
+
+The live acceptance suite currently passes both Qur'an 37:30 and a non-Qur'an Bhagavad Gita 1:1 resource through the same provider interface.
+
+The worked example's exact Uthmani evidence anchors were corrected after the live verifier proved the prior human-entered anchors were not byte-exact. This is intended behavior: provider text wins over a locally plausible source string.
+
 ## Contract files
 
-- `manifest.json` — contract manifest and validation order.
+- `manifest.json` — contract manifest, validation order, and runtime provider references.
 - `SOURCE-PROVIDER-CONTRACT.md` — provider/source ownership boundary.
+- `RGBL-CONNECTOR.md` — first live Source Provider reference transport.
+- `VALIDATION.md` — deterministic/offline validation architecture.
 - `ID-GRAMMAR.md` — WSI-owned identifier rules and external-ID rules.
 - `wsi-record.schema.json` — canonical JSON Schema Draft 2020-12 record.
 - `../registries/controlled-vocabularies.json` — controlled values.
@@ -120,9 +153,11 @@ Passing JSON Schema alone does not imply semantic correctness.
 
 WSI is not hardcoded to scripture names or to one provider.
 
-The first production integration is RGBL because it already preserves exact text, passage identity, editions, provenance, rights, and multi-tradition resources.
+RGBL is the first integration because it already preserves exact text, passage identity, editions, provenance, rights, and multi-tradition resources.
 
 Another provider may be supported later if it can satisfy the Source Provider Contract.
+
+Provider transport is also not semantic identity: repository, SDK, API, or database-backed resolvers may implement the same logical interface.
 
 ## Cross-language rule
 
