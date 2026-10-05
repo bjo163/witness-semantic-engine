@@ -1,6 +1,6 @@
 # WSI Source Provider Contract
 
-**Contract revision:** `0.1-draft`  
+**Contract revision:** `0.2-draft`  
 **WSI Machine Contract:** `0.2.0`
 
 This document defines the boundary between Witness Semantic Engine (WSI) and any external source system.
@@ -42,9 +42,19 @@ repository: bjo163/rocksoul-rgbl
 
 WSI schema MUST NOT require RGBL-specific field names inside semantic Frames.
 
-Instead, provider-specific resolution occurs at the Source Binding boundary.
+Provider-specific resolution occurs at the Source Binding boundary.
 
-This permits another provider to satisfy the same contract later without redefining WSI semantic objects.
+The logical runtime provider interface is transport-neutral. Conceptually it supports:
+
+```text
+verifyRevision(revision)
+currentRevision()
+resolveResource(revision, resourceId, hints?)
+```
+
+An implementation MAY use a repository checkout, SDK, API, local database, or another transport without redefining WSI semantic objects.
+
+This permits another provider to satisfy the same contract later without redefining the semantic core.
 
 ---
 
@@ -84,6 +94,8 @@ resolution_status
 The provider revision SHOULD be an immutable release identifier or commit SHA.
 
 `main`, `latest`, or another moving ref MUST NOT be sufficient for reproducible reviewed analysis.
+
+A provider's current HEAD MAY advance without invalidating a previously reviewed analysis. The pinned revision remains authoritative for reproducibility as long as it can still be resolved.
 
 ---
 
@@ -153,9 +165,15 @@ An exact textual anchor.
 ```json
 {
   "type": "TEXT_QUOTE",
-  "exact": "سُلْطَانٍ"
+  "exact": "سُلْطَـٰنٍۭ"
 }
 ```
+
+For primary-source live proof, `exact` MUST match the pinned provider representation literally.
+
+The verifier MUST NOT silently normalize, stem, transliterate, translate, or fuzzy-match a non-identical string and then claim verbatim source proof.
+
+Analytic forms such as normalized surface strings, lemmas, and roots belong in WSI analysis fields and MAY differ from the provider's exact orthography.
 
 The quote is an anchor only. It is not source authority.
 
@@ -173,6 +191,8 @@ Character offsets in a declared provider representation.
 
 Provider representation identity MUST be known before offsets are considered stable.
 
+When `exact` is supplied with a character range, the provider slice MUST equal it.
+
 ### TOKEN_IDS
 
 Provider/tool-specific token identifiers.
@@ -185,6 +205,8 @@ Provider/tool-specific token identifiers.
 ```
 
 Token IDs MUST NOT be treated as portable across incompatible tokenizers.
+
+The first RGBL repository connector does not claim live TOKEN_IDS verification because RGBL source resources do not yet expose one universal tokenizer-stable index for this purpose.
 
 ---
 
@@ -253,7 +275,7 @@ WSI MUST reference provider provenance when needed but MUST NOT silently duplica
 
 ## 9. RGBL interoperability baseline
 
-RGBL currently supplies generic corpus/source objects including:
+RGBL supplies generic corpus/source objects including:
 
 ```text
 ENTITY
@@ -292,6 +314,8 @@ mw:content:quran:37:30:ar-uthmani
 
 These IDs remain owned by RGBL.
 
+The first WSI reference transport is `RgblRepositoryProvider`, documented in `spec/RGBL-CONNECTOR.md`. It resolves RGBL records directly from the exact Git revision named by the Source Binding.
+
 ---
 
 ## 10. Resolution states
@@ -307,28 +331,53 @@ INACCESSIBLE
 
 A reviewed/locked WSI assertion SHOULD NOT depend on an unresolved source binding.
 
+When a binding claims `RESOLVED` but live proof fails for its pinned revision, resources, or required selectors, the runtime verifier reports a stale-binding finding. It MUST NOT silently rewrite the record.
+
 ---
 
 ## 11. Validation requirements
 
-A deterministic source-binding validator SHOULD check:
+Offline deterministic validation SHOULD check:
 
 ```text
 provider identifier known
-provider revision pinned
-primary resource resolves
-all required resource IDs resolve
-resource kinds are compatible with analysis usage
-selectors resolve when applicable
-quote anchor matches pinned content when applicable
-provider snapshot/revision is reproducible
+provider revision structurally pinned
+primary resource included in binding
+all local binding/resource references are internally coherent
+selector shapes are valid
+```
+
+Live Source Provider verification SHOULD additionally prove:
+
+```text
+provider revision exists
+required resource IDs exist at the pinned revision
+analysis target resolves
+TEXT_QUOTE matches pinned provider content literally
+CHAR_RANGE resolves against pinned provider content
+claimed RESOLVED binding remains valid
 ```
 
 Provider-specific validation is downstream integration logic; it MUST NOT redefine WSI semantic ontology.
 
 ---
 
-## 12. Future provider compatibility
+## 12. Cross-resource acceptance
+
+The provider abstraction MUST be tested against more than one scripture/corpus family before it is treated as universal enough for further engine development.
+
+M3 currently verifies the same RGBL connector against:
+
+```text
+Qur'an 37:30
+Bhagavad Gita 1:1
+```
+
+This is a software interoperability test only. It does not assert theological equivalence among sources.
+
+---
+
+## 13. Future provider compatibility
 
 A new provider may be accepted when it can implement the same logical interface.
 
