@@ -12,10 +12,11 @@ Blueprint:       3.1-draft
 Milestone 0:     DONE
 Milestone 1:     IMPLEMENTED / REVIEW PENDING
 Milestone 2:     IMPLEMENTED / REVIEW PENDING — CI GREEN
-Milestone 3:     NEXT — live RGBL connector
+Milestone 3:     IN PROGRESS — live RGBL connector
+Milestone 4:     PLANNED — linguistic plugins + stratified goldens
 ```
 
-Milestone 2 has passed the `dev` CI acceptance suite (`typecheck → tests → golden validation → repository policy`). Promotion to `main` remains pending review.
+Milestone 2 has passed the `dev` CI acceptance suite. Milestone 3 is now implementing the runtime `SourceProvider` boundary and real pinned RGBL source verification. Promotion to `main` remains pending review.
 
 The canonical milestone tracker is [`ROADMAP.md`](ROADMAP.md). Architecture remains normative in [`BLUEPRINT.md`](BLUEPRINT.md).
 
@@ -106,31 +107,16 @@ Canonical text remains owned by the provider. WSI may keep quote/selectors only 
 
 WSI no longer needs a Qur'an adapter, Torah adapter, Psalms adapter, or Gospel adapter in its semantic core.
 
-If a source provider already exposes a stable addressable resource, WSI analyzes that resource through the same contract.
+If a source provider exposes a stable addressable resource, WSI analyzes that resource through the same contract.
 
-Corpus-specific ingestion belongs upstream.
-
-Language-specific analysis belongs in optional linguistic plugins:
-
-```text
-Arabic
-Hebrew
-Greek
-Pali
-Sanskrit
-Generic fallback
-...
-```
+Corpus-specific ingestion belongs upstream. Language-specific analysis belongs in optional linguistic plugins.
 
 ## Semantic frame, not keyword
 
 The primary semantic unit is a Frame/Proposition.
 
-Example:
-
 ```text
 P1 ── AUTHORITY_OVER [NEGATED] ──▶ P2
-
 P2 ── HAS_STATE ──▶ [TRANSGRESSION]
 ```
 
@@ -140,8 +126,6 @@ A frame can be n-ary and may contain multiple semantic-role bindings.
 
 Direction is not embedded as a hidden fact inside a Frame.
 
-Preferred model:
-
 ```text
 FRAME F2
   ↓
@@ -150,13 +134,7 @@ ASSESSMENT A2
   result = NEGATIVE
 ```
 
-This keeps:
-
-```text
-POLARITY != DIRECTION
-MODALITY != DIRECTION
-SPEECH ACT != DIRECTION
-```
+This keeps polarity, modality, speech act, and direction separate.
 
 ## Witness boundary
 
@@ -165,29 +143,27 @@ Witness is downstream interpretation/derivation, not translation.
 ```text
 [TRANSGRESSION]
   ↓
-BOUNDARY_VIOLATION       # Witness Pattern
+BOUNDARY_VIOLATION
   ↓
-OFFSIDE                  # localized Witness label
+OFFSIDE
   ↓
-RETURN / ALIGN           # response
+RETURN / ALIGN
   ↓
-BOUNDARY_ALIGNMENT       # positive-direction target
+BOUNDARY_ALIGNMENT
 ```
 
 The source condition is not rewritten to become positive.
 
 ## Current worked example
 
-As-Saffat 37:30 remains a **non-normative worked example** only.
-
-The v0.2 golden candidate binds to real RGBL identities:
+As-Saffat 37:30 remains a **non-normative worked example** only. It binds to real RGBL identities:
 
 ```text
 mw:passage:quran:37:30
 mw:content:quran:37:30:ar-uthmani
 ```
 
-It does not define the schema by itself.
+It tests the contract; it does not define the schema by itself.
 
 ## Machine Contract
 
@@ -221,43 +197,41 @@ See:
 - [`spec/README.md`](spec/README.md)
 - [`spec/SOURCE-PROVIDER-CONTRACT.md`](spec/SOURCE-PROVIDER-CONTRACT.md)
 - [`spec/VALIDATION.md`](spec/VALIDATION.md)
+- [`spec/RGBL-CONNECTOR.md`](spec/RGBL-CONNECTOR.md)
 - [`spec/ID-GRAMMAR.md`](spec/ID-GRAMMAR.md)
 
-## Deterministic validator
+## Deterministic validator — M2
 
-Milestone 2 adds an offline deterministic validator. It deliberately does **not** fetch canonical source content.
-
-Validation passes:
+The offline validator checks:
 
 ```text
 1. JSON Schema
 2. WSI registry integrity
-3. Source-binding resolution against pinned offline provider indexes
+3. Source-binding resolution against pinned offline indexes
 4. Evidence-selector validation
 5. WSI semantic invariants
 6. Review policy
 ```
 
-Install dependencies and run all checks:
+Run:
 
 ```bash
 npm install
 npm run check
 ```
 
-Validate golden candidates only:
+## Live Source Provider — M3
+
+M3 adds the runtime `SourceProvider` contract and a repository-backed RGBL implementation. Canonical content is resolved from the exact Git revision pinned by the WSI Source Binding.
+
+Live verification checks resource existence plus quote/range evidence without copying source authority into WSI.
 
 ```bash
-npm run validate
+npm run verify:source -- data/golden-candidates/quran/037/030.json \
+  --provider-root /path/to/rocksoul-rgbl
 ```
 
-Validate one analysis record:
-
-```bash
-npm run validate -- path/to/analysis.json
-```
-
-The offline provider index is only a reproducibility aid; RGBL remains source authority. Full source/content verification is Milestone 3.
+A separate CI workflow checks both the 37:30 worked example and a non-Qur'an Bhagavad Gita resource through the same connector.
 
 ## Implementation direction
 
@@ -265,25 +239,11 @@ The contract remains language-independent.
 
 ### TypeScript
 
-Use for:
-
-- RGBL/source-provider integration;
-- canonical WSI object model;
-- orchestration;
-- deterministic validation;
-- CLI/API;
-- review tooling;
-- Witness pipeline.
+Use for Source Provider integration, canonical WSI objects, validation, orchestration, CLI/API, review tooling, and Witness pipeline.
 
 ### Python
 
-Use as optional language/research workers for:
-
-- Arabic NLP;
-- Hebrew NLP;
-- Greek NLP;
-- other linguistic pipelines;
-- embeddings/reranking/evaluation experiments.
+Use as optional linguistic/research workers for Arabic, Hebrew, Greek, other language NLP, embeddings, reranking, and evaluation.
 
 ### Rust
 
@@ -319,7 +279,7 @@ dev → promotion PR → main
 
 Conventional Commits drive automated versioning, changelog generation, tags, and GitHub Releases.
 
-`dev` is the active research branch. `main` is the stable release branch.
+`dev` is active research. `main` is stable release history.
 
 ## Design principle
 
