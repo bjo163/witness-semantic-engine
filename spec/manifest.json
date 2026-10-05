@@ -2,10 +2,11 @@
   "contract_name": "WSI Machine Contract",
   "contract_version": "0.2.0",
   "status": "research-draft",
-  "blueprint_revision": "3.1-draft",
+  "blueprint_revision": "3.2-draft",
   "schema_dialect": "https://json-schema.org/draft/2020-12/schema",
   "canonical_schema": "spec/wsi-record.schema.json",
   "source_provider_contract": "spec/SOURCE-PROVIDER-CONTRACT.md",
+  "source_provider_connector_spec": "spec/RGBL-CONNECTOR.md",
   "validation_spec": "spec/VALIDATION.md",
   "id_grammar": "spec/ID-GRAMMAR.md",
   "validator": {
@@ -26,7 +27,11 @@
   "first_source_provider": {
     "name": "rocksoul-rgbl",
     "repository": "bjo163/rocksoul-rgbl",
-    "provider_contract": "moonwitness-corpus/v0.1"
+    "provider_contract": "moonwitness-corpus/v0.1",
+    "reference_runtime_interface": "src/source-provider/types.ts",
+    "reference_connector": "src/source-provider/rgbl-repository.ts",
+    "live_verifier": "src/source-provider/verify.ts",
+    "live_workflow": ".github/workflows/provider-live.yml"
   },
   "validation_order": [
     "JSON_SCHEMA",
@@ -36,10 +41,20 @@
     "WSI_SEMANTIC_INVARIANTS",
     "REVIEW_POLICY"
   ],
+  "runtime_verification": [
+    "PINNED_PROVIDER_REVISION",
+    "PROVIDER_RESOURCE_RESOLUTION",
+    "ANALYSIS_TARGET_RESOLUTION",
+    "TEXT_QUOTE_EXACT_MATCH",
+    "CHAR_RANGE_RESOLUTION",
+    "STALE_BINDING_DETECTION"
+  ],
   "principles": [
     "WSI_DOES_NOT_OWN_PRIMARY_SOURCE",
     "EXTERNAL_SOURCE_IDENTITIES_REMAIN_EXTERNAL",
     "SOURCE_BINDINGS_PIN_PROVIDER_REVISIONS",
+    "PROVIDER_TRANSPORT_DOES_NOT_DEFINE_SEMANTIC_IDENTITY",
+    "EXACT_PRIMARY_SOURCE_ANCHORS_MATCH_PINNED_PROVIDER_CONTENT",
     "LEXICAL_SENSE_PRECEDES_UNIVERSAL_CONCEPT_MAPPING",
     "PARTICIPANT_RELATION_CONCEPT_POLARITY_MODALITY_ASSESSMENT_ARE_SEPARATE",
     "DIRECTION_IS_AN_ASSESSMENT_NOT_INTRINSIC_FRAME_STRUCTURE",
