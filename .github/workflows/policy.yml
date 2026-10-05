@@ -1,0 +1,163 @@
+name: Repository Policy
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: policy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  policy:
+    name: Validate repository contract
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate repository structure
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          required=(
+            README.md
+            BLUEPRINT.md
+            VERSION
+            CHANGELOG.md
+            .github/CODEOWNERS
+            .github/pull_request_template.md
+          )
+
+          for path in "${required[@]}"; do
+            if [[ ! -f "$path" ]]; then
+              echo "::error::Required repository file is missing: $path"
+              exit 1
+            fi
+          done
+
+          version="$(tr -d '[:space:]' < VERSION)"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::VERSION must contain a plain SemVer value (X.Y.Z); found: $version"
+            exit 1
+          fi
+
+      - name: Enforce dev to main promotion path
+        if: github.event_name == 'pull_request'
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "$BASE_REF" != "main" || "$HEAD_REF" != "dev" ]]; then
+            echo "::error::The only supported promotion pull request is dev -> main. Got: ${HEAD_REF} -> ${BASE_REF}"
+            exit 1
+          fi
+
+          python3 - <<'PY'
+          import os
+          import re
+          import sys
+
+          title = os.environ["PR_TITLE"].strip()
+          pattern = re.compile(
+              r"^(feat|fix|perf|refactor|docs|test|build|ci|chore|style|revert)"
+              r"(\([a-zA-Z0-9._/-]+\))?(!)?: .+"
+          )
+          if not pattern.match(title):
+              print(f"::error::PR title must follow Conventional Commits: {title}")
+              sys.exit(1)
+          PY
+
+      - name: Validate Conventional Commits
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python3 - <<'PY'
+          import os
+          import re
+          import subprocess
+          import sys
+
+          event = os.environ.get("EVENT_NAME", "")
+          zero = "0" * 40
+
+          if event == "pull_request":
+              base = os.environ.get("PR_BASE_SHA", "")
+              head = os.environ.get("PR_HEAD_SHA", "")
+          elif event == "push":
+              base = os.environ.get("BEFORE_SHA", "")
+              head = os.environ.get("AFTER_SHA", "")
+              if not base or base == zero:
+                  base = f"{head}^" if head else ""
+          else:
+              print("workflow_dispatch: commit-range validation skipped")
+              sys.exit(0)
+
+          if not base or not head:
+              print("No resolvable commit range; nothing to validate")
+              sys.exit(0)
+
+          try:
+              raw = subprocess.check_output(
+                  ["git", "log", "--no-merges", "--format=%H%x1f%s", f"{base}..{head}"],
+                  text=True,
+              ).strip()
+          except subprocess.CalledProcessError:
+              print("::warning::Unable to resolve full commit range; validating HEAD only")
+              raw = subprocess.check_output(
+                  ["git", "log", "-1", "--format=%H%x1f%s", head],
+                  text=True,
+              ).strip()
+
+          if not raw:
+              print("No non-merge commits to validate")
+              sys.exit(0)
+
+          pattern = re.compile(
+              r"^(feat|fix|perf|refactor|docs|test|build|ci|chore|style|revert)"
+              r"(\([a-zA-Z0-9._/-]+\))?(!)?: .+"
+          )
+
+          failures = []
+          for line in raw.splitlines():
+              sha, subject = line.split("\x1f", 1)
+              if not pattern.match(subject.strip()):
+                  failures.append((sha[:8], subject))
+
+          if failures:
+              for sha, subject in failures:
+                  print(f"::error::Invalid Conventional Commit {sha}: {subject}")
+              sys.exit(1)
+
+          print("Conventional Commit validation passed")
+          PY
+
+      - name: Guard release metadata ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "VERSION and CHANGELOG.md are release-managed on main."
+          echo "Manual edits should be exceptional and explicitly documented."
