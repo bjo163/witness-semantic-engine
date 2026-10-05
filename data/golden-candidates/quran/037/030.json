@@ -43,7 +43,7 @@
           "derivation_type": "DIRECT",
           "selector": {
             "type": "TEXT_QUOTE",
-            "exact": "سُلْطَانٍ"
+            "exact": "سُلْطَـٰنٍۭ"
           },
           "notes": []
         }
@@ -77,7 +77,7 @@
           "derivation_type": "DIRECT",
           "selector": {
             "type": "TEXT_QUOTE",
-            "exact": "طَاغِينَ"
+            "exact": "طَـٰغِينَ"
           },
           "notes": []
         }
@@ -182,7 +182,7 @@
           "derivation_type": "COMPOSITIONAL",
           "selector": {
             "type": "TEXT_QUOTE",
-            "exact": "وَمَا كَانَ لَنَا عَلَيْكُم مِّن سُلْطَانٍ"
+            "exact": "وَمَا كَانَ لَنَا عَلَيْكُم مِّن سُلْطَـٰنٍۭ"
           },
           "notes": ["Relation combines negation, holder, target, and the authority expression."]
         }
@@ -221,7 +221,7 @@
           "derivation_type": "COMPOSITIONAL",
           "selector": {
             "type": "TEXT_QUOTE",
-            "exact": "كُنتُمْ قَوْمًا طَاغِينَ"
+            "exact": "كُنتُمْ قَوْمًا طَـٰغِينَ"
           },
           "notes": []
         }
@@ -332,7 +332,7 @@
           "derivation_type": "INTERPRETIVE",
           "selector": {
             "type": "TEXT_QUOTE",
-            "exact": "قَوْمًا طَاغِينَ"
+            "exact": "قَوْمًا طَـٰغِينَ"
           },
           "notes": []
         }
