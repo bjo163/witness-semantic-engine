@@ -16,8 +16,20 @@ if (!providerRoot) {
   test('real RGBL pinned revision verifies the 37:30 WSI evidence anchors', async () => {
     const ctx = loadValidationContext()
     const record = readAnalysisFile(join(ctx.rootDir, 'data', 'golden-candidates', 'quran', '037', '030.json'))
+    const source = await provider.resolveResource({
+      revision: pinnedRevision,
+      resourceId: 'mw:content:quran:37:30:ar-uthmani',
+      hints: { dataset: 'quran-tanzil-uthmani' },
+    })
+    assert.equal(source?.kind, 'textual.content')
+    assert.ok(source?.text)
+
     const report = await verifyAnalysisSources(record, new Map([[provider.id, provider]]))
-    assert.equal(report.valid, true, JSON.stringify(report.findings, null, 2))
+    assert.equal(
+      report.valid,
+      true,
+      `${JSON.stringify(report.findings, null, 2)}\nPinned source text: ${source?.text ?? '<unavailable>'}`,
+    )
     assert.ok(report.verifiedResources >= 2)
     assert.ok(report.verifiedSelectors >= 1)
   })
