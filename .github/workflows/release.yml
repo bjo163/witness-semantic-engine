@@ -1,0 +1,301 @@
+name: Release Main
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Version, changelog, tag and release
+    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip release]')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Compute release and generate changelog entry
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+          RUNNER_TEMP: ${{ runner.temp }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python3 - <<'PY'
+          from __future__ import annotations
+
+          import datetime as dt
+          import os
+          import re
+          import subprocess
+          from pathlib import Path
+
+          allowed_types = {
+              "feat",
+              "fix",
+              "perf",
+              "refactor",
+              "docs",
+              "test",
+              "build",
+              "ci",
+              "chore",
+              "style",
+              "revert",
+          }
+
+          type_titles = {
+              "feat": "Features",
+              "fix": "Fixes",
+              "perf": "Performance",
+              "refactor": "Refactors",
+              "docs": "Documentation",
+              "test": "Tests",
+              "build": "Build",
+              "ci": "CI",
+              "chore": "Chores",
+              "style": "Style",
+              "revert": "Reverts",
+          }
+
+          event = os.environ.get("EVENT_NAME", "")
+          before = os.environ.get("BEFORE_SHA", "")
+          after = os.environ.get("AFTER_SHA", "HEAD") or "HEAD"
+          zero = "0" * 40
+
+          if event == "push" and before and before != zero:
+              commit_range = f"{before}..{after}"
+          else:
+              try:
+                  last_tag = subprocess.check_output(
+                      ["git", "describe", "--tags", "--abbrev=0", "--match", "v[0-9]*"],
+                      text=True,
+                      stderr=subprocess.DEVNULL,
+                  ).strip()
+              except subprocess.CalledProcessError:
+                  last_tag = ""
+              commit_range = f"{last_tag}..HEAD" if last_tag else "HEAD"
+
+          fmt = "%H%x1f%s%x1f%B%x1e"
+          cmd = ["git", "log", "--no-merges", f"--format={fmt}"]
+          if commit_range == "HEAD":
+              cmd.append("HEAD")
+          else:
+              cmd.append(commit_range)
+
+          raw = subprocess.check_output(cmd, text=True).strip("\n\x1e")
+          records = []
+          conventional = re.compile(
+              r"^(?P<type>feat|fix|perf|refactor|docs|test|build|ci|chore|style|revert)"
+              r"(?:\((?P<scope>[a-zA-Z0-9._/-]+)\))?"
+              r"(?P<breaking>!)?: (?P<description>.+)$"
+          )
+
+          if raw:
+              for record in raw.split("\x1e"):
+                  record = record.strip()
+                  if not record:
+                      continue
+                  parts = record.split("\x1f", 2)
+                  if len(parts) != 3:
+                      continue
+                  sha, subject, body = (p.strip() for p in parts)
+                  if "[skip release]" in subject:
+                      continue
+                  match = conventional.match(subject)
+                  if not match:
+                      # Policy should prevent this on dev. We fail closed on main too.
+                      raise SystemExit(f"Non-Conventional Commit reached main: {sha[:8]} {subject}")
+                  commit_type = match.group("type")
+                  if commit_type not in allowed_types:
+                      continue
+                  is_breaking = bool(match.group("breaking")) or "BREAKING CHANGE:" in body
+                  records.append(
+                      {
+                          "sha": sha,
+                          "short": sha[:8],
+                          "subject": subject,
+                          "body": body,
+                          "type": commit_type,
+                          "breaking": is_breaking,
+                          "description": match.group("description"),
+                          "scope": match.group("scope"),
+                      }
+                  )
+
+          output_path = Path(os.environ["GITHUB_OUTPUT"])
+
+          if not records:
+              with output_path.open("a", encoding="utf-8") as out:
+                  out.write("release=false\n")
+              print("No releasable commits found in this main update.")
+              raise SystemExit(0)
+
+          if any(r["breaking"] for r in records):
+              bump = "major"
+          elif any(r["type"] == "feat" for r in records):
+              bump = "minor"
+          else:
+              bump = "patch"
+
+          version_text = Path("VERSION").read_text(encoding="utf-8").strip()
+          version_match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", version_text)
+          if not version_match:
+              raise SystemExit(f"Invalid VERSION file: {version_text!r}")
+
+          major, minor, patch = map(int, version_match.groups())
+          if bump == "major":
+              major, minor, patch = major + 1, 0, 0
+          elif bump == "minor":
+              minor, patch = minor + 1, 0
+          else:
+              patch += 1
+
+          new_version = f"{major}.{minor}.{patch}"
+          tag = f"v{new_version}"
+
+          existing_tag = subprocess.run(
+              ["git", "rev-parse", "--verify", "--quiet", f"refs/tags/{tag}"],
+              stdout=subprocess.DEVNULL,
+              stderr=subprocess.DEVNULL,
+          )
+          if existing_tag.returncode == 0:
+              raise SystemExit(f"Tag already exists: {tag}")
+
+          grouped: dict[str, list[dict]] = {key: [] for key in type_titles}
+          breaking_records = []
+          for record in records:
+              grouped[record["type"]].append(record)
+              if record["breaking"]:
+                  breaking_records.append(record)
+
+          lines = [f"## [{new_version}] - {dt.date.today().isoformat()}", ""]
+
+          if breaking_records:
+              lines.extend(["### Breaking Changes", ""])
+              for record in breaking_records:
+                  lines.append(f"- {record['description']} (`{record['short']}`)")
+              lines.append("")
+
+          for commit_type, title in type_titles.items():
+              items = grouped[commit_type]
+              if not items:
+                  continue
+              lines.extend([f"### {title}", ""])
+              for record in items:
+                  scope = f"**{record['scope']}:** " if record["scope"] else ""
+                  lines.append(f"- {scope}{record['description']} (`{record['short']}`)")
+              lines.append("")
+
+          release_section = "\n".join(lines).rstrip() + "\n"
+
+          changelog = Path("CHANGELOG.md")
+          old = changelog.read_text(encoding="utf-8")
+          header = "# Changelog"
+          if not old.startswith(header):
+              raise SystemExit("CHANGELOG.md must start with '# Changelog'")
+          remainder = old[len(header):].lstrip("\n")
+          changelog.write_text(
+              f"{header}\n\n{release_section}\n{remainder}",
+              encoding="utf-8",
+          )
+          Path("VERSION").write_text(new_version + "\n", encoding="utf-8")
+
+          notes_path = Path(os.environ["RUNNER_TEMP"]) / "wse-release-notes.md"
+          notes_path.write_text(release_section, encoding="utf-8")
+
+          with output_path.open("a", encoding="utf-8") as out:
+              out.write("release=true\n")
+              out.write(f"version={new_version}\n")
+              out.write(f"tag={tag}\n")
+              out.write(f"bump={bump}\n")
+              out.write(f"notes={notes_path}\n")
+
+          print(f"Release: {version_text} -> {new_version} ({bump})")
+          PY
+
+      - name: Commit release metadata and tag
+        if: steps.version.outputs.release == 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add VERSION CHANGELOG.md
+          git commit -m "chore(release): v${VERSION} [skip release]"
+          git tag -a "$TAG" -m "$TAG"
+
+          git push origin HEAD:main
+          git push origin "$TAG"
+
+      - name: Publish GitHub Release
+        if: steps.version.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+          NOTES: ${{ steps.version.outputs.notes }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$TAG" \
+            --notes-file "$NOTES"
+
+      - name: Synchronize release metadata back to dev safely
+        if: steps.version.outputs.release == 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch origin main dev
+          main_sha="$(git rev-parse origin/main)"
+          dev_sha="$(git rev-parse origin/dev)"
+
+          # Fast-forward is ideal and cannot lose dev work.
+          if git merge-base --is-ancestor "$dev_sha" "$main_sha"; then
+            echo "dev can be safely fast-forwarded to main."
+            git push origin "${main_sha}:refs/heads/dev"
+            exit 0
+          fi
+
+          # dev has advanced/diverged (common after squash promotion). Merge main
+          # into dev without force. If a conflict occurs, abort and leave dev intact.
+          git switch -C dev origin/dev
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git merge --no-ff origin/main -m "chore(sync): main release v${VERSION} into dev [skip release]"; then
+            if git push origin dev; then
+              echo "dev synchronized with released main without force push."
+            else
+              echo "::warning::dev changed while synchronization was running; push was rejected safely. Re-sync manually."
+            fi
+          else
+            git merge --abort || true
+            echo "::warning::Automatic main -> dev synchronization encountered a conflict and was aborted. No dev commits were overwritten."
+          fi
