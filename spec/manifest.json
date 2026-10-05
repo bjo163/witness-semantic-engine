@@ -6,15 +6,29 @@
   "schema_dialect": "https://json-schema.org/draft/2020-12/schema",
   "canonical_schema": "spec/wsi-record.schema.json",
   "source_provider_contract": "spec/SOURCE-PROVIDER-CONTRACT.md",
-  "source_provider_connector_spec": "spec/RGBL-CONNECTOR.md",
   "validation_spec": "spec/VALIDATION.md",
   "id_grammar": "spec/ID-GRAMMAR.md",
+  "linguistic_analyzer_contract": "spec/LINGUISTIC-ANALYZER-CONTRACT.md",
+  "linguistic_analysis_schema": "spec/linguistic-analysis.schema.json",
+  "linguistic_golden_profiles": "data/linguistic-goldens/profiles.json",
   "validator": {
     "implementation": "src/validation/validator.ts",
     "cli": "src/cli.ts",
     "mode": "offline-deterministic",
     "provider_indexes": [
       "spec/providers/rocksoul-rgbl.v0.1.json"
+    ]
+  },
+  "linguistics": {
+    "contract_version": "0.1.0",
+    "runtime": "src/linguistics",
+    "schema": "spec/linguistic-analysis.schema.json",
+    "golden_profiles": "data/linguistic-goldens/profiles.json",
+    "reference_analyzers": [
+      "wsi:linguistic-analyzer/arabic-baseline",
+      "wsi:linguistic-analyzer/hebrew-baseline",
+      "wsi:linguistic-analyzer/greek-baseline",
+      "wsi:linguistic-analyzer/generic-baseline"
     ]
   },
   "registries": [
@@ -27,11 +41,7 @@
   "first_source_provider": {
     "name": "rocksoul-rgbl",
     "repository": "bjo163/rocksoul-rgbl",
-    "provider_contract": "moonwitness-corpus/v0.1",
-    "reference_runtime_interface": "src/source-provider/types.ts",
-    "reference_connector": "src/source-provider/rgbl-repository.ts",
-    "live_verifier": "src/source-provider/verify.ts",
-    "live_workflow": ".github/workflows/provider-live.yml"
+    "provider_contract": "moonwitness-corpus/v0.1"
   },
   "validation_order": [
     "JSON_SCHEMA",
@@ -41,20 +51,12 @@
     "WSI_SEMANTIC_INVARIANTS",
     "REVIEW_POLICY"
   ],
-  "runtime_verification": [
-    "PINNED_PROVIDER_REVISION",
-    "PROVIDER_RESOURCE_RESOLUTION",
-    "ANALYSIS_TARGET_RESOLUTION",
-    "TEXT_QUOTE_EXACT_MATCH",
-    "CHAR_RANGE_RESOLUTION",
-    "STALE_BINDING_DETECTION"
-  ],
   "principles": [
     "WSI_DOES_NOT_OWN_PRIMARY_SOURCE",
     "EXTERNAL_SOURCE_IDENTITIES_REMAIN_EXTERNAL",
     "SOURCE_BINDINGS_PIN_PROVIDER_REVISIONS",
-    "PROVIDER_TRANSPORT_DOES_NOT_DEFINE_SEMANTIC_IDENTITY",
-    "EXACT_PRIMARY_SOURCE_ANCHORS_MATCH_PINNED_PROVIDER_CONTENT",
+    "LINGUISTIC_ANALYZER_OUTPUT_IS_CANDIDATE_NOT_SEMANTIC_TRUTH",
+    "UNSUPPORTED_LINGUISTIC_FEATURES_MUST_NOT_BE_INVENTED",
     "LEXICAL_SENSE_PRECEDES_UNIVERSAL_CONCEPT_MAPPING",
     "PARTICIPANT_RELATION_CONCEPT_POLARITY_MODALITY_ASSESSMENT_ARE_SEPARATE",
     "DIRECTION_IS_AN_ASSESSMENT_NOT_INTRINSIC_FRAME_STRUCTURE",
