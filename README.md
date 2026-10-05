@@ -1,6 +1,6 @@
 # Witness Semantic Engine
 
-> **Spec-first semantic research infrastructure for turning source text into auditable semantic frames, Witness observations, and positive-direction outputs.**
+> **Corpus-agnostic, spec-first semantic research infrastructure for transforming declared source corpora into auditable semantic frames, Witness patterns, and positive-direction outputs.**
 
 [![Status](https://img.shields.io/badge/status-research--design-blue)](#project-status)
 [![Version](https://img.shields.io/badge/version-0.1.0-informational)](VERSION)
@@ -8,140 +8,178 @@
 
 ## Why this repository exists
 
-Most text research stops at **source → translation → interpretation**. Witness Semantic Engine adds a separate, machine-readable layer that asks:
+Most text research stops at **source → translation → interpretation**. Witness Semantic Engine (WSE) adds a separate machine-readable layer that asks:
 
-1. What does the source explicitly contain?
-2. What semantic propositions are actually asserted?
-3. Who or what participates in those propositions?
-4. Which language-neutral concepts are instantiated?
-5. What polarity, modality, and evaluative direction are supported by evidence?
-6. What can be **witnessed** from that semantic state?
-7. What correction or alignment follows from that witness?
-8. What is the resulting **positive direction**?
+1. What exact source corpus, work, edition, and reference system are being analyzed?
+2. What does the source explicitly contain?
+3. What semantic propositions are supported by evidence?
+4. Who or what participates in those propositions?
+5. Which contextual senses and language-neutral concepts are involved?
+6. What polarity, modality, speech act, and evaluative direction are supported?
+7. What pattern can be **witnessed** from reviewed semantics?
+8. What response/correction follows?
+9. What is the resulting **positive direction**?
 
-The project is designed to keep those questions separate. A translation is not a semantic key. A participant is not a concept. Negation is not direction. A Witness label is not source text. Positive direction must never overwrite the source state.
+The project keeps those questions structurally separate.
+
+## Universal corpus model
+
+WSE does **not** hardcode one scripture as the semantic core.
+
+The normative hierarchy is:
+
+```text
+SOURCE CORPUS
+  └─ CORPUS INSTANCE
+      └─ WORK
+          └─ EDITION
+              └─ REFERENCE SYSTEM
+                  └─ SOURCE UNIT
+```
+
+Three universal infrastructure terms are important:
+
+- **Corpus Profile** — declarative description of a corpus family and its source/reference structure.
+- **Corpus Instance** — the actual edition/work/reference data selected for research.
+- **Corpus Adapter** — implementation code that converts corpus-specific source/linguistic structures into the universal WSI contract.
+
+A profile such as Qur'an, Torah-associated texts, Psalms-associated texts, or Gospel-associated texts is an adapter/profile concern, not a different semantic engine.
+
+The Qur'an may be an early reference implementation, but it is **not** an architectural dependency.
 
 ## Core model
 
 ```text
-SOURCE
+SOURCE CORPUS + PROFILE
+  ↓
+CORPUS INSTANCE / WORK / EDITION / REFERENCE SYSTEM
+  ↓
+IMMUTABLE SOURCE UNIT
   ↓
 LINGUISTIC EVIDENCE
   ↓
-PARTICIPANTS
+LEXICAL SENSE
+  ↓
+DISCOURSE + PARTICIPANTS
   ↓
 SEMANTIC FRAMES / PROPOSITIONS
   ↓
 CONCEPTS + RELATIONS
   ↓
-POLARITY + MODALITY
+POLARITY + MODALITY + SPEECH ACT
   ↓
 SOURCE DIRECTION
   ↓
-EVIDENCE + CONFIDENCE
+EVIDENCE + CONFIDENCE + REVIEW
   ↓
-LOCKED BASE SEMANTICS
+ASSERTION-LEVEL LOCK (optional production state)
   ↓
-WITNESS
+WITNESS PATTERN
   ↓
-CORRECTION
+LOCALIZED WITNESS LABEL
+  ↓
+RESPONSE / CORRECTION
   ↓
 POSITIVE DIRECTION
 ```
 
-The **semantic frame**, not the keyword, is the primary unit of meaning.
+The **semantic frame**, not the keyword and not the corpus identity, is the primary semantic unit.
 
-## Non-negotiable separation
+## Key distinction: lock is not corpus lock-in
 
-| Layer | Question | Example |
-| --- | --- | --- |
-| Source | What is written? | Original Arabic text |
-| Linguistic | What form does the language take? | token, lemma, root, POS, syntax |
-| Participant | Who/what is involved? | speaker, addressee, group |
-| Frame | What is happening? | `P1 → AUTHORITY_OVER → P2` |
-| Concept | What universal concept is instantiated? | `wsi:concept/authority` |
-| Polarity | Is it affirmed or negated? | `NEGATED` |
-| Source direction | How is the state evaluated in context? | `NEGATIVE` |
-| Witness | What pattern is observed? | `OFFSIDE` |
-| Correction | What needs realignment? | `RETURN_TO_BOUNDARY` |
-| Positive direction | Where should the correction move? | `BOUNDARY_ALIGNMENT` |
+`LOCKED` is a **review status for semantic assertions/frames**.
+
+It does not mean a corpus is locked into the architecture, and it does not mean theological certainty.
+
+A single Source Corpus may contain `CANDIDATE`, `RESEARCHED`, `REVIEWED`, `LOCKED`, `DISPUTED`, and unresolved assertions at the same time.
 
 ## Canonical identity vs human labels
 
-Concept identity is language-neutral.
+Concept identity is language-neutral:
 
 ```text
 Machine identity:  wsi:concept/transgression
 English label:     TRANSGRESSION
 Indonesian label:  Melampaui batas
-Arabic label:      طغيان
 Display key:       [TRANSGRESSION]
 ```
 
-English is a technical label, **not** the ontology identity. For Qur'anic research, Arabic remains the primary source evidence.
+English is a technical label, not ontology identity.
 
-## Example: As-Saffat 37:30
+Source-language lexical forms are evidence for contextual senses; they are not automatically universal concept IDs.
 
-The conceptual result can be represented as:
+## Worked example policy
 
-```text
-P1 (WE / SPEAKER)
-   ── AUTHORITY_OVER [NEGATED] ──▶
-P2 (YOU / ADDRESSEE / GROUP)
+As-Saffat 37:30 is kept as a **non-normative worked example / golden candidate**. It tests distinctions such as speaker/addressee, negation, relation, state, source direction, Witness Pattern, and positive-direction derivation.
 
-P2
-   ── HAS_STATE ──▶
-[TRANSGRESSION]
+It must not define the universal schema by itself.
 
-SOURCE DIRECTION: NEGATIVE
-WITNESS:          OFFSIDE
-CORRECTION:       RETURN_TO_BOUNDARY
-POSITIVE DIRECTION: BOUNDARY_ALIGNMENT
-```
-
-The key distinction is that **OFFSIDE is a Witness label**, not a translation of the source and not a canonical ontology concept.
+The `OFFSIDE` example is a localized Witness label, not a source translation and not a canonical ontology concept.
 
 ## Research integrity rules
 
-The engine must preserve the following invariants:
+The engine must preserve these boundaries:
 
+- Source Corpus ≠ ontology.
+- Corpus Profile ≠ semantic core.
+- Edition ≠ abstract revelation.
 - Source text is immutable.
-- Every canonical concept has a stable ID.
-- Every semantic assertion has provenance/evidence.
+- Normalization is a derived view.
+- Token ≠ lexeme ≠ lexical sense ≠ concept.
 - Participant ≠ concept.
 - Discourse role ≠ semantic role.
 - Relation ≠ concept.
 - Polarity ≠ direction.
-- Modality ≠ direction.
-- Witness ≠ source, translation, tafsir, or canonical concept.
-- Correction ≠ source assertion.
+- Modality ≠ speech act.
+- Translation/commentary ≠ primary source assertion.
+- Witness Pattern ≠ Witness Label ≠ canonical concept.
 - Positive direction ≠ source direction.
-- Context may resolve ambiguity but may not overwrite surface evidence.
+- Cross-corpus semantic similarity ≠ theological equivalence.
 - `UNKNOWN`, `UNRESOLVED`, and `UNDETERMINED` are valid outputs.
-- Base semantics must be locked before Witness derivation.
-- Witness must be established before positive-direction derivation.
 
-See **[BLUEPRINT.md](BLUEPRINT.md)** for the normative architecture and implementation plan.
+See **[BLUEPRINT.md](BLUEPRINT.md)** for the normative architecture.
+
+## Machine contract
+
+The current machine-contract work is under `spec/` and uses:
+
+```text
+JSON
++ JSON Schema 2020-12
++ versioned registries
++ deterministic semantic invariants
++ research review states
+```
+
+Validation is layered:
+
+```text
+1. JSON Schema structure
+2. Registry referential integrity
+3. Semantic invariant validation
+4. Corpus-profile / source-integrity validation
+5. Research review policy
+```
+
+Passing JSON Schema does not mean a semantic interpretation is correct.
 
 ## Project status
 
 **Research / architecture phase.**
 
-The repository intentionally starts **spec-first**. The first milestone is not an NLP model; it is a stable contract for evidence, semantic frames, ontology IDs, provenance, scoring, validation, Witness derivation, and release governance.
-
-No production extractor should be built until the specification and golden examples are stable enough to test deterministically.
+The repository is intentionally spec-first. Implementation code must not outrun the source, evidence, identity, provenance, and validation contracts.
 
 ## Intended implementation path
 
-The specification is language-independent. The planned implementation order is:
+The specification is implementation-independent.
 
-1. **Python** — research engine, Arabic NLP integration, schema validation, ontology experiments, golden-test tooling.
-2. **Canonical JSON / JSON Schema** — contract shared across languages.
-3. **JSON-LD / RDF / SHACL** — optional semantic-web export and graph validation.
-4. **Rust** — optional phase-2 deterministic core/CLI when schemas stabilize and performance/type guarantees justify it.
-5. **JavaScript/TypeScript** — API, explorer, visualization, and application layer when needed.
+1. **Python** — first research implementation, multilingual NLP/adapters, schema validation, ontology experimentation, evaluation.
+2. **Canonical JSON / JSON Schema** — contract shared across implementations.
+3. **JSON-LD / RDF / SKOS / OntoLex / PROV-O / SHACL** — optional interoperability/export layer.
+4. **Rust** — optional typed deterministic core/CLI after contract stabilization.
+5. **TypeScript/JavaScript** — API, semantic explorer, review UI, visualization, annotation workflows.
 
-The repository must never become “a Python project that happens to contain a specification.” The **specification is the product contract**; implementations are replaceable.
+The product contract is the specification, not any programming language.
 
 ## Development and release model
 
@@ -155,137 +193,36 @@ dev  ───── promotion PR ─────▶  main
 
 ### `dev`
 
-- Active research and implementation branch.
-- Direct development happens here.
-- Every commit must follow **Conventional Commits**.
-- CI/policy validation runs on every push.
-- A promotion PR from `dev` to `main` is created/maintained automatically when meaningful differences exist.
+Active research and implementation. Conventional Commits and policy validation apply.
 
 ### `main`
 
-- Stable, releasable branch.
-- Changes arrive through `dev → main` promotion.
-- A push/merge to `main` triggers automated semantic versioning and release generation.
-- Release metadata is committed directly to `main`; no release branch is created.
+Stable integration/release branch. Changes arrive through `dev → main` promotion.
 
-### No additional working branches
-
-The project deliberately does **not** use `feature/*`, `release/*`, or `hotfix/*` branches in the normal workflow. This keeps research state obvious and prevents ontology/schema work from fragmenting across long-lived branches.
+No standard long-lived `feature/*`, `release/*`, or `hotfix/*` branch model is used.
 
 ## Commit convention
 
-Use Conventional Commits:
+Examples:
 
 ```text
-feat(ontology): add participant role model
-fix(scoring): correct confidence normalization
-docs(blueprint): clarify witness derivation
-refactor(frame): separate relation from concept
-chore(repo): update repository governance
+feat(spec): define corpus profile contract
+feat(adapter): add reference corpus adapter
+fix(schema): preserve source-unit edition identity
+docs(blueprint): clarify corpus-neutral core
+refactor(witness): separate pattern from localized label
 ```
-
-Breaking change:
-
-```text
-feat(schema)!: replace legacy direction representation
-```
-
-or include a `BREAKING CHANGE:` footer.
-
-### Automated version policy
-
-The release workflow chooses the **highest** required bump in the promoted change set:
-
-| Change | Version bump |
-| --- | --- |
-| `!` / `BREAKING CHANGE:` | major |
-| `feat` | minor |
-| `fix`, `perf`, `refactor`, `docs`, `build`, `ci`, `test`, `style`, `chore` | patch |
-| no recognized releasable commit | no release |
-
-The current project starts at **`0.1.0`**. During `0.x`, the project should still treat breaking changes explicitly; the automation follows standard SemVer major/minor/patch arithmetic rather than silently redefining SemVer.
 
 ## Release automation
 
-On a releasable push to `main`, automation will:
+On a releasable push to `main`, automation calculates SemVer from Conventional Commits, updates `VERSION` and `CHANGELOG.md`, creates a tag and GitHub Release, and synchronizes `dev` only when safe.
 
-1. inspect Conventional Commit messages in the promoted range;
-2. calculate the next SemVer;
-3. update `VERSION`;
-4. prepend the generated release section to `CHANGELOG.md`;
-5. commit release metadata to `main`;
-6. create `vX.Y.Z` tag;
-7. publish a GitHub Release;
-8. fast-forward `dev` to the release commit **only when safe**; if `dev` has advanced independently, it is left untouched rather than force-updated.
+Repository version, schema version, ontology version, corpus-profile version, adapter version, and source-edition version are separate domains.
 
-No release branch is required.
+## Blueprint principle
 
-## Repository automation
-
-The bootstrap automation covers:
-
-- Conventional Commit validation on `dev`;
-- `dev → main` pull-request policy;
-- automatic promotion PR creation;
-- repository invariant checks;
-- automated SemVer bumping;
-- automated `CHANGELOG.md` generation;
-- automated Git tag and GitHub Release creation;
-- safe post-release `dev` synchronization;
-- Dependabot updates for GitHub Actions;
-- CODEOWNERS and a promotion-review checklist.
-
-## Recommended GitHub repository settings
-
-Some controls are repository settings rather than files and therefore must be enabled in GitHub settings:
-
-### `main`
-
-- Require a pull request before merging.
-- Require successful status checks.
-- Require conversation resolution.
-- Block force pushes and deletion.
-- Prefer **squash** or **rebase**; if merge commits are retained, Conventional Commit validation still applies to the underlying promoted commits.
-- Do not allow direct human pushes.
-
-### `dev`
-
-- Block force pushes and deletion.
-- Direct pushes are allowed for the intentionally two-branch workflow.
-- Require CI to pass before promoting to `main`.
-
-> Repository rulesets/branch protection should be configured in GitHub Settings. The committed workflows reinforce policy but cannot replace server-side protection against direct pushes.
-
-## Version sources
-
-- `VERSION` — canonical repository release version.
-- `CHANGELOG.md` — generated human-readable release history.
-- Git tags — immutable release markers (`vX.Y.Z`).
-- GitHub Releases — published release notes.
-
-Application/package metadata will later consume the canonical version rather than inventing a second independent version source.
-
-## Blueprint
-
-The normative research and engineering design is maintained in **[BLUEPRINT.md](BLUEPRINT.md)**. It defines:
-
-- source and evidence model;
-- participants and semantic roles;
-- frame/proposition representation;
-- concept registry rules;
-- polarity, modality, direction, and confidence;
-- Witness and positive-direction derivation;
-- provenance and review status;
-- machine-readable contract;
-- validation invariants;
-- golden datasets;
-- release/versioning governance;
-- phased implementation plan.
-
-## Design principle
-
-> **Do not store interpretation as if it were source. Do not store a sentence as one giant key. Decompose, relate, normalize, evidence, score, validate, lock — then Witness.**
+> **Do not make a source corpus the ontology. Declare the corpus, preserve the edition, resolve the sense, build the frame, attach evidence, review the assertion — then Witness.**
 
 ---
 
-**Witness Semantic Engine** is currently a research architecture. Interfaces and ontology terms may evolve until the first stable specification release.
+**Witness Semantic Engine** is currently a research architecture. Core contracts and ontology terms may evolve until the first stable specification release.
