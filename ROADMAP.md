@@ -17,8 +17,8 @@ M0  Repository foundation             DONE
 M1  Provider-bound Machine Contract   IMPLEMENTED / REVIEW PENDING
 M2  Deterministic validator           IMPLEMENTED / REVIEW PENDING — CI GREEN
 M3  Live RGBL connector               IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN
-M4  Linguistic plugins + goldens      NEXT
-M5  Semantic frame engine             PLANNED
+M4  Linguistic plugins + goldens      IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN
+M5  Semantic frame engine             NEXT
 M6  Witness engine                    PLANNED
 M7  Scale / batch processing          PLANNED
 M8  Production hardening              PLANNED
@@ -180,39 +180,77 @@ Remaining acceptance gate:
 
 ## M4 — Linguistic plugins + stratified golden analyses
 
-**Status:** NEXT
+**Status:** IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN
 
 Goal:
 
 Introduce language analyzers without coupling them to scripture identity and build a diverse research set before automatic semantic-frame generation.
 
-Planned deliverables:
+Delivered on `dev`:
 
-- language-neutral `LinguisticAnalyzer` plugin contract;
-- analyzer provenance/version contract;
-- normalized token/morphology/syntax candidate output;
-- Arabic reference plugin or adapter;
-- Hebrew reference plugin or adapter;
-- Greek reference plugin or adapter;
-- generic/fallback analyzer contract;
-- explicit handling of unsupported linguistic features;
-- stratified golden analyses across different languages, source traditions, discourse structures, and semantic constructions;
-- deterministic fixtures separating analyzer output from reviewed semantic truth.
+- language-neutral `LinguisticAnalyzer` plugin interface;
+- versioned analyzer descriptor and provenance contract;
+- deterministic content-bound linguistic analysis IDs;
+- machine-readable `linguistic-analysis.schema.json`;
+- Unicode code-point token spans rather than JavaScript-specific UTF-16 interchange offsets;
+- deterministic Unicode tokenization and NFC analysis normalization;
+- explicit analyzer capability states (`SUPPORTED`, `PARTIAL`, `UNSUPPORTED`);
+- explicit annotation states (`RESOLVED`, `UNRESOLVED`, `UNSUPPORTED`);
+- separate token fields for normalized form, lemma, UPOS, XPOS, morphology features, and dependencies;
+- conservative Arabic baseline reference plugin;
+- conservative Hebrew baseline reference plugin;
+- conservative Greek baseline reference plugin;
+- generic language-neutral fallback plugin;
+- linguistic-output invariant validator;
+- JSON Schema + mutation/unit tests;
+- stratified live golden profiles that store provider bindings rather than duplicate canonical source text;
+- live profiles for Arabic/Arab, Hebrew/Hebr, Greek/Grek, and Sanskrit/Deva fallback resources from the same pinned RGBL revision.
 
-Golden analyses MUST NOT be selected only from one scripture, language, or grammatical pattern.
+The baseline reference plugins intentionally implement only deterministic tokenization and NFC normalization. Lemma, POS, morphology, syntax, sentence segmentation, and discourse cues remain explicit `UNSUPPORTED` values until a deeper analyzer actually supports them.
 
-Acceptance gate:
+Technical acceptance completed on the live RGBL gate:
 
-- at least three linguistically distinct language/resource profiles pass the same plugin contract;
-- analyzer output is provenance-versioned;
-- unsupported features return explicit unresolved/unsupported states rather than invented structure;
-- existing M2/M3 suites remain green.
+```text
+Arabic / Quran 37:30 baseline profile          PASS
+Hebrew / OSHB WLC Genesis 1:1 profile          PASS
+Greek / SBLGNT John 1:1 profile                PASS
+Sanskrit / Bhagavad Gita 1:1 generic fallback PASS
+TypeScript linguistic integration              PASS
+M3 live provider regression                     PASS
+```
+
+Important boundaries:
+
+```text
+LINGUISTIC ANALYZER OUTPUT
+!=
+REVIEWED SEMANTIC TRUTH
+
+NFC ANALYSIS VIEW
+!=
+PROVIDER SOURCE REPLACEMENT
+
+LANGUAGE ANALYZER
+!=
+SCRIPTURE ADAPTER
+```
+
+Reference documentation:
+
+- `spec/LINGUISTIC-ANALYZER-CONTRACT.md`
+- `spec/linguistic-analysis.schema.json`
+- `data/linguistic-goldens/profiles.json`
+
+Remaining acceptance gate:
+
+- review;
+- promotion to `main`.
 
 ---
 
 ## M5 — Semantic frame engine
 
-**Status:** PLANNED
+**Status:** NEXT
 
 Goal:
 
@@ -231,6 +269,8 @@ Generate auditable research candidates for:
 Machine proposals remain candidates until review policy permits promotion.
 
 Acceptance must include ambiguous and unresolved examples, not only easy positive cases.
+
+M5 MUST consume Source Provider + linguistic-analysis contracts without treating analyzer output as reviewed semantic fact.
 
 ---
 
@@ -339,11 +379,11 @@ batch reproducibility
 
 ## Immediate next work
 
-M4 begins after M3 implementation review:
+M5 begins after M4 implementation review:
 
-1. define the language-neutral `LinguisticAnalyzer` interface;
-2. define analyzer input/output and provenance contracts;
-3. select a stratified set of source resources rather than one scripture-only sample;
-4. implement the first reference analyzer adapters;
-5. preserve raw analyzer findings separately from reviewed WSI lexical senses and semantic frames;
-6. keep M2 deterministic validation and M3 live provider verification as non-regression gates.
+1. define the semantic-candidate engine boundary between linguistic analysis and reviewed WSI Frames;
+2. define deterministic candidate IDs and candidate provenance;
+3. generate participant/role/frame candidates without silently promoting them to reviewed truth;
+4. preserve ambiguity as competing candidates or explicit `UNRESOLVED` results;
+5. add goldens for negation, modality, commands/questions, reported speech, and n-ary participant structures;
+6. keep M2 deterministic validation, M3 live source verification, and M4 cross-language analyzer profiles as non-regression gates.
