@@ -8,15 +8,15 @@ Current development position:
 
 ```text
 Machine Contract: v0.2.0
-Blueprint:       3.1-draft
+Blueprint:       3.2-draft
 Milestone 0:     DONE
 Milestone 1:     IMPLEMENTED / REVIEW PENDING
 Milestone 2:     IMPLEMENTED / REVIEW PENDING — CI GREEN
-Milestone 3:     IN PROGRESS — live RGBL connector
-Milestone 4:     PLANNED — linguistic plugins + stratified goldens
+Milestone 3:     IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN
+Milestone 4:     NEXT — linguistic plugin contract + stratified goldens
 ```
 
-Milestone 2 has passed the `dev` CI acceptance suite. Milestone 3 is now implementing the runtime `SourceProvider` boundary and real pinned RGBL source verification. Promotion to `main` remains pending review.
+M2 passes deterministic validation CI. M3 now resolves and verifies real resources against the exact RGBL Git revision pinned by each Source Binding; the live suite passes both Qur'an 37:30 evidence anchors and a structurally separate Bhagavad Gita resource through the same provider interface.
 
 The canonical milestone tracker is [`ROADMAP.md`](ROADMAP.md). Architecture remains normative in [`BLUEPRINT.md`](BLUEPRINT.md).
 
@@ -105,11 +105,11 @@ Canonical text remains owned by the provider. WSI may keep quote/selectors only 
 
 ## Why this is more universal
 
-WSI no longer needs a Qur'an adapter, Torah adapter, Psalms adapter, or Gospel adapter in its semantic core.
+WSI does not need a Qur'an adapter, Torah adapter, Psalms adapter, Gospel adapter, or similar scripture-specific semantic branch.
 
-If a source provider exposes a stable addressable resource, WSI analyzes that resource through the same contract.
+If a Source Provider exposes a stable addressable resource, WSI analyzes that resource through the same contract. Corpus-specific ingestion belongs upstream; language-specific analysis belongs in optional linguistic plugins.
 
-Corpus-specific ingestion belongs upstream. Language-specific analysis belongs in optional linguistic plugins.
+The M3 live test deliberately resolves both Qur'an and Bhagavad Gita resources through the same `SourceProvider` interface. This is an interoperability test, not a claim of theological equivalence.
 
 ## Semantic frame, not keyword
 
@@ -163,7 +163,7 @@ mw:passage:quran:37:30
 mw:content:quran:37:30:ar-uthmani
 ```
 
-It tests the contract; it does not define the schema by itself.
+Its evidence anchors are now verified literally against the pinned RGBL/Tanzil Uthmani source snapshot. It tests the contract; it does not define the universal schema.
 
 ## Machine Contract
 
@@ -222,16 +222,33 @@ npm run check
 
 ## Live Source Provider — M3
 
-M3 adds the runtime `SourceProvider` contract and a repository-backed RGBL implementation. Canonical content is resolved from the exact Git revision pinned by the WSI Source Binding.
+M3 implements the runtime `SourceProvider` contract and a repository-backed RGBL reference connector. Canonical content is resolved from the exact Git revision pinned by the WSI Source Binding.
 
-Live verification checks resource existence plus quote/range evidence without copying source authority into WSI.
+Live verification checks:
+
+```text
+pinned revision exists
+resource exists at that revision
+analysis target resolves
+TEXT_QUOTE matches provider text literally
+CHAR_RANGE resolves against provider text
+claimed RESOLVED bindings are not stale
+```
+
+Run locally with an RGBL checkout:
 
 ```bash
 npm run verify:source -- data/golden-candidates/quran/037/030.json \
   --provider-root /path/to/rocksoul-rgbl
 ```
 
-A separate CI workflow checks both the 37:30 worked example and a non-Qur'an Bhagavad Gita resource through the same connector.
+CI also verifies a non-Qur'an Bhagavad Gita fixture through the same connector.
+
+## What comes next — M4
+
+M4 defines language-analysis plugin boundaries and builds a stratified golden-analysis set. Language plugins are analysis tools, never source authority.
+
+Initial targets include Arabic, Hebrew, Greek, and a generic fallback; other languages are added when justified by provider resources and research needs.
 
 ## Implementation direction
 
@@ -248,6 +265,21 @@ Use as optional linguistic/research workers for Arabic, Hebrew, Greek, other lan
 ### Rust
 
 Optional later for demonstrated performance/type-safety needs.
+
+## Production path
+
+WSI does not call itself production-stable merely because one corpus can be processed. The planned path is:
+
+```text
+M4 linguistic plugins + stratified goldens
+M5 semantic frame engine
+M6 Witness engine
+M7 scale / reproducible batch processing
+M8 production hardening
+M9 release candidate → v1.0
+```
+
+See `ROADMAP.md` for acceptance gates.
 
 ## Research integrity
 
