@@ -1,0 +1,88 @@
+name: Promote Dev to Main
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: promote-dev-main
+  cancel-in-progress: true
+
+jobs:
+  promote:
+    name: Maintain promotion pull request
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check whether dev differs from main
+        id: diff
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          file_count="$(gh api "repos/${REPO}/compare/main...dev" --jq '.files | length')"
+          ahead_by="$(gh api "repos/${REPO}/compare/main...dev" --jq '.ahead_by')"
+
+          echo "file_count=${file_count}" >> "$GITHUB_OUTPUT"
+          echo "ahead_by=${ahead_by}" >> "$GITHUB_OUTPUT"
+
+          if [[ "$file_count" == "0" ]]; then
+            echo "No file differences between dev and main; promotion PR is not needed."
+          else
+            echo "dev has ${file_count} changed file(s) and is ${ahead_by} commit(s) ahead in the compare graph."
+          fi
+
+      - name: Create promotion pull request when needed
+        if: steps.diff.outputs.file_count != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          existing="$(gh pr list \
+            --repo "$REPO" \
+            --base main \
+            --head dev \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')"
+
+          if [[ -n "$existing" ]]; then
+            echo "Promotion PR #${existing} already exists; the dev branch update is automatically reflected."
+            exit 0
+          fi
+
+          body_file="$(mktemp)"
+          cat > "$body_file" <<'EOF'
+          ## Automated promotion
+
+          This pull request promotes the current `dev` research state to `main`.
+
+          Before merging:
+
+          - verify the repository policy check passes;
+          - review semantic/spec changes carefully;
+          - confirm source semantics are not mixed with Witness/positive-direction derivations;
+          - confirm Conventional Commit history expresses the intended SemVer impact;
+          - resolve all review conversations.
+
+          The release workflow runs only after this promotion reaches `main`.
+          EOF
+
+          gh pr create \
+            --repo "$REPO" \
+            --base main \
+            --head dev \
+            --title "chore(promote): dev to main" \
+            --body-file "$body_file"
