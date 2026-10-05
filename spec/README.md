@@ -135,19 +135,73 @@ The live acceptance suite currently passes both Qur'an 37:30 and a non-Qur'an Bh
 
 The worked example's exact Uthmani evidence anchors were corrected after the live verifier proved the prior human-entered anchors were not byte-exact. This is intended behavior: provider text wins over a locally plausible source string.
 
+## Linguistic analyzer boundary — M4
+
+M4 introduces a separate language-analysis contract between Source Provider content and later semantic-frame generation.
+
+```text
+SOURCE PROVIDER CONTENT
+→ LINGUISTIC ANALYZER
+→ LINGUISTIC CANDIDATE OUTPUT
+→ later semantic/review layer
+```
+
+The analyzer contract reports capabilities explicitly:
+
+```text
+TOKENIZATION
+NORMALIZATION
+SENTENCE_SEGMENTATION
+LEMMA
+POS
+MORPHOLOGY
+SYNTAX
+DISCOURSE_CUES
+```
+
+Unsupported structure remains `UNSUPPORTED`; supported-but-unresolved structure may remain `UNRESOLVED`. An analyzer must not fabricate morphology, syntax, lemma, or discourse structure merely to produce a complete-looking record.
+
+Reference implementation:
+
+```text
+src/linguistics/types.ts
+src/linguistics/baseline.ts
+src/linguistics/reference.ts
+src/linguistics/validate.ts
+spec/LINGUISTIC-ANALYZER-CONTRACT.md
+spec/linguistic-analysis.schema.json
+data/linguistic-goldens/profiles.json
+```
+
+The current baseline analyzers resolve deterministic Unicode tokenization and NFC analysis normalization only. Deeper lemma/POS/morphology/syntax adapters may be added behind the same interface later.
+
+The live stratified suite resolves provider text at the pinned RGBL revision and passes the same contract across:
+
+```text
+Arabic / Arab   — Qur'an resource
+Hebrew / Hebr   — OSHB/WLC resource
+Greek / Grek    — SBLGNT resource
+Sanskrit / Deva — Bhagavad Gita through generic fallback
+```
+
+The golden profile set stores source bindings and expected analyzer behavior, not a duplicate canonical text corpus.
+
 ## Contract files
 
-- `manifest.json` — contract manifest, validation order, and runtime provider references.
+- `manifest.json` — contract manifest, validation order, runtime provider references, and linguistic contract references.
 - `SOURCE-PROVIDER-CONTRACT.md` — provider/source ownership boundary.
 - `RGBL-CONNECTOR.md` — first live Source Provider reference transport.
 - `VALIDATION.md` — deterministic/offline validation architecture.
+- `LINGUISTIC-ANALYZER-CONTRACT.md` — language-neutral analyzer boundary and invariants.
+- `linguistic-analysis.schema.json` — machine-readable linguistic candidate output schema.
 - `ID-GRAMMAR.md` — WSI-owned identifier rules and external-ID rules.
-- `wsi-record.schema.json` — canonical JSON Schema Draft 2020-12 record.
+- `wsi-record.schema.json` — canonical JSON Schema Draft 2020-12 semantic-analysis record.
 - `../registries/controlled-vocabularies.json` — controlled values.
 - `../registries/concepts.json` — WSI concept registry seed.
 - `../registries/relations.json` — WSI relation registry seed.
 - `../registries/witness-patterns.json` — Witness Pattern registry seed.
-- `../data/golden-candidates/quran/037/030.json` — non-normative worked example bound to real RGBL resource IDs.
+- `../data/golden-candidates/quran/037/030.json` — non-normative semantic worked example bound to real RGBL resource IDs.
+- `../data/linguistic-goldens/profiles.json` — stratified provider-bound linguistic acceptance profiles.
 
 ## Provider independence
 
@@ -165,13 +219,15 @@ Never equate lexical items because translations happen to use the same word.
 
 ```text
 external source anchor
-→ lexical/linguistic analysis
+→ linguistic analysis candidate
 → contextual sense
 → frame role
 → optional universal concept mapping
 ```
 
 Unresolved concept mapping is valid.
+
+A linguistic candidate is not automatically a reviewed lexical sense, semantic role, Frame, relation, or concept mapping.
 
 ## Witness rule
 
@@ -193,9 +249,11 @@ These remain separate:
 repository version
 Blueprint revision
 Machine Contract version
+linguistic contract version
 registry version
 ontology version
 analyzer version
+analyzer ruleset/model version
 source-provider contract/version
 source-provider revision
 confidence policy version
