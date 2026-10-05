@@ -9,7 +9,9 @@
   "scripts": {
     "validate": "tsx src/cli.ts validate",
     "validate:golden": "tsx src/cli.ts validate data/golden-candidates/quran/037/030.json",
-    "test": "tsx --test test/validator.test.ts",
+    "verify:source": "tsx src/cli.ts verify-source",
+    "test": "tsx --test test/*.test.ts",
+    "test:provider:live": "tsx --test test/provider-live.test.ts",
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck && npm run test && npm run validate"
   },
