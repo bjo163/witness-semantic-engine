@@ -2,287 +2,646 @@
 
 **Status:** Normative research/engineering blueprint  
 **Repository:** `bjo163/witness-semantic-engine`  
-**Specification line:** `0.x` research phase  
-**Initial repository version:** `0.1.0`
+**Blueprint revision:** `2.0-draft`  
+**Repository line:** `0.x` research phase  
+**Primary implementation target:** full Qur'an corpus first  
+**Future corpus families:** Torah, Psalms, Gospel corpora  
 
 ---
+
+# 0. Normative language
+
+The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY**, and **OPTIONAL** are to be interpreted as normative requirements in this blueprint.
+
+This blueprint is intentionally **spec-first**. Implementation code, model prompts, databases, and user interfaces are subordinate to the semantic contract defined here.
+
+---
+
+# PART I — MISSION, SCOPE, AND RESEARCH BOUNDARIES
 
 ## 1. Purpose
 
-Witness Semantic Engine (WSE) is a **spec-first semantic research system** for transforming source text into auditable semantic propositions and then, in a strictly separate derivation layer, producing a **Witness** and a **positive direction**.
+Witness Semantic Engine (WSE) is a semantic research system for transforming revelation-associated source corpora into **auditable semantic propositions**, and then, in a strictly separate derivation layer, producing a **Witness**, a response/correction, and a **positive direction**.
 
-The project is intentionally not defined as a translation engine, tafsir engine, keyword extractor, sentiment classifier, or generic LLM prompt collection. Those may contribute evidence or context, but they are not the canonical product contract.
+The system is not primarily:
+
+- a translation engine;
+- a tafsir/commentary engine;
+- a keyword extractor;
+- a sentiment classifier;
+- a theological truth scorer;
+- a generic LLM prompt collection;
+- a verse similarity engine.
+
+Those functions may contribute evidence or presentation, but they are not the canonical semantic contract.
 
 The core research question is:
 
-> **What does the source explicitly assert, what semantic structure is supported by evidence, what can be witnessed from that structure, and what positive direction follows without rewriting the source?**
+> **What does the selected source edition explicitly assert, what semantic structure is supported by evidence, what can responsibly be witnessed from that structure, and what positive direction can be derived without rewriting the source?**
 
-The canonical transformation is:
+Canonical transformation:
 
 ```text
-SOURCE
+CORPUS + EDITION + REFERENCE SYSTEM
+  ↓
+IMMUTABLE SOURCE UNIT
   ↓
 LINGUISTIC EVIDENCE
   ↓
-PARTICIPANTS
+LEXICAL SENSES
   ↓
-SEMANTIC FRAMES
+DISCOURSE / SPEAKER SCOPE
   ↓
-CONCEPTS + RELATIONS
+PARTICIPANTS + COREFERENCE
   ↓
-POLARITY + MODALITY
+SEMANTIC FRAMES / PROPOSITIONS
+  ↓
+SOURCE-SPECIFIC SENSE MAPPING
+  ↓
+CANONICAL CONCEPTS + RELATIONS
+  ↓
+POLARITY + MODALITY + SPEECH ACT
   ↓
 SOURCE DIRECTION
   ↓
-PROVENANCE + CONFIDENCE
+PROVENANCE + CONFIDENCE + REVIEW
   ↓
 BASE SEMANTICS LOCK
   ↓
-WITNESS
+WITNESS PATTERN
   ↓
-CORRECTION
+LOCALIZED WITNESS LABEL
+  ↓
+RESPONSE / CORRECTION
   ↓
 POSITIVE DIRECTION
 ```
 
 ---
 
-# PART I — RESEARCH CONTRACT
+## 2. Corpus roadmap
 
-## 2. Design principles
+### 2.1 Phase A — Full Qur'an first
 
-### 2.1 Source first
+The first production research target is the **full Qur'an corpus**, not a collection of hand-picked verses.
 
-The original source is immutable evidence. Interpretation may explain it but may never silently replace it.
+As-Saffat 37:30 is only a **non-normative worked example** used to test distinctions such as:
 
-For Qur'anic research:
+- speaker vs addressee;
+- negated relation;
+- discourse correction/retraction;
+- semantic state;
+- source direction;
+- Witness derivation.
 
-- Arabic is the primary textual source.
-- Translation is a presentation/interpretation aid.
-- English is allowed as a technical ontology label.
-- Canonical concept identity must remain language-neutral.
+It MUST NOT determine the schema by itself.
 
-### 2.2 Frames before keywords
+The schema must be validated against diverse Qur'anic phenomena before being considered stable, including:
 
-A semantic keyword by itself loses the most important information: **who, does/is what, toward whom/what, under which polarity and modality**.
+- narrative;
+- dialogue;
+- nested/reported speech;
+- pronouns and coreference;
+- ellipsis;
+- negation and negation scope;
+- commands and prohibitions;
+- questions;
+- oaths;
+- conditions;
+- comparisons;
+- causal and purposive relations;
+- temporal relations;
+- multiple participants;
+- divine and human speech;
+- positive, negative, mixed, and unresolved evaluation;
+- lexical ambiguity and polysemy;
+- repeated passages with different local contexts.
 
-Therefore the primary unit is the **semantic frame/proposition**.
+### 2.2 Phase B — Three additional revelation-associated corpus families
 
-A key such as `[AUTHORITY]` is a concept node inside a proposition, not the full proposition.
-
-### 2.3 Separation of concerns
-
-The following are distinct and must not be collapsed:
+The architecture SHOULD later support three additional corpus families:
 
 ```text
-SOURCE
-TOKEN
-LEMMA
-ROOT
-PARTICIPANT
-DISCOURSE ROLE
-SEMANTIC ROLE
-FRAME
-RELATION
-CONCEPT
-POLARITY
-MODALITY
-SOURCE DIRECTION
-CONFIDENCE
-WITNESS
-CORRECTION
-POSITIVE DIRECTION
+TAWRAT / TORAH-ASSOCIATED CORPUS
+ZABUR / PSALMS-ASSOCIATED CORPUS
+INJIL / GOSPEL-ASSOCIATED CORPUS
 ```
 
-### 2.4 Evidence over forced completeness
-
-The system is allowed to return:
+For engineering identifiers, initial neutral corpus slugs are recommended:
 
 ```text
-UNKNOWN
-UNRESOLVED
-UNDETERMINED
+torah
+psalms
+gospels
 ```
 
-A missing answer is preferable to an invented semantic claim.
+The system MUST NOT silently claim that a selected modern or historical textual edition is identical to a theological concept of an original revelation.
 
-### 2.5 Positive direction does not rewrite negative source
-
-A negative source state remains negative when evidence supports it.
-
-The framework does **not** transform:
+Instead, every analysis MUST explicitly identify:
 
 ```text
-NEGATIVE SOURCE → “actually positive”
-```
-
-Instead:
-
-```text
-NEGATIVE SOURCE
-→ WITNESS
-→ CORRECTION
-→ POSITIVE DIRECTION
-```
-
-This distinction is foundational.
-
----
-
-## 3. Normative terminology
-
-The words below have precise meanings in this project.
-
-### SOURCE
-Original textual evidence.
-
-### TOKEN
-Stable segment of the source text.
-
-### LINGUISTIC EVIDENCE
-Morphology, lemma, root, POS, syntax, grammatical features, and related analysis.
-
-### PARTICIPANT
-An entity participating in a semantic frame.
-
-### DISCOURSE ROLE
-Position in discourse, e.g. `SPEAKER`, `ADDRESSEE`, `REFERENT`.
-
-### SEMANTIC ROLE
-Role inside a frame, e.g. `AGENT`, `PATIENT`, `HOLDER`, `TARGET`, `STATE_BEARER`.
-
-### FRAME
-A semantic proposition representing an action, state, relation, event, or attribute.
-
-### RELATION
-The semantic connection between frame elements.
-
-### CONCEPT
-A language-neutral semantic identity.
-
-### SEMANTIC KEY
-A human-readable display label for a canonical concept, e.g. `[TRANSGRESSION]`.
-
-### POLARITY
-Whether a proposition is affirmed or negated.
-
-### MODALITY
-The assertion mode: asserted, possible, conditional, command, etc.
-
-### SOURCE DIRECTION
-Evaluative orientation supported by source context.
-
-### WITNESS
-A derived, human-readable observation or metaphor that captures a semantic pattern.
-
-### CORRECTION
-A derived description of what must be realigned after the Witness.
-
-### POSITIVE DIRECTION
-A derived positive target after correction.
-
-### PROVENANCE
-Traceability information connecting an assertion to its source, tokens, method, versions, and review state.
-
-### CONFIDENCE
-Operational research confidence—not theological truth percentage.
-
----
-
-## 4. Layer model
-
-### L0 — Source
-
-Must contain, at minimum:
-
-```text
-source_id
-source_type
+corpus_family
+work
+edition
+textual_tradition
+canon_profile
+reference_system
 language
-canonical_reference
-text
+script
+source_version
+license
+checksum
 ```
 
-Example:
+This makes the project capable of studying revelation-associated texts while remaining transparent about the actual textual witness being analyzed.
+
+### 2.3 Independent extraction before cross-corpus comparison
+
+Each corpus MUST first be semantically extracted **independently**.
+
+Wrong architecture:
+
+```text
+Qur'an concept
+→ force equivalent Torah/Psalm/Gospel concept
+```
+
+Required architecture:
+
+```text
+CORPUS A SOURCE
+→ independent semantic extraction
+→ locked assertions
+
+CORPUS B SOURCE
+→ independent semantic extraction
+→ locked assertions
+
+ONLY THEN:
+locked concept/frame A
+↔ reviewed cross-corpus alignment
+↔ locked concept/frame B
+```
+
+Cross-corpus alignment is a separate research layer and MUST NOT rewrite either source corpus.
+
+---
+
+## 3. Foundational axioms
+
+### A1 — Source identity precedes semantics
+
+No passage exists in the machine model without a corpus, edition, language, and reference system.
+
+### A2 — Source is immutable
+
+Raw ingested source text MUST remain byte-for-byte or codepoint-for-codepoint reproducible from its declared edition.
+
+### A3 — Normalization is a view, not a replacement
+
+Removing Arabic diacritics, Hebrew cantillation, Greek accents, punctuation, or orthographic marks MUST create a derived text view. It MUST NOT overwrite the raw source.
+
+### A4 — Frames before keywords
+
+The primary semantic unit is a proposition/frame, not a keyword.
+
+### A5 — Lexeme is not sense
+
+A surface form, root, or lemma MUST NOT be mapped directly to a universal concept without sense resolution when ambiguity exists.
+
+### A6 — Concept identity is language-neutral
+
+English labels are technical presentation labels, not ontology identity.
+
+### A7 — Source semantics and interpretation are separate
+
+Translation, tafsir, exegesis, commentary, lexicons, and AI suggestions may support research, but MUST retain separate provenance.
+
+### A8 — Direction is not polarity
+
+Negation is a logical property. Positive/negative direction is evaluative orientation. They are different dimensions.
+
+### A9 — Witness is derived
+
+Witness MUST NOT be stored as if it were translation, lexical meaning, or source assertion.
+
+### A10 — Positive direction does not rewrite the source
+
+A negative source condition remains negative when supported by the source. Positive direction is a later response target.
+
+### A11 — Unknown is valid
+
+`UNKNOWN`, `UNRESOLVED`, and `UNDETERMINED` are valid research outcomes.
+
+### A12 — Cross-corpus similarity is not theological equivalence
+
+Semantic alignment MUST be expressed as a scoped research mapping with provenance and confidence, never as an unqualified claim that two revelations, editions, or doctrines are identical.
+
+---
+
+# PART II — CORPUS AND SOURCE ARCHITECTURE
+
+## 4. Corpus identity model
+
+A machine-readable corpus profile SHOULD contain:
+
+```text
+corpus_id
+corpus_family
+name
+scope
+tradition_context
+works
+languages
+reference_systems
+status
+```
+
+Example conceptually:
 
 ```json
 {
-  "id": "quran:37:30",
-  "source_type": "quran",
-  "language": "ar",
-  "canonical_reference": "37:30",
-  "text": "..."
+  "corpus_id": "wsi:corpus/quran",
+  "corpus_family": "quran",
+  "scope": "Qur'anic text",
+  "status": "ACTIVE"
 }
 ```
 
-The source layer is immutable after ingestion except for explicitly versioned source corrections.
+Future examples:
+
+```text
+wsi:corpus/torah
+wsi:corpus/psalms
+wsi:corpus/gospels
+```
+
+Corpus identity alone is insufficient for source claims. A source edition is required.
 
 ---
 
-### L1 — Linguistic evidence
+## 5. Edition model
 
-Each token should eventually support:
+Every ingested textual edition MUST have an edition record.
+
+Recommended fields:
+
+```text
+edition_id
+corpus_id
+title
+language
+script
+textual_tradition
+canon_profile
+reference_system_id
+publisher_or_source
+source_uri
+license
+license_constraints
+version
+checksum_algorithm
+checksum
+normalization_policy
+status
+```
+
+Example identifier pattern:
+
+```text
+wsi:edition/quran/<edition-slug>
+wsi:edition/torah/<edition-slug>
+wsi:edition/psalms/<edition-slug>
+wsi:edition/gospels/<edition-slug>
+```
+
+The blueprint intentionally does not yet lock a specific Torah, Psalms, or Gospel edition. Edition selection requires a separate documented research/licensing decision.
+
+---
+
+## 6. Reference systems and versification
+
+A canonical reference such as `37:30` or `Gen.1.1` is not sufficient as a global identifier.
+
+The engine MUST distinguish:
+
+```text
+work identity
+edition identity
+reference system
+canonical reference
+internal source-unit identity
+```
+
+Reason: chapter/verse numbering, book scope, Psalm numbering, textual divisions, and canonical profiles may differ between traditions and editions.
+
+Recommended model:
+
+```json
+{
+  "reference_system_id": "...",
+  "external_reference": "Gen.1.1",
+  "internal_unit_id": "..."
+}
+```
+
+External standards such as OSIS or USFM identifiers MAY be stored as mappings, but MUST NOT replace WSI internal identity.
+
+Recommended external reference record:
+
+```json
+{
+  "system": "OSIS",
+  "value": "Gen.1.1"
+}
+```
+
+For Qur'an units:
+
+```json
+{
+  "system": "QURAN_SURAH_AYAH",
+  "value": "37:30"
+}
+```
+
+---
+
+## 7. Generic source unit
+
+The engine MUST use a generic term such as **source unit** or **passage unit**, not assume that every corpus is structurally a Qur'anic ayah or Biblical verse.
+
+Minimum unit record:
+
+```text
+unit_id
+edition_id
+reference_system_id
+canonical_reference
+raw_text
+language
+script
+parent_unit_ids
+sequence
+checksum
+```
+
+Recommended ID pattern:
+
+```text
+urn:wsi:unit:<corpus>:<edition>:<reference>
+```
+
+Examples:
+
+```text
+urn:wsi:unit:quran:<edition>:37:30
+urn:wsi:unit:torah:<edition>:Gen.1.1
+urn:wsi:unit:psalms:<edition>:Ps.1.1
+urn:wsi:unit:gospels:<edition>:Mark.1.1
+```
+
+These examples are illustrative; final escaping/canonical URI grammar belongs to the schema milestone.
+
+---
+
+## 8. Text views
+
+Every source unit MAY expose multiple views:
+
+```text
+RAW
+DISPLAY
+NORMALIZED
+SEARCH
+LINGUISTIC
+```
+
+Each non-raw view MUST declare:
+
+```text
+view_id
+source_unit_id
+transformation_profile
+transformation_version
+text
+checksum
+```
+
+Examples of transformations that MUST be explicit:
+
+- Arabic diacritic handling;
+- Qur'anic orthographic sign handling;
+- Hebrew niqqud/cantillation handling;
+- Greek diacritic normalization;
+- Unicode normalization;
+- punctuation normalization.
+
+No linguistic pipeline may silently change the source string.
+
+---
+
+# PART III — LINGUISTIC AND SEMANTIC RESEARCH MODEL
+
+## 9. Tokenization
+
+Tokens are analysis artifacts tied to a text view.
+
+Recommended fields:
 
 ```text
 token_id
+unit_id
+text_view_id
+sequence
 surface
+char_start
+char_end
+tokenizer_id
+tokenizer_version
+```
+
+Token stability is defined relative to:
+
+```text
+source edition
+text view
+tokenizer version
+```
+
+Token sequence numbers MUST NOT be treated as eternally stable across incompatible tokenizer versions.
+
+---
+
+## 10. Morphology and lexemes
+
+Linguistic analysis MAY include:
+
+```text
 lemma
 root
 pos
-morphology
+morphological_features
 syntax
-source_span
+dependency_relation
+lexeme_id
 analysis_source
 ```
 
 Rules:
 
 ```text
-TOKEN ≠ CONCEPT
-ROOT ≠ CONCEPT
+TOKEN ≠ LEXEME
+LEXEME ≠ LEXICAL SENSE
 LEMMA ≠ CONCEPT
+ROOT ≠ CONCEPT
 POS ≠ CONCEPT
 ```
 
-A lemma/root may support concept linking, but it does not automatically determine a concept.
+This is especially important for Arabic, Biblical Hebrew, and Koine Greek, where one lexical form may participate in multiple senses and constructions.
 
 ---
 
-### L2 — Participants
+## 11. Lexical sense layer
 
-Participants represent entities, not semantic concepts.
+A dedicated **Lexical Sense** layer is REQUIRED before a lexical item is promoted to a canonical semantic concept when ambiguity exists.
 
 Recommended fields:
 
 ```text
+sense_id
+lexeme_id
+unit_id
+source_span
+sense_gloss
+sense_definition
+language
+sense_inventory_source
+contextual_evidence
+confidence
+review_status
+```
+
+Conceptual pipeline:
+
+```text
+SURFACE
+→ LEMMA / LEXEME
+→ CONTEXTUAL LEXICAL SENSE
+→ FRAME ROLE
+→ CONCEPT MAPPING
+```
+
+The engine MUST NOT conclude that Arabic, Hebrew, and Greek expressions represent the same universal concept merely because one English translation uses the same word.
+
+This layer is the primary defense against false cross-language equivalence.
+
+---
+
+## 12. Discourse scope and utterances
+
+Full-corpus scripture processing requires explicit discourse scope.
+
+The engine SHOULD model:
+
+```text
+utterance_id
+parent_utterance_id
+speaker_participant_id
+addressee_participant_ids
+quoted_or_reported
+source_span
+speech_act
+```
+
+This is REQUIRED for passages containing:
+
+- nested speech;
+- reported speech;
+- changes of speaker;
+- divine quotation;
+- human quotation;
+- pronouns whose referent depends on speaker scope.
+
+A participant role such as `SPEAKER` MUST be scoped to an utterance, not globally assumed for an entire passage.
+
+---
+
+## 13. Participants and coreference
+
+Participant records SHOULD contain:
+
+```text
 participant_id
+unit_id
 surface_reference
 entity_type
-discourse_role
+discourse_roles
 resolved_identity
 resolution_status
 resolution_evidence
+coreference_cluster_id
 ```
+
+Rules:
+
+```text
+PARTICIPANT ≠ CONCEPT
+GRAMMATICAL SUBJECT ≠ SEMANTIC AGENT by default
+SPEAKER ≠ AGENT by default
+ADDRESSEE ≠ PATIENT by default
+```
+
+A contextual identity resolution MUST NOT overwrite the surface reference.
 
 Example:
 
 ```json
 {
-  "id": "P1",
   "surface_reference": "WE",
-  "discourse_role": "SPEAKER",
   "resolved_identity": null,
   "resolution_status": "UNRESOLVED"
 }
 ```
 
-A contextual interpretation may populate `resolved_identity`, but must never overwrite the surface reference.
+Later contextual research may add an identity candidate with provenance.
 
 ---
 
-### L3 — Semantic frames
+## 14. Semantic roles
 
-Canonical frame types for the first version:
+Semantic roles are scoped to individual frames.
+
+Initial role registry MAY include:
+
+```text
+AGENT
+PATIENT
+THEME
+EXPERIENCER
+STIMULUS
+HOLDER
+TARGET
+RECIPIENT
+BENEFICIARY
+SOURCE
+GOAL
+LOCATION
+INSTRUMENT
+STATE_BEARER
+```
+
+The registry MUST be extensible and versioned.
+
+No role should be added merely to fit one verse if an existing general role is semantically adequate.
+
+---
+
+## 15. Semantic frames / propositions
+
+Frames are the primary canonical semantic unit.
+
+Initial frame classes:
 
 ```text
 ACTION
@@ -292,41 +651,77 @@ EVENT
 ATTRIBUTE
 ```
 
-Minimal frame structure:
+Minimum frame record:
 
 ```text
 frame_id
-frame_type
+unit_id
+utterance_id
+frame_class
 predicate_or_relation
-participants
-concepts
+roles
+concept_refs
 polarity
 modality
+speech_act
+temporal_info
 evidence
 confidence
+review_status
 ```
 
-Conceptual representation:
+Examples:
 
 ```text
 P1 ── RELATION ──▶ P2
 ```
 
-or:
-
 ```text
 P2 ── HAS_STATE ──▶ CONCEPT
 ```
 
-Frames may link to other frames through discourse relations.
+A frame MUST preserve enough structure to answer:
+
+> who/what, does/is what, toward whom/what, under which scope, polarity, modality, and evidence?
 
 ---
 
-### L4 — Concepts and ontology
+## 16. Relation registry
 
-Canonical concept IDs are language-neutral URIs/identifiers.
+Relations are not concepts.
 
 Example:
+
+```text
+concept: AUTHORITY
+relation: AUTHORITY_OVER
+```
+
+Wrong:
+
+```text
+[NO-AUTHORITY-OVER-YOU]
+```
+
+Correct decomposition:
+
+```text
+concept = AUTHORITY
+relation = AUTHORITY_OVER
+holder = P1
+target = P2
+polarity = NEGATED
+```
+
+Relations MUST have stable IDs and definitions.
+
+---
+
+## 17. Canonical concept ontology
+
+Canonical concept identifiers are language-neutral.
+
+Examples:
 
 ```text
 wsi:concept/authority
@@ -338,13 +733,31 @@ Human labels are metadata:
 ```json
 {
   "id": "wsi:concept/transgression",
-  "labels": {
+  "pref_labels": {
     "en": "Transgression",
-    "id": "Melampaui batas",
-    "ar": "طغيان"
+    "id": "Melampaui batas"
   },
   "display_key": "TRANSGRESSION"
 }
+```
+
+Arabic/Hebrew/Greek lexical forms SHOULD normally be attached through lexical entries/senses and mappings rather than treated as universal concept labels by default.
+
+A concept record SHOULD eventually contain:
+
+```text
+concept_id
+preferred_labels
+alternative_labels
+definition
+scope_note
+examples
+non_examples
+broader
+narrower
+related
+status
+created_in_ontology_version
 ```
 
 Normative rule:
@@ -354,51 +767,45 @@ CONCEPT ID = IDENTITY
 LABEL = PRESENTATION
 ```
 
-A label may change without changing concept identity.
+---
 
-Synonyms must not automatically create duplicate concepts. Sense resolution must occur first.
+## 18. Source-specific senses and universal concepts
+
+To avoid premature universalization, WSI SHOULD support two semantic levels:
+
+### Level A — source/context sense
+
+A context-bound meaning supported by the passage and source language.
+
+### Level B — WSI universal concept
+
+A broader language-neutral concept used for indexing across corpora.
+
+Mapping:
+
+```text
+SOURCE-SPECIFIC SENSE
+  ↓ reviewed mapping
+WSI UNIVERSAL CONCEPT
+```
+
+A source-specific sense MAY remain unmapped when no safe universal concept exists.
+
+This is preferable to ontology distortion.
 
 ---
 
-### L5 — Polarity and modality
+## 19. Polarity
 
-#### Polarity
+Polarity applies to propositions/scopes, not concept identity.
 
-Initial controlled vocabulary:
+Initial vocabulary:
 
 ```text
 AFFIRMED
 NEGATED
-```
-
-Potential future value:
-
-```text
 UNDETERMINED
 ```
-
-#### Modality
-
-Initial controlled vocabulary:
-
-```text
-ASSERTED
-POSSIBLE
-CONDITIONAL
-HYPOTHETICAL
-COMMAND
-PROHIBITION
-QUESTION
-```
-
-Rules:
-
-```text
-POLARITY ≠ DIRECTION
-MODALITY ≠ DIRECTION
-```
-
-Do not encode negation into concept identity.
 
 Wrong:
 
@@ -413,46 +820,181 @@ concept = wsi:concept/authority
 polarity = NEGATED
 ```
 
+Negation scope MUST be attached to the appropriate frame or sub-proposition.
+
 ---
 
-### L6 — Source direction
+## 20. Modality
 
-Source direction describes evaluative orientation supported by the source context.
+Modality MUST be separated from speech act.
 
-Initial vocabulary:
+Initial epistemic/modal vocabulary MAY include:
 
 ```text
-POSITIVE
-NEGATIVE
-NEUTRAL
-MIXED
+ASSERTED
+POSSIBLE
+PROBABLE
+NECESSARY
+HYPOTHETICAL
+COUNTERFACTUAL
 UNDETERMINED
 ```
 
-Direction should primarily be attached to a frame/assertion. A verse-level direction is a **derived summary** and therefore optional.
-
-Do not force every verse to have one global direction.
+`COMMAND`, `PROHIBITION`, and `QUESTION` MUST NOT be stored as ordinary epistemic modality values.
 
 ---
 
-### L7 — Evidence and provenance
+## 21. Speech act
 
-Every canonical semantic assertion must be traceable.
-
-Minimum provenance:
+Initial speech-act vocabulary MAY include:
 
 ```text
-source_id
-evidence_token_ids
-evidence_type
-extractor_or_researcher
-framework_version
-ontology_version
-extractor_version
-review_status
+ASSERTION
+COMMAND
+PROHIBITION
+QUESTION
+REQUEST
+PROMISE
+WARNING
+OATH
+SUPPLICATION
+UNDETERMINED
 ```
 
-Initial evidence types:
+This registry is expected to evolve from corpus evidence.
+
+A speech act is not itself a semantic concept unless separately represented by a frame.
+
+---
+
+## 22. Logical and discourse relations
+
+Frame-to-frame relations SHOULD be represented explicitly.
+
+Candidate registry:
+
+```text
+CAUSE
+RESULT
+PURPOSE
+CONDITION
+CONTRAST
+CONCESSION
+SEQUENCE
+ELABORATION
+CORRECTION
+RETRACTION
+ALTERNATIVE
+```
+
+These are structural relations between propositions, not automatic semantic keys.
+
+---
+
+## 23. Temporal information
+
+Temporal semantics SHOULD be represented independently from tense morphology.
+
+Future fields MAY include:
+
+```text
+event_time
+reference_time
+aspect
+temporal_relation
+```
+
+The engine MUST NOT assume that grammatical tense alone fully determines event time.
+
+---
+
+# PART IV — MEANING, TRANSLATION, TAFSIR, AND COMMENTARY
+
+## 24. Translation layer
+
+Translations are valuable research and presentation resources, but they are not the primary source when an original-language source edition is available.
+
+A translation record SHOULD contain:
+
+```text
+translation_id
+unit_id
+language
+edition
+translator_or_publisher
+text
+license
+source_uri
+```
+
+Translations MAY support lexical sense research, but:
+
+```text
+TRANSLATION ALONE
+MUST NOT CREATE
+DIRECT SOURCE EVIDENCE
+```
+
+Multiple translations SHOULD be allowed simultaneously.
+
+---
+
+## 25. Tafsir / commentary / exegesis layer
+
+The generic machine term is **interpretation source**.
+
+Subtypes MAY include:
+
+```text
+TAFSIR
+COMMENTARY
+EXEGESIS
+LEXICON
+GRAMMAR
+SCHOLARLY_NOTE
+TRADITIONAL_NOTE
+```
+
+Recommended record:
+
+```text
+interpretation_id
+source_type
+author_or_tradition
+work
+citation
+language
+text_or_summary
+target_unit_ids
+target_frame_ids
+target_concept_ids
+provenance
+```
+
+An interpretation may explain, support, challenge, or offer an alternative to a semantic assertion.
+
+It MUST NOT overwrite primary source evidence.
+
+---
+
+## 26. Evidence source class vs derivation type
+
+These two dimensions MUST be kept separate.
+
+### Evidence source class
+
+```text
+PRIMARY_TEXT
+TRANSLATION
+LEXICON
+GRAMMAR
+COMMENTARY
+CROSS_REFERENCE
+MODEL_SUGGESTION
+HUMAN_ANALYSIS
+```
+
+### Derivation type
 
 ```text
 DIRECT
@@ -462,164 +1004,367 @@ INTERPRETIVE
 DERIVED
 ```
 
-Definitions:
+Example:
 
-- `DIRECT` — lexical evidence supports the concept/state directly.
-- `COMPOSITIONAL` — supported by multiple tokens and grammatical structure.
-- `CONTEXTUAL` — requires neighboring text or discourse context.
-- `INTERPRETIVE` — research interpretation/hypothesis.
-- `DERIVED` — algorithmically or logically derived from previously locked semantic data.
+```text
+source_class = PRIMARY_TEXT
+derivation_type = COMPOSITIONAL
+```
 
-Canonical extraction should prefer `DIRECT` and `COMPOSITIONAL` assertions.
+or:
+
+```text
+source_class = COMMENTARY
+derivation_type = INTERPRETIVE
+```
+
+This prevents “direct vs tafsir” from becoming one overloaded field.
 
 ---
 
-### L8 — Confidence
+# PART V — SOURCE DIRECTION
 
-Confidence must remain decomposable.
+## 27. Source direction definition
 
-Initial dimensions:
+`SOURCE_DIRECTION` is the evaluative orientation of a frame/assertion as supported by source context.
+
+Initial values:
+
+```text
+POSITIVE
+NEGATIVE
+NEUTRAL
+MIXED
+UNDETERMINED
+```
+
+Rules:
+
+```text
+POLARITY ≠ SOURCE_DIRECTION
+MODALITY ≠ SOURCE_DIRECTION
+SPEECH_ACT ≠ SOURCE_DIRECTION
+```
+
+A negated negative action is not automatically a negative direction.
+
+A command is not automatically positive.
+
+A frame direction SHOULD be preferred over a unit-level summary.
+
+---
+
+## 28. Unit-level direction
+
+A verse/ayah/passage-level direction is optional derived metadata.
+
+```text
+unit_direction = optional
+```
+
+It may summarize locked frame directions only when a fair summary is possible.
+
+If directions conflict:
+
+```text
+MIXED
+```
+
+If evidence is insufficient:
+
+```text
+UNDETERMINED
+```
+
+The engine MUST NOT force every passage into a binary positive/negative label.
+
+---
+
+# PART VI — PROVENANCE, CONFIDENCE, AND REVIEW
+
+## 29. Provenance
+
+Every canonical assertion MUST be traceable.
+
+Minimum provenance:
+
+```text
+corpus_id
+edition_id
+unit_id
+text_view_id
+evidence_spans_or_tokens
+evidence_source_class
+derivation_type
+researcher_or_extractor
+framework_version
+schema_version
+ontology_version
+extractor_version
+review_status
+created_at
+```
+
+For AI-generated candidates, additionally record where available:
+
+```text
+model_family
+provider
+prompt_or_policy_version
+generation_id
+```
+
+The system SHOULD be exportable to PROV-O semantics later.
+
+---
+
+## 30. Confidence model
+
+Confidence is operational research confidence, never theological truth percentage.
+
+Confidence MUST be decomposable.
+
+Baseline components MAY include:
 
 ```text
 source_directness
-lexical_alignment
+lexical_sense_fit
+morphology_support
 syntax_support
+discourse_support
 context_consistency
 ontology_fit
+cross_source_support
 ```
 
-Initial suggested weighting:
+No universal weighting is permanently fixed in this blueprint.
+
+Instead each score MUST reference:
 
 ```text
-0.30 source_directness
-0.25 lexical_alignment
-0.20 syntax_support
-0.15 context_consistency
-0.10 ontology_fit
+confidence_policy_id
+confidence_policy_version
+component_scores
+aggregate_score
 ```
 
-Derived formula:
-
-```text
-confidence =
-  0.30*S +
-  0.25*L +
-  0.20*G +
-  0.15*C +
-  0.10*O
-```
-
-The weighting is versioned policy, not eternal truth. It must later be calibrated against reviewed golden data.
-
-Confidence means:
-
-> How strongly does the current evidence and ontology mapping support this research assertion?
-
-It must never be described as a percentage of religious or theological truth.
+A baseline policy may be introduced experimentally, but it MUST be calibrated against reviewed golden data before being treated as stable.
 
 ---
 
-## 5. Base semantics lock
+## 31. Review states
 
-The system must distinguish **draft extraction** from **locked base semantics**.
-
-Suggested states:
+Recommended assertion-level lifecycle:
 
 ```text
-DRAFT
+CANDIDATE
+RESEARCHED
 REVIEWED
 LOCKED
+DISPUTED
 DEPRECATED
 ```
 
-Witness generation is allowed only after the relevant base semantic frame is at least `REVIEWED`; production Witness data should require `LOCKED`.
+Locking MUST occur at assertion/frame granularity where practical.
 
-This prevents later positive-direction logic from contaminating source extraction.
+A source unit may therefore contain both locked and unresolved assertions.
+
+AI/model output begins as `CANDIDATE` unless produced by a deterministic transformation whose inputs are already locked.
 
 ---
 
-# PART II — WITNESS CONTRACT
+## 32. Disagreement model
 
-## 6. Witness definition
+The architecture MUST support multiple interpretations without corrupting source data.
 
-A Witness is a derived observation that makes a semantic condition recognizable without claiming that the Witness label itself appears in the source.
+Required principle:
+
+```text
+ONE IMMUTABLE SOURCE
+→ MULTIPLE COMPETING ASSERTIONS ALLOWED
+→ DISTINCT PROVENANCE
+→ DISTINCT CONFIDENCE
+→ DISTINCT REVIEW STATUS
+```
+
+The engine SHOULD avoid destructive “winner replaces loser” semantics for contested interpretations.
+
+---
+
+## 33. Base semantics lock
+
+Witness production MUST consume reviewed/locked semantics rather than raw source text whenever possible.
+
+Production rule:
+
+```text
+LOCKED FRAME(S)
+→ WITNESS PIPELINE
+```
+
+Research preview MAY consume `REVIEWED` frames but MUST clearly mark downstream output as provisional.
+
+This barrier prevents positive-direction logic from contaminating source extraction.
+
+---
+
+# PART VII — WITNESS CONTRACT
+
+## 34. Witness Pattern vs Witness Label
+
+A major distinction is REQUIRED:
+
+### Witness Pattern
+
+A machine-stable pattern identity.
 
 Example:
 
 ```text
-Canonical concept: TRANSGRESSION
-Witness: OFFSIDE
+wsi:witness-pattern/boundary-violation
 ```
 
-`OFFSIDE` is useful because it captures the pattern “crossing a valid boundary,” but it is not a translation and is not a synonym entry in the canonical ontology.
+### Witness Label
 
-Witness record should eventually contain:
+A human-facing metaphor/analogy/phrase associated with a pattern.
+
+Example:
 
 ```text
-witness_id
+OFFSIDE
+```
+
+Therefore:
+
+```text
+OFFSIDE ≠ CANONICAL CONCEPT
+OFFSIDE ≠ SOURCE TRANSLATION
+OFFSIDE ≠ UNIVERSAL WITNESS ID
+```
+
+A Witness Pattern may have multiple localized labels depending on culture, language, or audience.
+
+Recommended Witness Pattern fields:
+
+```text
+witness_pattern_id
+definition
 observed_frame_ids
-label
-type
 mapped_concepts
-reasoning_summary
-confidence
+pattern_conditions
+counterexamples
+status
 provenance
 review_status
 ```
 
-Possible Witness types:
+Recommended label fields:
+
+```text
+label
+language
+locale
+domain
+witness_type
+fit_score
+notes
+```
+
+Witness types MAY include:
 
 ```text
 METAPHOR
-PATTERN
 ANALOGY
+PATTERN
 OBSERVATION
 ```
 
 ---
 
-## 7. Correction
+## 35. Witness derivation
 
-Correction is generated **after** a Witness has been established.
+Witness answers:
 
-It answers:
+> **What recognizable pattern is exhibited by the locked semantic condition?**
 
-> What must change, stop, return, align, restore, or develop in response to the witnessed condition?
+Witness MUST NOT answer:
 
-Correction is not automatically the lexical opposite of the source concept.
+> “What wording do we wish the verse had?”
 
-For example:
+A valid Witness derivation requires:
 
 ```text
-TRANSGRESSION
-→ OFFSIDE
-→ RETURN_TO_BOUNDARY
+observed locked frame(s)
+pattern match
+explicit derivation record
+fit confidence
+non-contradiction review
 ```
 
-The framework must distinguish a linguistically supported opposite from a derived practical correction.
+The system MUST allow:
+
+```text
+WITNESS = UNRESOLVED
+```
 
 ---
 
-## 8. Positive direction
+## 36. Response and correction
 
-Positive direction is the desired semantic target after correction.
+`CORRECTION` is appropriate when the Witness exposes a misalignment requiring repair.
 
-Example:
+However, not every source state requires correction.
+
+The broader machine field SHOULD be:
 
 ```text
-RETURN_TO_BOUNDARY
-→ BOUNDARY_ALIGNMENT
-→ POSITIVE
+response
 ```
 
-A positive direction record should include:
+with response types such as:
 
 ```text
-target_concept_or_state
-direction = POSITIVE
-derivation_type
-derivation_confidence
-source_witness_id
+CORRECT
+RETURN
+STOP
+AVOID
+ALIGN
+MAINTAIN
+CULTIVATE
+DEVELOP
+RESTORE
+UNRESOLVED
+```
+
+For a negative witnessed condition:
+
+```text
+TRANSGRESSION
+→ BOUNDARY_VIOLATION pattern
+→ OFFSIDE label
+→ RETURN / ALIGN response
+```
+
+A response is a derived layer and MUST NOT be represented as source wording unless explicitly present in a separate source frame.
+
+---
+
+## 37. Positive direction
+
+Positive direction is the desired target state after an appropriate Witness response.
+
+Recommended record:
+
+```text
+positive_direction_id
+target_concept_ids
+target_state
+target_orientation = POSITIVE
+derivation_basis
+source_witness_pattern_id
+source_frame_ids
+confidence
+review_status
 ```
 
 Rule:
@@ -628,49 +1373,193 @@ Rule:
 POSITIVE_DIRECTION ≠ SOURCE_DIRECTION
 ```
 
-The source direction may be negative while the derived target direction is positive.
+Possible situations:
+
+### Negative source condition
+
+```text
+NEGATIVE SOURCE
+→ WITNESS
+→ CORRECTION
+→ POSITIVE TARGET
+```
+
+### Positive source condition
+
+```text
+POSITIVE SOURCE
+→ WITNESS
+→ MAINTAIN / CULTIVATE
+→ POSITIVE TARGET
+```
+
+### Neutral or unresolved source condition
+
+```text
+NEUTRAL / UNDETERMINED
+→ WITNESS MAY EXIST
+→ POSITIVE DIRECTION MAY REMAIN UNRESOLVED
+```
+
+The system MUST NOT invent a positive prescription solely to satisfy UI expectations.
 
 ---
 
-## 9. Witness transformation contract
+## 38. “GULA” terminology
 
-Canonical flow:
+`GULA` MAY remain a project-internal or conversational shorthand for the positive-response layer.
 
-```text
-SOURCE STATE
-    ↓
-OBSERVATION
-    ↓
-WITNESS
-    ↓
-CORRECTION
-    ↓
-TARGET STATE
-    ↓
-POSITIVE DIRECTION
-```
-
-A Witness transformation must fail closed if the system cannot justify the correction.
-
-Allowed result:
+Canonical machine fields SHOULD use explicit names:
 
 ```text
-WITNESS = OFFSIDE
-CORRECTION = UNRESOLVED
-POSITIVE_DIRECTION = UNRESOLVED
+witness
+response
+correction (when applicable)
+positive_direction
 ```
 
-This is preferable to hallucinating a positive prescription.
+This keeps the data contract understandable outside the original research conversation.
 
 ---
 
-# PART III — EXAMPLE CONTRACT
+# PART VIII — CROSS-CORPUS SEMANTIC ALIGNMENT
 
-## 10. As-Saffat 37:30 reference example
+## 39. Alignment is post-extraction
 
-This verse is the initial research example because it exposes several distinctions at once: speaker/addressee, negated authority relation, retraction/correction discourse structure, and a negative transgression state.
+Cross-corpus alignment MUST only compare independently extracted and reviewed semantic objects.
 
-Conceptual structure:
+Targets may include:
+
+```text
+concept ↔ concept
+frame ↔ frame
+relation ↔ relation
+witness pattern ↔ witness pattern
+positive direction ↔ positive direction
+```
+
+Raw verse-to-verse “equivalence” SHOULD NOT be the primitive mapping.
+
+---
+
+## 40. Mapping relations
+
+Alignment SHOULD use conservative, explicit mapping relations inspired by semantic-web practice.
+
+Candidate mapping types:
+
+```text
+EXACT_MATCH
+CLOSE_MATCH
+BROADER_MATCH
+NARROWER_MATCH
+RELATED_MATCH
+CONTRASTING
+UNRESOLVED
+```
+
+`EXACT_MATCH` MUST have the highest review threshold and SHOULD be rare across independently evolved languages/traditions.
+
+Each mapping MUST contain:
+
+```text
+mapping_id
+subject_semantic_id
+object_semantic_id
+mapping_type
+scope
+basis
+confidence
+provenance
+review_status
+```
+
+A mapping MUST NOT imply theological identity beyond its explicitly declared semantic scope.
+
+---
+
+## 41. Corpus-specific adapters
+
+The core semantic contract is corpus-neutral.
+
+Each corpus family SHOULD have an adapter responsible for source-specific concerns.
+
+### Qur'an adapter
+
+Expected concerns:
+
+```text
+surah/ayah reference
+Arabic orthography
+Qur'anic tokenization
+Arabic morphology
+root/lemma analysis
+speaker/discourse context
+edition/reading profile when applicable
+```
+
+### Torah adapter
+
+Expected concerns:
+
+```text
+book/chapter/verse reference
+Biblical Hebrew source editions
+textual tradition
+Hebrew morphology
+reference/versification profile
+```
+
+### Psalms adapter
+
+Expected concerns:
+
+```text
+Psalm numbering/reference profile
+Hebrew poetic structure
+parallelism
+textual tradition
+possible alternate numbering mappings
+```
+
+### Gospels adapter
+
+Expected concerns:
+
+```text
+individual Gospel work identity
+Greek source edition where selected
+Koine Greek morphology
+quotation/speaker structure
+canon/reference profile
+```
+
+Adapters may add source-specific metadata but MUST emit the same canonical semantic frame contract.
+
+---
+
+# PART IX — WORKED EXAMPLE POLICY
+
+## 42. As-Saffat 37:30 is a test fixture, not the framework
+
+As-Saffat 37:30 remains useful as an early golden candidate.
+
+It MUST be described as:
+
+```text
+NON-NORMATIVE WORKED EXAMPLE
+```
+
+It is not evidence that every passage has:
+
+- exactly two concepts;
+- exactly two participants;
+- one negative direction;
+- one Witness;
+- one correction;
+- one positive direction.
+
+Illustrative structure:
 
 ```text
 P1 = WE / SPEAKER
@@ -685,437 +1574,519 @@ F1 ── RETRACTION/CORRECTION ──▶ F2
 F2:
 P2 ── HAS_STATE ──▶ [TRANSGRESSION]
 
-F2 SOURCE DIRECTION = NEGATIVE
+F2 SOURCE_DIRECTION = NEGATIVE
 ```
 
-Canonical concept IDs:
+Illustrative Witness chain:
 
 ```text
-wsi:concept/authority
-wsi:concept/transgression
+locked TRANSGRESSION state
+→ witness pattern: BOUNDARY_VIOLATION
+→ localized label: OFFSIDE
+→ response: RETURN / ALIGN
+→ positive target: BOUNDARY_ALIGNMENT
 ```
 
-Witness derivation:
+The exact concept mapping and scores remain subject to golden-record review.
 
-```text
-[TRANSGRESSION]
-→ OFFSIDE
-→ RETURN_TO_BOUNDARY
-→ BOUNDARY_ALIGNMENT
-→ POSITIVE
-```
-
-Important exclusions from canonical direct keys unless separately evidenced:
-
-```text
-CHOICE
-RESPONSIBILITY
-BOUNDARY
-```
-
-Those may be useful derived/contextual concepts, but they must not be silently promoted to direct source concepts.
+Important: `BOUNDARY_ALIGNMENT` is a derived target concept/state, not a lexical claim that the source explicitly contains the word “boundary.”
 
 ---
 
-# PART IV — MACHINE CONTRACT
+# PART X — MACHINE CONTRACT
 
-## 11. Canonical machine representation
+## 43. Canonical document structure
 
 The first implementation contract is JSON validated by JSON Schema.
 
-Conceptual top-level document:
+Conceptual top-level record:
 
 ```json
 {
-  "id": "quran:37:30",
+  "document_id": "...",
   "spec_version": "...",
-  "source": {},
+  "schema_version": "...",
+  "corpus": {},
+  "edition": {},
+  "source_unit": {},
+  "text_views": [],
   "tokens": [],
+  "lexical_analyses": [],
+  "lexical_senses": [],
+  "utterances": [],
   "participants": [],
   "frames": [],
   "discourse_relations": [],
-  "concept_refs": [],
-  "derived_summaries": {},
+  "concept_mappings": [],
+  "source_directions": [],
+  "translations": [],
+  "interpretation_refs": [],
   "witnesses": [],
-  "provenance": {},
-  "review": {}
+  "responses": [],
+  "positive_directions": [],
+  "provenance": [],
+  "reviews": []
 }
 ```
 
-The future schema must enforce structural separation rather than relying on prompt discipline.
+The schema MUST enforce separation structurally rather than relying on prompt discipline.
 
 ---
 
-## 12. Stable identifiers
+## 44. Stable identifiers
 
-Recommended ID namespaces:
+Recommended namespaces:
 
 ```text
-quran:<surah>:<ayah>
-quran:<surah>:<ayah>:<token>
+wsi:corpus/<slug>
+wsi:edition/<corpus>/<edition>
+wsi:unit/<corpus>/<edition>/<reference>
+wsi:token/<unit>/<local-id>
+wsi:lexeme/<language>/<id>
+wsi:sense/<id>
+wsi:participant/<unit>/<local-id>
+wsi:utterance/<unit>/<local-id>
+wsi:frame/<unit>/<local-id>
 wsi:concept/<slug>
 wsi:relation/<slug>
-wsi:witness/<slug-or-uuid>
-wsi:frame/<source-id>/<local-id>
-wsi:participant/<source-id>/<local-id>
+wsi:witness-pattern/<slug>
+wsi:positive-direction/<id>
+wsi:mapping/<id>
 ```
 
-Examples:
+Stable IDs MUST survive label changes.
 
-```text
-quran:37:30
-quran:37:30:10
-wsi:concept/transgression
-wsi:relation/authority-over
-wsi:frame/quran:37:30/F2
-```
-
-Stable IDs must survive label changes.
+Human-readable display strings MUST NOT be the sole identity mechanism.
 
 ---
 
-## 13. Controlled vocabularies
+## 45. Controlled registries
 
-The project should maintain explicit registries rather than free-text enum values.
-
-Initial registries:
+The project SHOULD maintain explicit versioned registries for:
 
 ```text
-frame_types
+corpus_families
+reference_systems
+text_view_types
 entity_types
 discourse_roles
 semantic_roles
+frame_classes
 relations
 polarity
-modality
+modalities
+speech_acts
+discourse_relations
 directions
-evidence_types
+evidence_source_classes
+derivation_types
 review_statuses
 witness_types
+response_types
+mapping_types
 ```
 
-Any new controlled value should require:
+Any new controlled value SHOULD require:
 
 1. definition;
-2. examples;
-3. non-examples;
-4. migration consideration;
-5. ontology/spec version impact assessment.
+2. motivation;
+3. examples;
+4. non-examples;
+5. overlap analysis;
+6. migration consideration;
+7. spec/ontology version impact.
 
 ---
 
-## 14. Validation invariants
+## 46. Validation invariants
 
-The first machine validator must eventually enforce at least:
+The first validator MUST eventually enforce at least:
 
 ```text
-I01 SOURCE_IS_IMMUTABLE
-I02 STABLE_CONCEPT_ID_REQUIRED
-I03 SEMANTIC_ASSERTION_REQUIRES_EVIDENCE
-I04 PARTICIPANT_IS_NOT_CONCEPT
-I05 DISCOURSE_ROLE_IS_NOT_SEMANTIC_ROLE
-I06 RELATION_IS_NOT_CONCEPT
-I07 POLARITY_IS_NOT_DIRECTION
-I08 MODALITY_IS_NOT_DIRECTION
-I09 WITNESS_IS_NOT_CANONICAL_CONCEPT
-I10 CORRECTION_IS_NOT_SOURCE_ASSERTION
-I11 POSITIVE_DIRECTION_IS_NOT_SOURCE_DIRECTION
-I12 CONTEXT_CANNOT_OVERWRITE_SURFACE_EVIDENCE
-I13 TRANSLATION_CANNOT_CREATE_DIRECT_EVIDENCE_ALONE
-I14 MASTER_CONCEPT_IS_OPTIONAL
-I15 VERSE_DIRECTION_IS_DERIVED_AND_OPTIONAL
-I16 UNRESOLVED_IS_VALID
-I17 CONFIDENCE_COMPONENTS_MUST_BE_RETAINED
-I18 BASE_MUST_LOCK_BEFORE_PRODUCTION_WITNESS
-I19 WITNESS_MUST_EXIST_BEFORE_POSITIVE_DIRECTION
-I20 VERSIONED_PROVENANCE_REQUIRED
+I01 SOURCE_EDITION_REQUIRED
+I02 SOURCE_IS_IMMUTABLE
+I03 NORMALIZATION_IS_A_DERIVED_VIEW
+I04 REFERENCE_SYSTEM_REQUIRED
+I05 SEMANTIC_ASSERTION_REQUIRES_EVIDENCE
+I06 TOKEN_IS_NOT_CONCEPT
+I07 LEMMA_IS_NOT_CONCEPT
+I08 LEXEME_IS_NOT_LEXICAL_SENSE
+I09 AMBIGUOUS_LEXEME_REQUIRES_SENSE_RESOLUTION
+I10 PARTICIPANT_IS_NOT_CONCEPT
+I11 DISCOURSE_ROLE_IS_NOT_SEMANTIC_ROLE
+I12 RELATION_IS_NOT_CONCEPT
+I13 POLARITY_IS_NOT_DIRECTION
+I14 MODALITY_IS_NOT_SPEECH_ACT
+I15 SPEECH_ACT_IS_NOT_DIRECTION
+I16 TRANSLATION_CANNOT_CREATE_DIRECT_SOURCE_EVIDENCE_ALONE
+I17 COMMENTARY_CANNOT_OVERWRITE_PRIMARY_SOURCE
+I18 CONTEXT_CANNOT_OVERWRITE_SURFACE_REFERENCE
+I19 STABLE_CONCEPT_ID_REQUIRED
+I20 UNIVERSAL_CONCEPT_MAPPING_MAY_BE_UNRESOLVED
+I21 CONFIDENCE_POLICY_MUST_BE_VERSIONED
+I22 WITNESS_IS_NOT_CANONICAL_CONCEPT
+I23 WITNESS_LABEL_IS_NOT_WITNESS_PATTERN_ID
+I24 RESPONSE_IS_NOT_SOURCE_ASSERTION
+I25 POSITIVE_DIRECTION_IS_NOT_SOURCE_DIRECTION
+I26 MASTER_CONCEPT_IS_OPTIONAL
+I27 UNIT_DIRECTION_IS_DERIVED_AND_OPTIONAL
+I28 UNRESOLVED_IS_VALID
+I29 VERSIONED_PROVENANCE_REQUIRED
+I30 LOCK_REQUIRED_BEFORE_PRODUCTION_WITNESS
+I31 CROSS_CORPUS_MAPPING_REQUIRES_INDEPENDENT_SOURCE_ASSERTIONS
+I32 CROSS_CORPUS_MAPPING_MUST_DECLARE_SCOPE
+I33 EDITION_LICENSE_METADATA_REQUIRED
+I34 TOKEN_ID_STABILITY_IS_TOKENIZER_VERSION_SCOPED
 ```
 
 ---
 
-## 15. Master concept policy
+## 47. Master concept policy
 
-A “Master Key” is useful for human summarization but is not fundamental semantic data.
-
-Therefore:
+A “Master Key” is a presentation convenience, not fundamental semantic data.
 
 ```text
 master_concept_id = optional
 ```
 
-If a verse has no clearly dominant concept, the correct output is `null`.
-
-The system must never force a master concept merely to satisfy presentation expectations.
-
----
-
-## 16. Verse direction policy
-
-A verse-level direction is a derived summary over one or more frame directions.
-
-Possible values:
+If there is no clearly dominant concept:
 
 ```text
-POSITIVE
-NEGATIVE
-NEUTRAL
-MIXED
-UNDETERMINED
+null
 ```
 
-If frame directions conflict or cannot be fairly summarized, use `MIXED` or `UNDETERMINED` rather than forcing a single polarity-like label.
+No passage should receive a forced master concept merely for display symmetry.
 
 ---
 
-# PART V — ENGINE ARCHITECTURE
+## 48. JSON Schema and semantic-web strategy
 
-## 17. Implementation language strategy
+Initial canonical exchange:
 
-The specification is implementation-independent.
+```text
+JSON
++ JSON Schema 2020-12
+```
+
+Later exports MAY include:
+
+```text
+JSON-LD
+RDF
+SKOS concept schemes
+OntoLex lexical grounding
+PROV-O provenance
+SHACL validation
+```
+
+RDF/JSON-LD is an export/interoperability representation, not permission to collapse the internal semantic distinctions.
+
+---
+
+# PART XI — FULL-CORPUS RESEARCH OPERATIONS
+
+## 49. Corpus processing lanes
+
+The system SHOULD distinguish two lanes.
+
+### Candidate lane
+
+High-throughput extraction that may use deterministic tools and AI candidate generation.
+
+```text
+source
+→ linguistic candidates
+→ sense candidates
+→ participant candidates
+→ frame candidates
+→ concept candidates
+```
+
+### Research lock lane
+
+Higher-assurance review:
+
+```text
+candidate
+→ evidence review
+→ conflict resolution
+→ reviewed assertion
+→ lock
+```
+
+Witness production is downstream from the lock lane.
+
+---
+
+## 50. Full-Qur'an coverage metrics
+
+The project MUST distinguish ingestion coverage from semantic quality.
+
+Recommended metrics:
+
+```text
+source_ingestion_coverage
+linguistic_analysis_coverage
+frame_candidate_coverage
+reviewed_frame_coverage
+locked_frame_coverage
+concept_mapping_coverage
+witness_coverage
+positive_direction_coverage
+unresolved_rate
+disputed_rate
+```
+
+A corpus is not “semantically complete” merely because every ayah has a JSON file.
+
+---
+
+## 51. Golden corpus strategy
+
+The golden corpus MUST be stratified across linguistic and semantic phenomena, not chosen only from easy examples.
+
+Qur'an golden set categories SHOULD include:
+
+```text
+dialogue
+reported speech
+nested speaker scopes
+negation
+imperative/prohibition
+question
+oath
+condition
+causal structure
+pronoun resolution
+ellipsis
+multiple participants
+polysemy
+temporal relations
+positive direction
+negative direction
+mixed direction
+unresolved direction
+repeated lexical item with different senses
+```
+
+As-Saffat 37:30 is one candidate among many.
+
+A holdout set SHOULD be preserved to detect overfitting of schema and extraction rules to early examples.
+
+---
+
+## 52. Regression testing
+
+Tests SHOULD include:
+
+```text
+schema tests
+registry tests
+invariant tests
+golden semantic tests
+sense-resolution tests
+coreference tests
+discourse-scope tests
+ontology mapping tests
+cross-corpus mapping tests
+migration tests
+release tests
+```
+
+A model/extractor upgrade MUST NOT silently rewrite locked golden data.
+
+Changes require explicit diff, review, and provenance.
+
+---
+
+# PART XII — IMPLEMENTATION ARCHITECTURE
+
+## 53. Language strategy
+
+The semantic contract is implementation-independent.
 
 ### Phase 1 — Python
 
-Python is preferred initially because the project is research-heavy and will require rapid iteration around:
+Preferred for:
 
-- Arabic NLP;
-- morphology/tokenization integrations;
-- ontology experimentation;
+- Arabic NLP research;
+- future Hebrew/Greek NLP integrations;
+- corpus ingestion research;
+- ontology iteration;
 - JSON Schema validation;
 - RDF/JSON-LD experiments;
 - golden dataset tooling;
-- analysis notebooks/scripts where appropriate.
+- evaluation and analysis.
 
 ### Phase 2 — Rust, optional
 
-Rust becomes attractive once contracts stabilize for:
+Use only after contracts stabilize, for demonstrated needs such as:
 
-- strict typed validators;
-- deterministic CLI;
-- high-throughput batch compilation/indexing;
-- embeddable core library;
+- deterministic typed core;
+- fast CLI/batch processing;
+- high-throughput validators;
+- embeddable library;
 - stronger runtime guarantees.
 
-Rust must consume the same canonical schema; it must not become a separate semantic implementation with divergent rules.
+Rust MUST consume the same canonical machine contract.
 
 ### Application layer — TypeScript/JavaScript
 
-Suitable later for:
+Recommended later for:
 
 - API gateway;
 - semantic explorer;
+- review UI;
 - graph visualization;
-- review interface;
-- annotation UI.
+- annotation workflows.
 
 ### Go
 
-Go remains viable for infrastructure/services but is not the preferred research implementation because it contributes less to the difficult early work: Arabic linguistic analysis and semantic/ontology iteration.
+Viable for infrastructure/services, but not currently preferred for the research core.
 
 ---
 
-## 18. Planned module boundaries
+## 54. Planned module boundaries
 
-Future implementation should preserve clear boundaries:
+Future implementation SHOULD preserve at least:
 
 ```text
+corpus/
+editions/
+references/
 source/
+text_views/
 linguistics/
+lexicon/
+senses/
+discourse/
 participants/
+coreference/
 frames/
+relations/
 ontology/
 polarity/
 modality/
+speech_act/
 direction/
+translations/
+interpretations/
 provenance/
 confidence/
+review/
 validation/
 witness/
-correction/
+response/
 positive_direction/
+alignment/
 export/
 ```
 
-The Witness module must consume locked semantic output rather than directly inspecting raw text whenever possible.
-
----
-
-## 19. No-LLM lock-in rule
-
-LLMs may be used as research assistants or candidate generators, but the canonical data contract must not depend on one model/provider.
-
-Any AI-generated assertion should record:
+Corpus-specific adapters SHOULD live behind shared interfaces, for example:
 
 ```text
-model/provider if applicable
-prompt/spec version
-candidate status
-human review status
-supporting evidence
+adapters/quran/
+adapters/torah/
+adapters/psalms/
+adapters/gospels/
 ```
 
-The system must allow deterministic validators and human-reviewed golden data to override model suggestions.
+---
+
+## 55. No-LLM lock-in
+
+LLMs MAY generate candidates but MUST NOT define the canonical contract.
+
+Model-produced assertions MUST preserve:
+
+```text
+candidate status
+model metadata when available
+prompt/policy version
+supporting evidence
+human/deterministic validation status
+```
+
+No model provider may become a semantic dependency of stored canonical data.
 
 ---
 
-# PART VI — GOLDEN DATASET AND TESTING
+## 56. Deterministic validation boundary
 
-## 20. Golden records
+Even if semantic extraction uses AI, the following SHOULD be deterministic:
 
-Reviewed examples are the foundation for trustworthy evolution.
+```text
+schema validation
+ID validation
+registry validation
+reference integrity
+provenance requirements
+state-transition rules
+lock rules
+cross-corpus mapping constraints
+release artifact validation
+```
 
-A future golden corpus should contain:
-
-- source;
-- token evidence;
-- participants;
-- semantic frames;
-- concepts;
-- polarity/modality;
-- source direction;
-- provenance;
-- confidence components;
-- Witness;
-- correction;
-- positive direction;
-- review notes.
-
-As-Saffat 37:30 should be one of the first golden records.
+AI may suggest; deterministic rules decide structural validity.
 
 ---
 
-## 21. Test categories
+# PART XIII — VERSIONING AND MIGRATION
 
-### Schema tests
+## 57. Version domains
 
-Validate structural correctness.
-
-### Invariant tests
-
-Validate framework rules.
-
-### Golden tests
-
-Compare extractor output against approved semantic records.
-
-### Ontology tests
-
-Detect duplicate IDs, orphan references, cyclic constraints where prohibited, and label collisions.
-
-### Migration tests
-
-Ensure old data can be migrated when schema/spec versions change.
-
-### Release tests
-
-Ensure version/changelog generation remains deterministic.
-
----
-
-# PART VII — VERSIONING
-
-## 22. Version domains
-
-The project will eventually need multiple version domains:
+The project requires separate version domains:
 
 ```text
 repository_version
-spec_version
+blueprint/spec_version
 schema_version
 ontology_version
+registry_version
+corpus_adapter_version
+source_edition_version
 extractor_version
+confidence_policy_version
+witness_policy_version
 ```
 
-At bootstrap only the repository release version is active.
+These MUST NOT be conflated.
 
-These domains must not be conflated later.
+Example:
 
-A repository release may change documentation without changing ontology version. An ontology change may require schema migration. A model/extractor update may change candidates without changing the spec.
+A documentation-only repository release may change `repository_version` without changing ontology data.
+
+A concept split may require an `ontology_version` change and migration.
+
+A new tokenizer may change `corpus_adapter_version` or extractor version without changing the source edition.
 
 ---
 
-## 23. Repository SemVer
+## 58. Migration policy
 
-Repository releases use Semantic Versioning.
-
-Highest change class wins:
+Breaking schema or ontology changes MUST provide:
 
 ```text
-BREAKING CHANGE / !   → major
-feat                   → minor
-fix/perf/refactor/...  → patch
+change rationale
+old representation
+new representation
+migration path
+affected IDs
+data compatibility note
+golden-corpus impact
 ```
 
-During early `0.x` research the project may evolve rapidly, but breaking changes should still be explicitly declared rather than hidden.
+Stable semantic IDs SHOULD be preserved when meaning has not changed.
 
-The repository version is stored in:
-
-```text
-VERSION
-```
-
-and mirrored by:
-
-```text
-Git tag: vX.Y.Z
-GitHub Release: vX.Y.Z
-CHANGELOG.md section
-```
+If meaning changes materially, create a new concept/relation ID and deprecate the old identity rather than silently redefining it.
 
 ---
 
-## 24. Conventional Commits policy
+# PART XIV — REPOSITORY GOVERNANCE
 
-Allowed initial types:
+## 59. Branch model
 
-```text
-feat
-fix
-perf
-refactor
-docs
-test
-build
-ci
-chore
-style
-revert
-```
-
-Recommended scopes:
-
-```text
-spec
-schema
-ontology
-source
-linguistics
-frame
-witness
-direction
-scoring
-provenance
-validation
-repo
-release
-```
-
-Examples:
-
-```text
-feat(ontology): add transgression concept hierarchy
-fix(frame): preserve negated relation target
-docs(spec): distinguish source and positive direction
-refactor(witness): separate correction from observation
-ci(repo): enforce dev to main promotion
-```
-
----
-
-# PART VIII — TWO-BRANCH GOVERNANCE
-
-## 25. Branch model
-
-Only two long-lived working branches are allowed:
+Only two long-lived working branches:
 
 ```text
 dev
@@ -1124,384 +2095,488 @@ main
 
 ### dev
 
-Purpose:
-
-- active research;
-- documentation evolution;
-- schema/ontology development;
-- implementation work.
-
-Direct commits are allowed by design.
+Active research and development.
 
 ### main
 
-Purpose:
+Stable integration/release branch.
 
-- stable integration point;
-- release source;
-- tagged history.
-
-Human direct pushes should be blocked by server-side repository rules.
-
-Promotion path:
+Promotion:
 
 ```text
-dev → pull request → main
+dev → PR → main
 ```
 
-No standard `feature/*`, `release/*`, `hotfix/*` workflow is used.
+No standard long-lived `feature/*`, `release/*`, or `hotfix/*` branch model.
 
 ---
 
-## 26. Promotion policy
+## 60. Commit and release policy
 
-A promotion from `dev` to `main` should require:
+Conventional Commits govern release impact.
 
-- repository policy workflow passes;
-- required files valid;
-- Conventional Commit history valid;
-- PR review/checklist complete;
-- unresolved review conversations cleared;
-- no known schema/ontology invariant failures.
-
-A promotion PR may contain multiple commits. Release automation derives the bump from the highest-impact Conventional Commit in the promoted range.
-
----
-
-## 27. Release without a third branch
-
-The project deliberately does not use release PR tooling that requires additional branches.
-
-After a successful promotion reaches `main`:
+Recommended scopes now include:
 
 ```text
-main push
-  ↓
-inspect promoted commits
-  ↓
-calculate SemVer
-  ↓
-update VERSION
-  ↓
-update CHANGELOG
-  ↓
-commit release metadata to main
-  ↓
-tag vX.Y.Z
-  ↓
-publish GitHub Release
-```
-
-Post-release synchronization of `dev` is allowed only when it can be performed safely without losing newer `dev` commits.
-
-Force-updating `dev` is prohibited.
-
----
-
-## 28. Required GitHub settings
-
-Workflow files alone cannot fully protect branches. Server-side repository rules should enforce:
-
-### main
-
-```text
-require pull request
-require successful checks
-require conversation resolution
-block force push
-block deletion
-restrict direct human push
-```
-
-### dev
-
-```text
-block force push
-block deletion
-```
-
-The automation may detect violations, but prevention belongs in GitHub rulesets/branch protection.
-
----
-
-# PART IX — CHANGELOG AND RELEASE NOTES
-
-## 29. Changelog policy
-
-`CHANGELOG.md` is generated from Conventional Commit history.
-
-Release sections should record:
-
-```text
-version
-date
-categorized changes
-commit references when practical
-breaking changes prominently
-```
-
-The changelog is a release artifact, not the canonical research history. Detailed semantic decisions belong in source-controlled specification/ontology records and review discussions.
-
----
-
-# PART X — SECURITY AND REPRODUCIBILITY
-
-## 30. Automation security
-
-Principles:
-
-- workflows receive minimum required permissions;
-- no repository secrets are required for basic bootstrap release flow;
-- third-party GitHub Actions should be minimized;
-- Dependabot should monitor action versions;
-- force pushes by automation are prohibited;
-- release automation must not overwrite advanced `dev` state;
-- generated releases must be traceable to immutable Git commits.
-
-Later, high-assurance mode may pin external actions to commit SHAs.
-
----
-
-## 31. Reproducibility
-
-A semantic record should ultimately be reproducible from:
-
-```text
-source version
-framework/spec version
-schema version
-ontology version
-extractor version
-configuration
+spec
+schema
+registry
+ontology
+corpus
+edition
+reference
+source
+linguistics
+sense
+discourse
+frame
+witness
+direction
+alignment
 provenance
+validation
+repo
+release
 ```
 
-Two runs under the same deterministic configuration should not silently produce structurally incompatible outputs.
+Repository SemVer is independent from semantic data version domains.
 
 ---
 
-# PART XI — RESEARCH REVIEW
+# PART XV — ROADMAP
 
-## 32. Review states
+## 61. Milestone 0 — Repository foundation
 
-Recommended future review workflow:
+Status target:
 
 ```text
-CANDIDATE
-RESEARCHED
-REVIEWED
-LOCKED
-DEPRECATED
+README
+BLUEPRINT
+branch governance
+release automation
+version/changelog automation
 ```
 
-AI/model output begins as `CANDIDATE` unless explicitly produced by deterministic source parsing.
-
-No AI suggestion should automatically become `LOCKED` semantic truth.
+No semantic engine required.
 
 ---
 
-## 33. Disagreement policy
+## 62. Milestone 1 — Machine contract
 
-The architecture must permit competing interpretations without corrupting the source layer.
-
-Possible future design:
-
-```text
-one immutable source
-multiple interpretation assertions
-separate provenance
-separate confidence
-separate review status
-```
-
-This is preferable to overwriting a previous interpretation.
-
----
-
-# PART XII — ROADMAP
-
-## 34. Milestone 0 — Repository foundation
-
-Goal: establish governance before implementation.
-
-Deliverables:
-
-- README;
-- Blueprint;
-- two-branch workflow;
-- Conventional Commit policy;
-- automatic promotion PR;
-- automated SemVer/version bump;
-- generated changelog;
-- automated tag and GitHub release;
-- action dependency updates.
-
-No semantic engine code required.
-
----
-
-## 35. Milestone 1 — Specification package
-
-Deliverables:
+Deliver:
 
 ```text
 JSON Schema
-controlled vocabulary registries
-concept registry format
-relation registry format
-provenance model
-confidence model
-validation rules
+ID grammar
+registry schemas
+corpus profile schema
+edition schema
+source-unit schema
+frame schema
+concept schema
+provenance schema
+review state machine
 ```
 
 Exit criterion:
 
-At least several manually reviewed verses can be represented without ad-hoc fields.
+Diverse Qur'anic examples can be represented without ad-hoc fields.
 
 ---
 
-## 36. Milestone 2 — Golden corpus
+## 63. Milestone 2 — Qur'an source adapter and golden corpus
 
-Start with carefully selected verses demonstrating different phenomena:
-
-- dialogue;
-- negation;
-- command/prohibition;
-- condition;
-- multiple participants;
-- temporal/event structure;
-- positive/negative/mixed directions;
-- ambiguous/coreference cases.
-
-As-Saffat 37:30 is the initial reference candidate.
-
-Exit criterion:
-
-Schema changes are driven by documented edge cases rather than speculation alone.
-
----
-
-## 37. Milestone 3 — Python research engine
-
-Initial capabilities:
+Deliver:
 
 ```text
-load source
-validate source IDs
-attach linguistic analysis
-construct candidate participants
-construct candidate frames
-link concepts
-calculate confidence
-validate invariants
-emit canonical JSON
+versioned Qur'an edition profile
+reference system
+raw source ingestion
+text views
+token anchors
+initial Arabic linguistic integration
+golden records across diverse phenomena
 ```
 
-Witness generation remains a separate pipeline stage.
+Exit criterion:
+
+The system reliably distinguishes source, linguistic evidence, sense, frame, concept, and Witness layers.
 
 ---
 
-## 38. Milestone 4 — Witness engine
+## 64. Milestone 3 — Full Qur'an candidate extraction
+
+Process the full corpus through the candidate lane.
+
+Outputs may remain partially unresolved.
+
+Goal:
+
+```text
+100% source ingestion
+broad candidate semantic coverage
+explicit unresolved/disputed tracking
+```
+
+Do not claim full semantic completion.
+
+---
+
+## 65. Milestone 4 — Qur'an review and lock program
+
+Progressively move high-confidence assertions:
+
+```text
+CANDIDATE
+→ RESEARCHED
+→ REVIEWED
+→ LOCKED
+```
+
+Prioritize representative semantic phenomena and high-reuse concepts.
+
+---
+
+## 66. Milestone 5 — Witness and positive-direction engine
+
+Consume locked Qur'anic semantics.
+
+Deliver:
+
+```text
+Witness Pattern registry
+localized Witness labels
+Witness confidence/review
+response/correction model
+positive-direction model
+```
+
+Witness generation MUST remain downstream of source-semantic review.
+
+---
+
+## 67. Milestone 6 — Multi-corpus protocol validation
+
+Before full ingestion of other corpora, test the generic architecture on carefully selected samples from:
+
+```text
+Torah-associated corpus
+Psalms-associated corpus
+Gospel-associated corpus
+```
+
+Validate:
+
+- edition identity;
+- reference systems;
+- Hebrew/Greek lexical-sense handling;
+- discourse structures;
+- concept mappings;
+- absence of Qur'an-specific schema assumptions.
+
+---
+
+## 68. Milestone 7 — Additional corpus ingestion
+
+Only after explicit edition/licensing decisions:
+
+```text
+Torah adapter
+Psalms adapter
+Gospels adapter
+```
+
+Each corpus receives independent golden data and review.
+
+---
+
+## 69. Milestone 8 — Cross-corpus semantic alignment
+
+Build reviewed mappings only after independent semantics exist.
 
 Capabilities:
 
 ```text
-consume LOCKED semantic frames
-produce Witness candidates
-score Witness fit
-review/lock Witness
-produce correction candidates
-produce positive direction candidates
+concept alignment
+frame-pattern alignment
+relation alignment
+Witness-pattern comparison
+positive-direction comparison
+semantic search across corpora
 ```
 
-No positive direction should be produced directly from raw text without passing through the semantic/Witness contract.
+The alignment engine MUST expose mapping type, scope, confidence, and provenance.
 
 ---
 
-## 39. Milestone 5 — Semantic web export
+## 70. Milestone 9 — Semantic-web exports and typed core
 
-Optional outputs:
+Evaluate:
 
 ```text
 JSON-LD
 RDF
-SHACL validation
-knowledge graph import
+SKOS
+OntoLex
+PROV-O
+SHACL
+Rust typed core
+TypeScript semantic explorer
 ```
 
-This is an export representation, not a replacement for the project semantics.
+Adopt only where demonstrated value exceeds complexity.
 
 ---
 
-## 40. Milestone 6 — Typed core / service layer
+# PART XVI — RESEARCH ETHICS AND INTERPRETIVE SAFETY
 
-Evaluate:
+## 71. No hidden theological collapse
 
-- Rust core/CLI if type/performance guarantees are justified;
-- TypeScript API/review UI;
-- graph visualization;
-- batch indexing and search.
-
-Do not migrate languages merely for fashion. Migration must solve a demonstrated requirement.
-
----
-
-# PART XIII — DECISION RECORD
-
-## 41. Decisions currently locked
-
-The following baseline decisions are considered locked for the repository foundation:
-
-1. The project is spec-first.
-2. Semantic frames are primary; keywords are secondary concept references.
-3. Source and interpretation remain distinct.
-4. Concept identity is language-neutral.
-5. English is a technical label, not semantic identity.
-6. Participant, relation, concept, polarity, modality, and direction are separate fields.
-7. Source direction and positive direction are distinct.
-8. Witness is a derived layer, not source/translation/tafsir.
-9. Positive direction must pass through Witness/correction logic.
-10. Unknown/unresolved states are valid.
-11. Every canonical assertion requires evidence/provenance.
-12. Confidence is operational and decomposable.
-13. Master concept is optional.
-14. Verse-level direction is derived and optional.
-15. Initial machine contract will be JSON + JSON Schema.
-16. Python is the initial research implementation language.
-17. Rust is optional after schema stabilization.
-18. Only `dev` and `main` are long-lived working branches.
-19. Releases occur from `main` without a third release branch.
-20. SemVer and Conventional Commits govern repository releases.
-
-Any future change to these decisions should be treated as an explicit architectural change and documented through versioned repository history.
-
----
-
-# PART XIV — FINAL INVARIANT
-
-The entire project can be summarized by one discipline:
+The engine MUST distinguish:
 
 ```text
-DO NOT STORE INTERPRETATION AS IF IT WERE SOURCE.
-DO NOT STORE A SENTENCE AS ONE GIANT KEY.
-DO NOT TURN NEGATION INTO A CONCEPT.
-DO NOT TURN WITNESS INTO A TRANSLATION.
-DO NOT TURN POSITIVE DIRECTION INTO SOURCE MEANING.
+textual observation
+linguistic analysis
+semantic assertion
+interpretation
+cross-corpus alignment
+theological claim
+```
+
+WSI semantic mappings are not automatically theological claims.
+
+If future researchers wish to store theological positions, those MUST be represented as explicitly sourced interpretation assertions, never hidden in the universal ontology.
+
+---
+
+## 72. No privileged translation ontology
+
+English MUST NOT become the hidden master meaning layer.
+
+Required architecture:
+
+```text
+SOURCE LANGUAGE
+→ CONTEXTUAL SENSE
+→ SEMANTIC FRAME
+→ UNIVERSAL CONCEPT MAPPING
+→ multilingual labels
+```
+
+Not:
+
+```text
+SOURCE LANGUAGE
+→ English translation
+→ ontology
+```
+
+---
+
+## 73. No forced symmetry across corpora
+
+The system MUST allow:
+
+```text
+concept exists in corpus A
+no safe equivalent in corpus B
+```
+
+and:
+
+```text
+frame pattern exists in corpus B
+no reviewed alignment in corpus A
+```
+
+Absence of a mapping is valid data.
+
+---
+
+## 74. No forced positive direction
+
+Witness is intended to enable constructive direction, but research integrity takes precedence.
+
+Valid outcome:
+
+```text
+WITNESS = REVIEWED
+RESPONSE = UNRESOLVED
+POSITIVE_DIRECTION = UNRESOLVED
+```
+
+A positive direction is valuable only if its derivation is explicit and defensible.
+
+---
+
+# PART XVII — STANDARDS BASELINE
+
+## 75. Standards and external models
+
+WSI does not need to copy external standards, but SHOULD remain interoperable with mature ideas from them.
+
+### SKOS
+
+Use as guidance for:
+
+```text
+concept identity
+preferred/alternative labels
+broader/narrower/related relations
+mapping relations
+```
+
+Reference:
+
+`https://www.w3.org/TR/skos-reference/`
+
+### OntoLex-Lemon
+
+Use as guidance for separating:
+
+```text
+lexical entry
+form
+lexical sense
+lexical concept
+ontology grounding
+```
+
+Reference:
+
+`https://www.w3.org/2016/05/ontolex/`
+
+### RDF
+
+Use as future graph interoperability model.
+
+Reference:
+
+`https://www.w3.org/TR/rdf-concepts/`
+
+### PROV-O
+
+Use as future provenance interoperability model.
+
+Reference:
+
+`https://www.w3.org/TR/prov-o/`
+
+### SHACL
+
+Use as future RDF graph validation model.
+
+Reference:
+
+`https://www.w3.org/TR/shacl/`
+
+### OSIS / USFM
+
+Use as external reference/encoding inspirations for Bible-family corpora, especially work identity and scripture reference mappings.
+
+References:
+
+`https://www.crosswire.org/osis/`
+
+`https://ubsicap.github.io/usfm/`
+
+### Qur'anic Arabic Corpus
+
+Use as an important reference for Qur'anic morphology, syntax/treebank concepts, and existing semantic-ontology practice. WSI remains independently versioned and MUST preserve its own provenance.
+
+Reference:
+
+`https://corpus.quran.com/documentation/`
+
+---
+
+# PART XVIII — DECISIONS LOCKED FOR THE NEXT PHASE
+
+## 76. Architectural decisions
+
+The following are considered baseline decisions for the next specification milestone:
+
+1. WSI is spec-first and machine-readable.
+2. The full Qur'an is the first corpus target.
+3. As-Saffat 37:30 is a non-normative example only.
+4. Torah-, Psalms-, and Gospel-associated corpora are planned future corpus families.
+5. Every source assertion is edition- and reference-system-specific.
+6. Raw source is immutable; normalization creates views.
+7. Source unit is generic; the engine does not hardcode “verse” as the universal structure.
+8. Token identity is scoped by source edition, text view, and tokenizer version.
+9. Lexical Sense is a distinct layer between lexeme and concept.
+10. Semantic frames/propositions are primary; semantic keys are concept displays.
+11. Discourse/utterance scope is required for reliable speaker and quotation analysis.
+12. Participant, discourse role, semantic role, relation, concept, polarity, modality, speech act, and direction are distinct.
+13. Translation and tafsir/commentary are secondary interpretation/evidence layers.
+14. Evidence source class and derivation type are separate dimensions.
+15. Concept identity is language-neutral.
+16. English is a technical label, not semantic identity.
+17. Universal concept mapping may remain unresolved.
+18. Source direction is distinct from polarity and from positive direction.
+19. Witness Pattern is distinct from localized Witness Label.
+20. Witness is derived from reviewed/locked semantic frames.
+21. Response/correction is derived and does not rewrite source meaning.
+22. Positive direction may remain unresolved.
+23. Cross-corpus semantic alignment occurs only after independent extraction.
+24. Cross-corpus alignment does not imply theological identity.
+25. Confidence is operational, decomposable, and policy-versioned.
+26. Competing interpretations may coexist with separate provenance.
+27. JSON + JSON Schema is the initial machine contract.
+28. Semantic-web standards are interoperability targets, not the internal research method itself.
+29. Python is the first research implementation language.
+30. Rust remains optional after contract stabilization.
+31. TypeScript/JavaScript is preferred for future application/review UI layers.
+32. Only `dev` and `main` are long-lived repository branches.
+
+Any future change to these decisions MUST be explicit and versioned.
+
+---
+
+# PART XIX — FINAL INVARIANTS
+
+## 77. The discipline of WSI
+
+The system MUST remember:
+
+```text
+DO NOT STORE AN EDITION AS IF IT WERE AN ABSTRACT REVELATION.
+DO NOT STORE A TRANSLATION AS IF IT WERE PRIMARY SOURCE.
+DO NOT STORE A LEMMA AS IF IT WERE A SENSE.
+DO NOT STORE A SENSE AS IF IT WERE AUTOMATICALLY A UNIVERSAL CONCEPT.
+DO NOT STORE A PARTICIPANT AS A CONCEPT.
+DO NOT STORE A RELATION AS A CONCEPT.
+DO NOT STORE NEGATION AS A CONCEPT.
+DO NOT STORE A SPEECH ACT AS DIRECTION.
+DO NOT STORE COMMENTARY AS SOURCE ASSERTION.
+DO NOT STORE WITNESS AS TRANSLATION.
+DO NOT STORE A LOCAL WITNESS LABEL AS A UNIVERSAL ONTOLOGY ID.
+DO NOT STORE POSITIVE DIRECTION AS SOURCE MEANING.
+DO NOT STORE CROSS-CORPUS SIMILARITY AS THEOLOGICAL EQUIVALENCE.
+DO NOT FORCE AN ANSWER WHERE EVIDENCE IS UNRESOLVED.
 ```
 
 Instead:
 
 ```text
-DECOMPOSE
-→ RELATE
-→ NORMALIZE
-→ EVIDENCE
-→ SCORE
-→ VALIDATE
+IDENTIFY THE CORPUS
+→ IDENTIFY THE EDITION
+→ PRESERVE THE SOURCE
+→ ANALYZE THE LANGUAGE
+→ RESOLVE THE SENSE
+→ RESOLVE THE DISCOURSE SCOPE
+→ IDENTIFY PARTICIPANTS
+→ BUILD FRAMES
+→ MAP CONCEPTS CONSERVATIVELY
+→ RECORD POLARITY / MODALITY / SPEECH ACT
+→ EVALUATE SOURCE DIRECTION
+→ ATTACH EVIDENCE + PROVENANCE
+→ REVIEW
 → LOCK
-→ WITNESS
-→ CORRECT
-→ MOVE POSITIVELY
+→ WITNESS THE PATTERN
+→ CHOOSE A HUMAN LABEL
+→ DERIVE A RESPONSE
+→ MOVE TOWARD A DEFENSIBLE POSITIVE DIRECTION
 ```
 
-That sequence is the architectural identity of Witness Semantic Engine.
+That sequence is the architectural identity of **Witness Semantic Engine**.
