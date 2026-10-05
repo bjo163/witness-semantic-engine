@@ -1,0 +1,31 @@
+{
+  "contract_name": "WSI Machine Contract",
+  "contract_version": "0.1.0",
+  "status": "research-draft",
+  "blueprint_revision": "2.0-draft",
+  "schema_dialect": "https://json-schema.org/draft/2020-12/schema",
+  "canonical_schema": "spec/wsi-record.schema.json",
+  "id_grammar": "spec/ID-GRAMMAR.md",
+  "registries": [
+    "registries/controlled-vocabularies.json",
+    "registries/concepts.json",
+    "registries/relations.json",
+    "registries/witness-patterns.json"
+  ],
+  "worked_example": "data/golden-candidates/quran/037/030.json",
+  "validation_order": [
+    "JSON_SCHEMA",
+    "REGISTRY_REFERENTIAL_INTEGRITY",
+    "WSI_INVARIANTS",
+    "REVIEW_POLICY"
+  ],
+  "principles": [
+    "SOURCE_IS_IMMUTABLE",
+    "LEXICAL_SENSE_PRECEDES_CROSS_LANGUAGE_CONCEPT_EQUIVALENCE",
+    "PARTICIPANT_RELATION_CONCEPT_POLARITY_MODALITY_DIRECTION_ARE_SEPARATE",
+    "WITNESS_IS_DERIVED_NOT_SOURCE",
+    "POSITIVE_DIRECTION_IS_DERIVED_NOT_SOURCE_DIRECTION",
+    "UNRESOLVED_IS_VALID",
+    "EVERY_CANONICAL_ASSERTION_REQUIRES_PROVENANCE"
+  ]
+}

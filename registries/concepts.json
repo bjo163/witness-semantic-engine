@@ -1,0 +1,31 @@
+{
+  "scheme_id": "wsi:concept-scheme/core-v0",
+  "scheme_version": "0.1.0",
+  "status": "research-draft",
+  "concepts": [
+    {
+      "id": "wsi:concept/authority",
+      "class": "SOURCE_SEMANTIC",
+      "status": "CANDIDATE",
+      "pref_labels": {"en": "Authority", "id": "Otoritas", "ar": "سُلْطَان"},
+      "definition": "Capacity, right, or power to exercise control or authority in a relation. Exact sense must be established by source-specific lexical and contextual evidence.",
+      "notes": ["The Arabic label grounds the worked example; it does not mean every occurrence of سلطان automatically maps to this concept."]
+    },
+    {
+      "id": "wsi:concept/transgression",
+      "class": "SOURCE_SEMANTIC",
+      "status": "CANDIDATE",
+      "pref_labels": {"en": "Transgression", "id": "Melampaui batas", "ar": "طُغْيَان"},
+      "definition": "Exceeding or violating a proper limit, boundary, or norm in the evaluated context.",
+      "notes": ["Cross-language terms must map through lexical-sense analysis, not translation-string matching."]
+    },
+    {
+      "id": "wsi:concept/boundary-alignment",
+      "class": "DERIVED_TARGET",
+      "status": "CANDIDATE",
+      "pref_labels": {"en": "Boundary alignment", "id": "Keselarasan dengan batas"},
+      "definition": "A derived positive target in which conduct or state is realigned with a valid boundary identified by the Witness derivation.",
+      "notes": ["This is not claimed as a direct lexical concept in As-Saffat 37:30."]
+    }
+  ]
+}

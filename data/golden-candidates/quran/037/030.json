@@ -1,0 +1,216 @@
+{
+  "record_id": "urn:wsi:record:quran:37.30",
+  "contract_version": "0.1.0",
+  "record_type": "SEMANTIC_RECORD",
+  "source": {
+    "corpus_id": "wsi:corpus/quran",
+    "work_id": "wsi:work/quran",
+    "edition_id": "wsi:edition/quran-research-example-ar-v0",
+    "reference_system_id": "wsi:refsys/quran-surah-ayah",
+    "unit_id": "urn:wsi:unit:quran:quran-research-example-ar-v0:37.30",
+    "canonical_reference": "37:30",
+    "language": "ar",
+    "script": "Arab",
+    "text": "وَمَا كَانَ لَنَا عَلَيْكُم مِّن سُلْطَانٍ ۖ بَلْ كُنتُمْ قَوْمًا طَاغِينَ",
+    "checksum": "sha256:754cf54170c66fea8502f40c02f1d56bcf9f30d0788dae24836e26f5cd2e0910",
+    "source_status": "WORKED_EXAMPLE"
+  },
+  "lexical_senses": [
+    {
+      "id": "LS1",
+      "surface": "سُلْطَانٍ",
+      "lemma": "سُلْطَان",
+      "root": "س ل ط",
+      "sense_gloss": "authority or power in relation to another party",
+      "maps_to_concept_id": "wsi:concept/authority",
+      "evidence": {
+        "source_class": "PRIMARY_TEXT",
+        "derivation_type": "DIRECT",
+        "spans": [{"unit_id": "urn:wsi:unit:quran:quran-research-example-ar-v0:37.30", "text": "سُلْطَانٍ", "token_ids": []}],
+        "notes": []
+      },
+      "confidence": {
+        "policy_id": "wsi:confidence/baseline-v0",
+        "policy_version": "0.1.0",
+        "components": {"source_directness": 1.0, "lexical_sense_fit": 0.98, "context_consistency": 0.97, "ontology_fit": 0.98},
+        "aggregate": 0.98
+      }
+    },
+    {
+      "id": "LS2",
+      "surface": "طَاغِينَ",
+      "lemma": "طَاغٍ",
+      "root": "ط غ ي",
+      "sense_gloss": "transgressing or exceeding a proper limit",
+      "maps_to_concept_id": "wsi:concept/transgression",
+      "evidence": {
+        "source_class": "PRIMARY_TEXT",
+        "derivation_type": "DIRECT",
+        "spans": [{"unit_id": "urn:wsi:unit:quran:quran-research-example-ar-v0:37.30", "text": "طَاغِينَ", "token_ids": []}],
+        "notes": []
+      },
+      "confidence": {
+        "policy_id": "wsi:confidence/baseline-v0",
+        "policy_version": "0.1.0",
+        "components": {"source_directness": 1.0, "lexical_sense_fit": 0.99, "context_consistency": 0.98, "ontology_fit": 0.99},
+        "aggregate": 0.99
+      }
+    }
+  ],
+  "utterances": [
+    {
+      "id": "U1",
+      "parent_utterance_id": null,
+      "speaker_participant_id": "P1",
+      "addressee_participant_ids": ["P2"],
+      "quoted_or_reported": true,
+      "speech_act": "STATEMENT"
+    }
+  ],
+  "participants": [
+    {
+      "id": "P1",
+      "surface_reference": "WE",
+      "entity_type": "GROUP",
+      "discourse_roles": ["SPEAKER"],
+      "resolved_identity": null,
+      "resolution_status": "UNRESOLVED",
+      "resolution_evidence": null
+    },
+    {
+      "id": "P2",
+      "surface_reference": "YOU",
+      "entity_type": "GROUP",
+      "discourse_roles": ["ADDRESSEE", "REFERENT"],
+      "resolved_identity": null,
+      "resolution_status": "UNRESOLVED",
+      "resolution_evidence": null
+    }
+  ],
+  "frames": [
+    {
+      "id": "F1",
+      "utterance_id": "U1",
+      "frame_type": "RELATION",
+      "predicate_relation_id": "wsi:relation/authority-over",
+      "role_bindings": [
+        {"role": "HOLDER", "participant_id": "P1"},
+        {"role": "TARGET", "participant_id": "P2"}
+      ],
+      "concept_ids": ["wsi:concept/authority"],
+      "polarity": "NEGATED",
+      "modality": "ASSERTED",
+      "speech_act": "STATEMENT",
+      "source_direction": "NEUTRAL",
+      "evidence": {
+        "source_class": "PRIMARY_TEXT",
+        "derivation_type": "COMPOSITIONAL",
+        "spans": [{"unit_id": "urn:wsi:unit:quran:quran-research-example-ar-v0:37.30", "text": "وَمَا كَانَ لَنَا عَلَيْكُم مِّن سُلْطَانٍ", "token_ids": []}],
+        "notes": ["Relation is compositional: negation + holder + target + authority expression."]
+      },
+      "confidence": {
+        "policy_id": "wsi:confidence/baseline-v0",
+        "policy_version": "0.1.0",
+        "components": {"source_directness": 0.98, "lexical_sense_fit": 0.98, "syntax_support": 0.95, "context_consistency": 0.96, "ontology_fit": 0.97},
+        "aggregate": 0.97
+      },
+      "review_status": "RESEARCHED"
+    },
+    {
+      "id": "F2",
+      "utterance_id": "U1",
+      "frame_type": "STATE",
+      "predicate_relation_id": "wsi:relation/has-state",
+      "role_bindings": [{"role": "STATE_BEARER", "participant_id": "P2"}],
+      "concept_ids": ["wsi:concept/transgression"],
+      "polarity": "AFFIRMED",
+      "modality": "ASSERTED",
+      "speech_act": "STATEMENT",
+      "source_direction": "NEGATIVE",
+      "evidence": {
+        "source_class": "PRIMARY_TEXT",
+        "derivation_type": "COMPOSITIONAL",
+        "spans": [{"unit_id": "urn:wsi:unit:quran:quran-research-example-ar-v0:37.30", "text": "كُنتُمْ قَوْمًا طَاغِينَ", "token_ids": []}],
+        "notes": []
+      },
+      "confidence": {
+        "policy_id": "wsi:confidence/baseline-v0",
+        "policy_version": "0.1.0",
+        "components": {"source_directness": 1.0, "lexical_sense_fit": 0.99, "syntax_support": 0.96, "context_consistency": 0.98, "ontology_fit": 0.99},
+        "aggregate": 0.98
+      },
+      "review_status": "RESEARCHED"
+    }
+  ],
+  "discourse_relations": [
+    {
+      "from_frame_id": "F1",
+      "relation_id": "wsi:relation/discourse-retraction",
+      "to_frame_id": "F2",
+      "evidence": {
+        "source_class": "PRIMARY_TEXT",
+        "derivation_type": "DIRECT",
+        "spans": [{"unit_id": "urn:wsi:unit:quran:quran-research-example-ar-v0:37.30", "text": "بَلْ", "token_ids": []}],
+        "notes": ["Discourse operator is represented separately from semantic concepts."]
+      },
+      "confidence": {
+        "policy_id": "wsi:confidence/baseline-v0",
+        "policy_version": "0.1.0",
+        "components": {"source_directness": 1.0, "context_consistency": 0.96, "ontology_fit": 0.95},
+        "aggregate": 0.97
+      }
+    }
+  ],
+  "concept_refs": [
+    {"concept_id": "wsi:concept/authority", "usage": "SOURCE", "review_status": "RESEARCHED"},
+    {"concept_id": "wsi:concept/transgression", "usage": "SOURCE", "review_status": "RESEARCHED"},
+    {"concept_id": "wsi:concept/boundary-alignment", "usage": "DERIVED_TARGET", "review_status": "CANDIDATE"}
+  ],
+  "source_direction_summary": "NEGATIVE",
+  "witnesses": [
+    {
+      "id": "W1",
+      "observed_frame_ids": ["F2"],
+      "pattern_id": "wsi:witness-pattern/boundary-violation",
+      "labels": [
+        {"language": "en", "label": "OFFSIDE", "type": "METAPHOR"},
+        {"language": "id", "label": "OFFSIDE", "type": "METAPHOR"}
+      ],
+      "correction": {
+        "response_id": "wsi:response/return-to-boundary",
+        "label": "Return to the valid boundary",
+        "status": "RESOLVED"
+      },
+      "positive_direction": {
+        "target_concept_id": "wsi:concept/boundary-alignment",
+        "direction": "POSITIVE",
+        "derivation_type": "DERIVED",
+        "status": "RESOLVED"
+      },
+      "confidence": {
+        "policy_id": "wsi:confidence/witness-baseline-v0",
+        "policy_version": "0.1.0",
+        "components": {"semantic_fit": 0.90, "non_contradiction": 0.95, "intuitiveness": 0.90, "localization_fit": 0.88},
+        "aggregate": 0.91
+      },
+      "review_status": "CANDIDATE"
+    }
+  ],
+  "provenance": {
+    "framework_version": "2.0-draft",
+    "schema_version": "0.1.0",
+    "ontology_version": "0.1.0",
+    "extractor_version": "manual-research-example",
+    "created_at": "2026-10-05T20:40:00+07:00",
+    "created_by": "WSI research bootstrap"
+  },
+  "review": {
+    "status": "RESEARCHED",
+    "reviewer": null,
+    "notes": [
+      "Worked example only; not a production Quran edition record.",
+      "As-Saffat 37:30 must not define the schema by itself.",
+      "Witness and positive direction remain candidate derivations until separately reviewed."
+    ]
+  }
+}
