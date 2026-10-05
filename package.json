@@ -1,0 +1,25 @@
+{
+  "name": "witness-semantic-engine",
+  "version": "0.0.0-development",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "validate": "tsx src/cli.ts validate",
+    "validate:golden": "tsx src/cli.ts validate data/golden-candidates/quran/037/030.json",
+    "test": "tsx --test test/validator.test.ts",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run test && npm run validate"
+  },
+  "dependencies": {
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.0",
+    "tsx": "4.20.0",
+    "typescript": "5.9.0"
+  }
+}
