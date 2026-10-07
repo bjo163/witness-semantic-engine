@@ -6,6 +6,7 @@ import Ajv2020 from 'ajv/dist/2020.js'
 import { findRepositoryRoot } from '../src/validation/context.js'
 import { deriveWitnesses } from '../src/witness/engine.js'
 import { validateWitnessDerivation } from '../src/witness/validate.js'
+import { witnessConceptRegistryFromRecord, witnessPatternRegistryFromRecord, witnessSemanticStateFromRecord } from '../src/witness/adapters.js'
 import type {
   WitnessConceptRegistrySnapshot,
   WitnessEngineInput,
@@ -19,40 +20,9 @@ const patternsFile = JSON.parse(readFileSync(join(root, 'registries/witness-patt
 const conceptsFile = JSON.parse(readFileSync(join(root, 'registries/concepts.json'), 'utf8')) as any
 const schema = JSON.parse(readFileSync(join(root, 'spec/witness-derivation.schema.json'), 'utf8')) as object
 
-const patternRegistry: WitnessPatternRegistrySnapshot = {
-  registryVersion: patternsFile.registry_version,
-  patterns: patternsFile.patterns.map((pattern: any) => ({
-    id: pattern.id,
-    status: pattern.status,
-    definition: pattern.definition,
-    triggerConcepts: pattern.trigger_concepts,
-    localizedLabels: pattern.localized_labels,
-    allowedResponses: pattern.allowed_responses.map((response: any) => ({
-      id: response.id,
-      label: response.label,
-      ...(response.target_concept_id ? { targetConceptId: response.target_concept_id } : {}),
-    })),
-  })),
-}
-
-const conceptRegistry: WitnessConceptRegistrySnapshot = {
-  registryVersion: conceptsFile.scheme_version,
-  concepts: conceptsFile.concepts.map((concept: any) => ({
-    id: concept.id,
-    class: concept.class,
-    status: concept.status,
-  })),
-}
-
-const semanticState: WitnessSemanticState = {
-  recordId: golden.record_id,
-  reviewStatus: golden.review.status,
-  frames: golden.frames.map((frame: any) => ({
-    id: frame.id,
-    conceptIds: frame.concept_ids,
-    reviewStatus: frame.review_status,
-  })),
-}
+const patternRegistry: WitnessPatternRegistrySnapshot = witnessPatternRegistryFromRecord(patternsFile)
+const conceptRegistry: WitnessConceptRegistrySnapshot = witnessConceptRegistryFromRecord(conceptsFile)
+const semanticState: WitnessSemanticState = witnessSemanticStateFromRecord(golden)
 
 const ajv = new Ajv2020({ allErrors: true, strict: false })
 const validateSchema = ajv.compile(schema)
