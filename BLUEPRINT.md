@@ -1130,15 +1130,29 @@ Live verification exposed and corrected non-exact Uthmani evidence anchors in th
 
 ## 53. M4 — Linguistic plugins + stratified golden analyses
 
-**Status: NEXT**
+**Status: IMPLEMENTED / REVIEW PENDING**
 
 Define a language-neutral analyzer contract, add reference analyzers/adapters, and build a structurally diverse golden set independent of scripture identity.
 
 ## 54. M5 — Semantic frame engine
 
-**Status: PLANNED**
+**Status: IMPLEMENTED / REVIEW PENDING**
 
-Candidate generation, contextual-sense resolution, participant/role extraction, relation/concept linking, assessments, confidence, provenance, and review workflows.
+M5 introduces a deterministic semantic candidate compiler over versioned linguistic analysis plus evidence-backed semantic proposals.
+
+Normative M5 separations:
+
+```text
+LINGUISTIC OUTPUT != SEMANTIC CANDIDATE
+SEMANTIC CANDIDATE != REVIEWED SEMANTIC TRUTH
+PARTICIPANT REFERENCE != SEMANTIC KEY
+FUNCTION WORD != SEMANTIC KEY
+RAW TOKEN IMPORTANCE != SEMANTIC KEY
+```
+
+A semantic key is emitted only for a registered concept candidate whose source role is `CONTENT`. Participant references, function words, structural markers, unknown roles, unresolved mappings, and unregistered concepts remain explicit but are not promoted into semantic keys.
+
+The reference compiler fails closed on broken token/local-reference structure while preserving research ambiguity through candidate states and `UNRESOLVED` outputs. M5 does not produce Witness or positive direction.
 
 ## 55. M6 — Witness engine
 

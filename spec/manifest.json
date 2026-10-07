@@ -63,6 +63,18 @@
     "WITNESS_IS_DERIVED_NOT_SOURCE",
     "POSITIVE_DIRECTION_IS_DERIVED_NOT_SOURCE_DIRECTION",
     "UNRESOLVED_IS_VALID",
-    "EVERY_CANONICAL_ASSERTION_REQUIRES_SOURCE_ANCHORED_EVIDENCE_AND_ANALYSIS_PROVENANCE"
-  ]
+    "EVERY_CANONICAL_ASSERTION_REQUIRES_SOURCE_ANCHORED_EVIDENCE_AND_ANALYSIS_PROVENANCE",
+    "SEMANTIC_CANDIDATE_IS_NOT_REVIEWED_TRUTH",
+    "PARTICIPANT_REFERENCE_IS_NOT_SEMANTIC_KEY",
+    "FUNCTION_WORD_IS_NOT_SEMANTIC_KEY"
+  ],
+  "semantic_candidate_contract": "spec/SEMANTIC-CANDIDATE-CONTRACT.md",
+  "semantic_candidate_schema": "spec/semantic-candidate.schema.json",
+  "semantics": {
+    "contract_version": "0.1.0",
+    "runtime": "src/semantics",
+    "schema": "spec/semantic-candidate.schema.json",
+    "test": "test/semantics.test.ts",
+    "compiler": "wsi:semantic-compiler/reference"
+  }
 }

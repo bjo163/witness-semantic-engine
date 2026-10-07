@@ -14,10 +14,11 @@ Milestone 1:     IMPLEMENTED / REVIEW PENDING
 Milestone 2:     IMPLEMENTED / REVIEW PENDING — CI GREEN
 Milestone 3:     IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN
 Milestone 4:     IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN
-Milestone 5:     NEXT — semantic frame engine
+Milestone 5:     IMPLEMENTED / REVIEW PENDING — semantic candidate compiler
+Milestone 6:     NEXT — Witness engine
 ```
 
-M2 passes deterministic validation CI. M3 resolves and verifies real resources against the exact RGBL Git revision pinned by each Source Binding. M4 now passes one language-neutral `LinguisticAnalyzer` contract across Arabic, Hebrew, Greek, and a Sanskrit generic-fallback profile without introducing scripture-specific semantic branches.
+M2 passes deterministic validation CI. M3 resolves and verifies real resources against the exact RGBL Git revision pinned by each Source Binding. M4 passes one language-neutral `LinguisticAnalyzer` contract across Arabic, Hebrew, Greek, and a Sanskrit generic-fallback profile. M5 now compiles evidence-backed semantic proposals into deterministic participant, concept/semantic-key, and Frame candidates without promoting candidates to reviewed truth.
 
 The canonical milestone tracker is [`ROADMAP.md`](ROADMAP.md). Architecture remains normative in [`BLUEPRINT.md`](BLUEPRINT.md).
 
@@ -304,17 +305,28 @@ Run the live profile suite with a pinned RGBL checkout:
 RGBL_REPO_PATH=/path/to/rocksoul-rgbl npm run test:linguistics:live
 ```
 
-## What comes next — M5
+## Semantic candidate engine — M5
 
-M5 builds the semantic candidate/frame engine on top of the source + linguistic boundaries already established.
-
-The critical rule is:
+M5 is implemented as a deterministic candidate compiler on top of the source + linguistic boundaries.
 
 ```text
-LINGUISTIC OUTPUT != REVIEWED SEMANTIC TRUTH
+SOURCE PROVIDER
+→ LINGUISTIC CANDIDATE
+→ EVIDENCE-BACKED SEMANTIC PROPOSALS
+→ SEMANTIC CANDIDATE
+→ REVIEW
+→ CANONICAL WSI SEMANTIC RECORD
 ```
 
-M5 must generate auditable candidates for senses, participants, roles, frames, relations, polarity/modality/speech act, concepts, assessments, confidence, and provenance while preserving ambiguity and `UNRESOLVED` outcomes.
+The compiler separates participants from concepts. A participant reference such as “WE / نا” may identify a participant but is not a semantic key. Function words and structural markers are also excluded from semantic keys by default.
+
+Semantic keys are presentation handles for registered source-semantic concepts; they are not raw-token importance scores.
+
+See `spec/SEMANTIC-CANDIDATE-CONTRACT.md`, `spec/semantic-candidate.schema.json`, `src/semantics/`, and `test/semantics.test.ts`.
+
+## What comes next — M6
+
+M6 consumes reviewed/eligible semantic state to derive Witness candidates, response/correction candidates, and positive direction without back-projecting those derived layers into source meaning.
 
 ## Implementation direction
 
@@ -337,7 +349,6 @@ Optional later for demonstrated performance/type-safety needs.
 WSI does not call itself production-stable merely because one corpus can be processed. The planned path is:
 
 ```text
-M5 semantic frame engine
 M6 Witness engine
 M7 scale / reproducible batch processing
 M8 production hardening

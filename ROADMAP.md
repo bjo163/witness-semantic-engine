@@ -18,8 +18,8 @@ M1  Provider-bound Machine Contract   IMPLEMENTED / REVIEW PENDING
 M2  Deterministic validator           IMPLEMENTED / REVIEW PENDING — CI GREEN
 M3  Live RGBL connector               IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN
 M4  Linguistic plugins + goldens      IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN
-M5  Semantic frame engine             NEXT
-M6  Witness engine                    PLANNED
+M5  Semantic frame engine             IMPLEMENTED / REVIEW PENDING — CI GREEN
+M6  Witness engine                    NEXT
 M7  Scale / batch processing          PLANNED
 M8  Production hardening              PLANNED
 M9  Release candidate → v1.0          PLANNED
@@ -250,27 +250,45 @@ Remaining acceptance gate:
 
 ## M5 — Semantic frame engine
 
-**Status:** NEXT
+**Status:** IMPLEMENTED / REVIEW PENDING — CI GREEN
 
 Goal:
 
-Generate auditable research candidates for:
+Generate auditable research candidates for contextual senses, participants, semantic roles, Frames, relations, concept mappings / semantic keys, polarity/modality/speech act, confidence, and provenance.
 
-- contextual senses;
-- participants;
-- semantic roles;
-- frames;
-- relations;
-- concept mappings;
-- polarity/modality/speech act;
-- assessments;
-- confidence/provenance.
+Delivered on `dev`:
 
-Machine proposals remain candidates until review policy permits promotion.
+- source-provider-neutral `SemanticCandidate` contract v0.1;
+- deterministic TypeScript reference compiler;
+- deterministic SHA-256 candidate IDs;
+- proposer provenance (`RULE | MANUAL | MODEL | IMPORT`);
+- participant candidates structurally separate from concept candidates;
+- explicit source roles: `CONTENT | PARTICIPANT_REFERENCE | FUNCTION_WORD | STRUCTURAL | UNKNOWN`;
+- semantic keys only from registered `CONTENT` concepts;
+- participant references such as “WE / نا” excluded from semantic keys by default;
+- function words and structural markers excluded from semantic keys by default;
+- unresolved/unregistered concepts preserved without forced key promotion;
+- Frame candidates with roles, concepts, relation IDs, polarity, modality, speech act, evidence token IDs, confidence, and candidate-only review state;
+- fail-closed structural checks for broken references;
+- semantic-candidate invariant validator;
+- JSON Schema + deterministic/mutation tests;
+- As-Saffat 37:30 and first-person plural `نا` regression coverage.
 
-Acceptance must include ambiguous and unresolved examples, not only easy positive cases.
+Critical boundary:
 
-M5 MUST consume Source Provider + linguistic-analysis contracts without treating analyzer output as reviewed semantic fact.
+```text
+LINGUISTIC OUTPUT
+!=
+SEMANTIC CANDIDATE
+!=
+REVIEWED SEMANTIC TRUTH
+
+PARTICIPANT REFERENCE
+!=
+SEMANTIC KEY
+```
+
+M5 does not emit Witness or positive direction. Those remain M6 responsibilities.
 
 ---
 
@@ -379,11 +397,11 @@ batch reproducibility
 
 ## Immediate next work
 
-M5 begins after M4 implementation review:
+M6 begins after M5 implementation review:
 
-1. define the semantic-candidate engine boundary between linguistic analysis and reviewed WSI Frames;
-2. define deterministic candidate IDs and candidate provenance;
-3. generate participant/role/frame candidates without silently promoting them to reviewed truth;
-4. preserve ambiguity as competing candidates or explicit `UNRESOLVED` results;
-5. add goldens for negation, modality, commands/questions, reported speech, and n-ary participant structures;
-6. keep M2 deterministic validation, M3 live source verification, and M4 cross-language analyzer profiles as non-regression gates.
+1. define Witness Pattern matching strictly over reviewed/eligible semantic state;
+2. prohibit Witness generation directly from raw text or unreviewed linguistic output;
+3. preserve `UNRESOLVED` when no justified response/correction follows;
+4. keep response/correction separate from source assertions;
+5. derive positive direction only after a Witness + response path exists;
+6. keep M2–M5 validation, provider, linguistic, and semantic-candidate gates as non-regression checks.

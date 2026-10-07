@@ -14,7 +14,8 @@
     "test:provider:live": "tsx --test test/provider-live.test.ts",
     "test:linguistics:live": "tsx --test test/linguistic-live.test.ts",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm run test && npm run validate"
+    "check": "npm run typecheck && npm run test && npm run validate",
+    "test:semantics": "tsx --test test/semantics.test.ts"
   },
   "dependencies": {
     "ajv": "8.17.1",
