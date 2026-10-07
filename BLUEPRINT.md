@@ -1156,9 +1156,34 @@ The reference compiler fails closed on broken token/local-reference structure wh
 
 ## 55. M6 — Witness engine
 
-**Status: PLANNED**
+**Status: IMPLEMENTED / REVIEW PENDING**
 
-Witness Pattern matching, localization, response/correction, and positive-direction derivation.
+M6 derives Witness candidates only after semantic eligibility is established.
+
+The reference engine has two modes:
+
+```text
+RESEARCH_PREVIEW
+PRODUCTION
+```
+
+`RESEARCH_PREVIEW` permits researched semantic state and candidate patterns for auditable experimentation; all output remains candidate. `PRODUCTION` requires reviewed/locked semantic records, Frames, and Witness Patterns.
+
+Response selection fails closed when zero or multiple responses are registered. Positive direction resolves only after a response resolves and only when its target is a registered `DERIVED_TARGET` concept.
+
+M6 intentionally records exact trigger coverage instead of inventing a theological truth percentage.
+
+```text
+SEMANTIC STATE
+→ WITNESS PATTERN
+→ LABEL
+→ RESPONSE
+→ POSITIVE DIRECTION
+
+SOURCE != WITNESS
+RESPONSE != SOURCE ASSERTION
+POSITIVE DIRECTION != SOURCE DIRECTION
+```
 
 ## 56. M7 — Scale / reproducible batch processing
 

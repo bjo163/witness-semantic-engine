@@ -19,8 +19,8 @@ M2  Deterministic validator           IMPLEMENTED / REVIEW PENDING — CI GREEN
 M3  Live RGBL connector               IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN
 M4  Linguistic plugins + goldens      IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN
 M5  Semantic frame engine             IMPLEMENTED / REVIEW PENDING — CI GREEN
-M6  Witness engine                    NEXT
-M7  Scale / batch processing          PLANNED
+M6  Witness engine                    IMPLEMENTED / REVIEW PENDING — CI GREEN
+M7  Scale / batch processing          NEXT
 M8  Production hardening              PLANNED
 M9  Release candidate → v1.0          PLANNED
 ```
@@ -294,21 +294,41 @@ M5 does not emit Witness or positive direction. Those remain M6 responsibilities
 
 ## M6 — Witness engine
 
-**Status:** PLANNED
+**Status:** IMPLEMENTED / REVIEW PENDING — CI GREEN
 
 Goal:
 
-Derive, separately from source semantics:
+Derive Witness, response/correction, and positive direction strictly after eligible semantic state exists.
+
+Delivered on `dev`:
+
+- Witness Derivation Contract v0.1 + JSON Schema;
+- deterministic TypeScript reference engine;
+- canonical WSI record/registry adapters;
+- explicit `RESEARCH_PREVIEW` and `PRODUCTION` modes;
+- production gate requiring `REVIEWED | LOCKED` semantic state and Frames;
+- production gate requiring `REVIEWED | LOCKED` Witness Patterns;
+- concept-trigger pattern matching over eligible Frames;
+- localized Witness labels kept separate from pattern identity;
+- response resolution only when exactly one allowed response exists;
+- ambiguous/missing response kept `UNRESOLVED`;
+- positive direction resolved only after response resolution;
+- positive target required to be a registered `DERIVED_TARGET` concept;
+- deterministic derivation IDs;
+- no invented theological/truth percentage; exact trigger coverage is retained instead;
+- invariant validator and JSON Schema tests;
+- As-Saffat 37:30 research-preview regression:
+  `TRANSGRESSION → OFFSIDE → RETURN_TO_BOUNDARY → BOUNDARY_ALIGNMENT`;
+- production fail-closed regression for unreviewed semantic/pattern state.
+
+Critical boundary:
 
 ```text
-reviewed semantic state
-→ Witness Pattern
-→ localized Witness label
-→ response/correction
-→ positive direction
+SOURCE != WITNESS
+WITNESS LABEL != WITNESS PATTERN
+RESPONSE != SOURCE ASSERTION
+POSITIVE DIRECTION != SOURCE DIRECTION
 ```
-
-The engine MUST preserve `UNRESOLVED` as a valid output and MUST NOT project correction/positive direction backward into source meaning.
 
 ---
 
@@ -397,11 +417,11 @@ batch reproducibility
 
 ## Immediate next work
 
-M6 begins after M5 implementation review:
+M7 begins after M6 implementation review:
 
-1. define Witness Pattern matching strictly over reviewed/eligible semantic state;
-2. prohibit Witness generation directly from raw text or unreviewed linguistic output;
-3. preserve `UNRESOLVED` when no justified response/correction follows;
-4. keep response/correction separate from source assertions;
-5. derive positive direction only after a Witness + response path exists;
-6. keep M2–M5 validation, provider, linguistic, and semantic-candidate gates as non-regression checks.
+1. define deterministic batch/job identity over provider revision + analysis contracts;
+2. process eligible resources without scripture-specific semantic branches;
+3. implement resume/retry and failure isolation;
+4. preserve source, linguistic, semantic, Witness, and review provenance per output;
+5. add stale/revalidation queues when provider bindings or versioned analysis contracts change;
+6. prove idempotent reruns on a representative multi-resource batch.

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wsi.example/spec/witness-derivation.schema.json",
+  "title": "WSI Witness Derivation Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractVersion","derivationId","mode","sourceSemanticRecordId","status","witnesses","findings","provenance"],
+  "properties": {
+    "contractVersion": { "const": "0.1.0" },
+    "derivationId": { "type": "string", "pattern": "^wsi:witness-derivation/sha256-[a-f0-9]{64}$" },
+    "mode": { "enum": ["RESEARCH_PREVIEW","PRODUCTION"] },
+    "sourceSemanticRecordId": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["COMPLETE","PARTIAL","UNRESOLVED"] },
+    "witnesses": { "type": "array", "items": { "$ref": "#/$defs/witness" } },
+    "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+    "provenance": { "$ref": "#/$defs/provenance" }
+  },
+  "$defs": {
+    "label": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["language","label","type"],
+      "properties": {
+        "language": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["METAPHOR","PATTERN_NAME","ANALOGY","OBSERVATION"] }
+      }
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status","responseId","label"],
+      "properties": {
+        "status": { "enum": ["RESOLVED","UNRESOLVED"] },
+        "responseId": { "type": ["string","null"] },
+        "label": { "type": ["string","null"] }
+      }
+    },
+    "positiveDirection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status","targetConceptId","direction","derivationType"],
+      "properties": {
+        "status": { "enum": ["RESOLVED","UNRESOLVED"] },
+        "targetConceptId": { "type": ["string","null"] },
+        "direction": { "enum": ["POSITIVE",null] },
+        "derivationType": { "const": "DERIVED" }
+      }
+    },
+    "witness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id","observedFrameIds","patternId","matchedConceptIds","triggerCoverage","labels","response","positiveDirection","reviewStatus"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^WC[1-9][0-9]*$" },
+        "observedFrameIds": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "patternId": { "type": "string", "pattern": "^wsi:witness-pattern/[a-z0-9][a-z0-9._-]*$" },
+        "matchedConceptIds": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^wsi:concept/[a-z0-9][a-z0-9._-]*$" } },
+        "triggerCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "labels": { "type": "array", "items": { "$ref": "#/$defs/label" } },
+        "response": { "$ref": "#/$defs/response" },
+        "positiveDirection": { "$ref": "#/$defs/positiveDirection" },
+        "reviewStatus": { "const": "CANDIDATE" }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["severity","code","message"],
+      "properties": {
+        "severity": { "enum": ["error","warning","info"] },
+        "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+        "message": { "type": "string", "minLength": 1 },
+        "frameId": { "type": "string", "minLength": 1 },
+        "patternId": { "type": "string", "minLength": 1 }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["engineId","engineVersion","contractVersion","rulesetVersion","patternRegistryVersion","conceptRegistryVersion"],
+      "properties": {
+        "engineId": { "const": "wsi:witness-engine/reference" },
+        "engineVersion": { "const": "0.1.0" },
+        "contractVersion": { "const": "0.1.0" },
+        "rulesetVersion": { "const": "witness-rules-1" },
+        "patternRegistryVersion": { "type": "string", "minLength": 1 },
+        "conceptRegistryVersion": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
