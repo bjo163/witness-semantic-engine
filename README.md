@@ -15,7 +15,8 @@ Milestone 2:     IMPLEMENTED / REVIEW PENDING — CI GREEN
 Milestone 3:     IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN
 Milestone 4:     IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN
 Milestone 5:     IMPLEMENTED / REVIEW PENDING — semantic candidate compiler
-Milestone 6:     NEXT — Witness engine
+Milestone 6:     IMPLEMENTED / REVIEW PENDING — Witness derivation engine
+Milestone 7:     NEXT — batch / reproducible processing
 ```
 
 M2 passes deterministic validation CI. M3 resolves and verifies real resources against the exact RGBL Git revision pinned by each Source Binding. M4 passes one language-neutral `LinguisticAnalyzer` contract across Arabic, Hebrew, Greek, and a Sanskrit generic-fallback profile. M5 now compiles evidence-backed semantic proposals into deterministic participant, concept/semantic-key, and Frame candidates without promoting candidates to reviewed truth.
@@ -324,9 +325,43 @@ Semantic keys are presentation handles for registered source-semantic concepts; 
 
 See `spec/SEMANTIC-CANDIDATE-CONTRACT.md`, `spec/semantic-candidate.schema.json`, `src/semantics/`, and `test/semantics.test.ts`.
 
-## What comes next — M6
+## Witness derivation engine — M6
 
-M6 consumes reviewed/eligible semantic state to derive Witness candidates, response/correction candidates, and positive direction without back-projecting those derived layers into source meaning.
+M6 is implemented as a deterministic derivation layer over eligible semantic state:
+
+```text
+REVIEWED / ELIGIBLE SEMANTIC STATE
+→ WITNESS PATTERN
+→ LOCALIZED WITNESS LABEL
+→ RESPONSE / CORRECTION
+→ POSITIVE DIRECTION
+```
+
+Two explicit modes prevent research output from masquerading as production truth:
+
+- `RESEARCH_PREVIEW` may consume `RESEARCHED` semantic state and candidate patterns; output remains `CANDIDATE`.
+- `PRODUCTION` requires semantic state, Frames, and Witness Patterns to be `REVIEWED` or `LOCKED`.
+
+The engine fails closed on ambiguous response choices and only resolves positive direction when the selected response points to a registered `DERIVED_TARGET` concept.
+
+For the existing As-Saffat 37:30 research record, M6 reproduces:
+
+```text
+TRANSGRESSION
+→ boundary-violation
+→ OFFSIDE
+→ return-to-boundary
+→ BOUNDARY_ALIGNMENT
+→ POSITIVE
+```
+
+without changing the source Frame or source-direction assessment.
+
+See `spec/WITNESS-ENGINE-CONTRACT.md`, `spec/witness-derivation.schema.json`, `src/witness/`, and `test/witness.test.ts`.
+
+## What comes next — M7
+
+M7 applies the same provider → linguistic → semantic → Witness contracts reproducibly at batch scale, with deterministic job identity, resume/retry behavior, provenance-preserving outputs, and explicit stale/revalidation queues.
 
 ## Implementation direction
 
@@ -349,7 +384,6 @@ Optional later for demonstrated performance/type-safety needs.
 WSI does not call itself production-stable merely because one corpus can be processed. The planned path is:
 
 ```text
-M6 Witness engine
 M7 scale / reproducible batch processing
 M8 production hardening
 M9 release candidate → v1.0

@@ -66,7 +66,12 @@
     "EVERY_CANONICAL_ASSERTION_REQUIRES_SOURCE_ANCHORED_EVIDENCE_AND_ANALYSIS_PROVENANCE",
     "SEMANTIC_CANDIDATE_IS_NOT_REVIEWED_TRUTH",
     "PARTICIPANT_REFERENCE_IS_NOT_SEMANTIC_KEY",
-    "FUNCTION_WORD_IS_NOT_SEMANTIC_KEY"
+    "FUNCTION_WORD_IS_NOT_SEMANTIC_KEY",
+    "WITNESS_REQUIRES_ELIGIBLE_SEMANTIC_STATE",
+    "PRODUCTION_WITNESS_REQUIRES_REVIEWED_OR_LOCKED_INPUT",
+    "AMBIGUOUS_RESPONSE_MUST_REMAIN_UNRESOLVED",
+    "POSITIVE_DIRECTION_REQUIRES_RESOLVED_RESPONSE",
+    "POSITIVE_DIRECTION_TARGET_MUST_BE_DERIVED_TARGET"
   ],
   "semantic_candidate_contract": "spec/SEMANTIC-CANDIDATE-CONTRACT.md",
   "semantic_candidate_schema": "spec/semantic-candidate.schema.json",
@@ -76,5 +81,18 @@
     "schema": "spec/semantic-candidate.schema.json",
     "test": "test/semantics.test.ts",
     "compiler": "wsi:semantic-compiler/reference"
+  },
+  "witness_engine_contract": "spec/WITNESS-ENGINE-CONTRACT.md",
+  "witness_derivation_schema": "spec/witness-derivation.schema.json",
+  "witness_engine": {
+    "contract_version": "0.1.0",
+    "runtime": "src/witness",
+    "schema": "spec/witness-derivation.schema.json",
+    "test": "test/witness.test.ts",
+    "engine": "wsi:witness-engine/reference",
+    "modes": [
+      "RESEARCH_PREVIEW",
+      "PRODUCTION"
+    ]
   }
 }
