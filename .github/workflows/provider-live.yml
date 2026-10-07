@@ -1,0 +1,63 @@
+name: Live Source Provider
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: provider-live-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rgbl:
+    name: Verify pinned RGBL resources
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout WSI
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned RGBL provider snapshot
+        uses: actions/checkout@v4
+        with:
+          repository: bjo163/rocksoul-rgbl
+          ref: df00706c98e21fb3fb0146b8389b0f2978f3d833
+          path: .providers/rocksoul-rgbl
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
+
+      - name: Typecheck provider and linguistic integration
+        run: npm run typecheck
+
+      - name: Run deterministic unit tests
+        run: npm run test
+
+      - name: Run live provider integration tests
+        env:
+          RGBL_REPO_PATH: ${{ github.workspace }}/.providers/rocksoul-rgbl
+        run: npm run test:provider:live
+
+      - name: Run stratified linguistic golden profiles
+        env:
+          RGBL_REPO_PATH: ${{ github.workspace }}/.providers/rocksoul-rgbl
+        run: npm run test:linguistics:live
+
+      - name: Verify worked-example source evidence live
+        env:
+          RGBL_REPO_PATH: ${{ github.workspace }}/.providers/rocksoul-rgbl
+        run: npm run verify:source -- data/golden-candidates/quran/037/030.json --provider-root "$RGBL_REPO_PATH"

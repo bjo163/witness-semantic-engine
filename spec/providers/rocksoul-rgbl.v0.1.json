@@ -1,0 +1,30 @@
+{
+  "provider": "rocksoul-rgbl",
+  "provider_contract": "moonwitness-corpus/v0.1",
+  "repository": "bjo163/rocksoul-rgbl",
+  "provider_revision": "df00706c98e21fb3fb0146b8389b0f2978f3d833",
+  "coverage": "PARTIAL",
+  "resources": [
+    {
+      "id": "mw:expression:quran:ar-uthmani-tanzil-1.1",
+      "kind": "textual.expression"
+    },
+    {
+      "id": "mw:edition:quran:tanzil-1.1-uthmani",
+      "kind": "textual.edition"
+    },
+    {
+      "id": "mw:passage:quran:37:30",
+      "kind": "textual.passage"
+    },
+    {
+      "id": "mw:content:quran:37:30:ar-uthmani",
+      "kind": "textual.content"
+    }
+  ],
+  "notes": [
+    "Offline validation index only; RGBL remains source authority.",
+    "PARTIAL means absence from this file is not proof that an RGBL resource does not exist.",
+    "Live provider resolution and source-content verification belong to Milestone 3."
+  ]
+}

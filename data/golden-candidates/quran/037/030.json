@@ -1,0 +1,437 @@
+{
+  "record_id": "wsi:analysis/7d5cf6d7-93a6-4a1f-ae6b-37c30f1a0001",
+  "contract_version": "0.2.0",
+  "record_type": "SEMANTIC_ANALYSIS",
+  "analysis_target": {
+    "source_binding_id": "S1",
+    "resource_id": "mw:passage:quran:37:30"
+  },
+  "source_bindings": [
+    {
+      "id": "S1",
+      "provider": "rocksoul-rgbl",
+      "provider_contract": "moonwitness-corpus/v0.1",
+      "provider_revision": "df00706c98e21fb3fb0146b8389b0f2978f3d833",
+      "repository": "bjo163/rocksoul-rgbl",
+      "primary_resource_id": "mw:passage:quran:37:30",
+      "resource_ids": [
+        "mw:passage:quran:37:30",
+        "mw:content:quran:37:30:ar-uthmani"
+      ],
+      "resolution_status": "RESOLVED",
+      "metadata": {
+        "dataset": "quran-tanzil-uthmani",
+        "edition_resource_id": "mw:edition:quran:tanzil-1.1-uthmani",
+        "expression_resource_id": "mw:expression:quran:ar-uthmani-tanzil-1.1"
+      }
+    }
+  ],
+  "lexical_senses": [
+    {
+      "id": "LS1",
+      "surface": "سُلْطَانٍ",
+      "language": "ar",
+      "lemma": "سُلْطَان",
+      "root": "س ل ط",
+      "sense_gloss": "authority or power in relation to another party",
+      "maps_to_concept_id": "wsi:concept/authority",
+      "evidence": [
+        {
+          "source_binding_id": "S1",
+          "resource_id": "mw:content:quran:37:30:ar-uthmani",
+          "source_class": "PRIMARY_TEXT",
+          "derivation_type": "DIRECT",
+          "selector": {
+            "type": "TEXT_QUOTE",
+            "exact": "سُلْطَـٰنٍۭ"
+          },
+          "notes": []
+        }
+      ],
+      "confidence": {
+        "policy_id": "wsi:confidence/baseline-v0",
+        "policy_version": "0.1.0",
+        "components": {
+          "source_directness": 1.0,
+          "lexical_sense_fit": 0.98,
+          "context_consistency": 0.97,
+          "ontology_fit": 0.98
+        },
+        "aggregate": 0.98
+      },
+      "review_status": "RESEARCHED"
+    },
+    {
+      "id": "LS2",
+      "surface": "طَاغِينَ",
+      "language": "ar",
+      "lemma": "طَاغٍ",
+      "root": "ط غ ي",
+      "sense_gloss": "transgressing or exceeding a proper limit",
+      "maps_to_concept_id": "wsi:concept/transgression",
+      "evidence": [
+        {
+          "source_binding_id": "S1",
+          "resource_id": "mw:content:quran:37:30:ar-uthmani",
+          "source_class": "PRIMARY_TEXT",
+          "derivation_type": "DIRECT",
+          "selector": {
+            "type": "TEXT_QUOTE",
+            "exact": "طَـٰغِينَ"
+          },
+          "notes": []
+        }
+      ],
+      "confidence": {
+        "policy_id": "wsi:confidence/baseline-v0",
+        "policy_version": "0.1.0",
+        "components": {
+          "source_directness": 1.0,
+          "lexical_sense_fit": 0.99,
+          "context_consistency": 0.98,
+          "ontology_fit": 0.99
+        },
+        "aggregate": 0.99
+      },
+      "review_status": "RESEARCHED"
+    }
+  ],
+  "utterances": [
+    {
+      "id": "U1",
+      "parent_utterance_id": null,
+      "speaker_participant_id": "P1",
+      "addressee_participant_ids": ["P2"],
+      "quoted_or_reported": true,
+      "speech_act": "STATEMENT",
+      "evidence": [
+        {
+          "source_binding_id": "S1",
+          "resource_id": "mw:content:quran:37:30:ar-uthmani",
+          "source_class": "PRIMARY_TEXT",
+          "derivation_type": "CONTEXTUAL",
+          "selector": { "type": "RESOURCE_ONLY" },
+          "notes": ["Utterance scope is a research analysis of the surrounding dialogue; it is not source-provider identity."]
+        }
+      ]
+    }
+  ],
+  "participants": [
+    {
+      "id": "P1",
+      "surface_reference": "WE",
+      "entity_type": "GROUP",
+      "discourse_roles": ["SPEAKER"],
+      "resolved_identity": null,
+      "resolution_status": "UNRESOLVED",
+      "evidence": [
+        {
+          "source_binding_id": "S1",
+          "resource_id": "mw:content:quran:37:30:ar-uthmani",
+          "source_class": "PRIMARY_TEXT",
+          "derivation_type": "COMPOSITIONAL",
+          "selector": {
+            "type": "TEXT_QUOTE",
+            "exact": "لَنَا"
+          },
+          "notes": []
+        }
+      ]
+    },
+    {
+      "id": "P2",
+      "surface_reference": "YOU",
+      "entity_type": "GROUP",
+      "discourse_roles": ["ADDRESSEE", "REFERENT"],
+      "resolved_identity": null,
+      "resolution_status": "UNRESOLVED",
+      "evidence": [
+        {
+          "source_binding_id": "S1",
+          "resource_id": "mw:content:quran:37:30:ar-uthmani",
+          "source_class": "PRIMARY_TEXT",
+          "derivation_type": "COMPOSITIONAL",
+          "selector": {
+            "type": "TEXT_QUOTE",
+            "exact": "عَلَيْكُم"
+          },
+          "notes": []
+        }
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "id": "F1",
+      "utterance_id": "U1",
+      "frame_type": "RELATION",
+      "predicate_relation_id": "wsi:relation/authority-over",
+      "role_bindings": [
+        { "role": "HOLDER", "participant_id": "P1" },
+        { "role": "TARGET", "participant_id": "P2" }
+      ],
+      "concept_ids": ["wsi:concept/authority"],
+      "polarity": "NEGATED",
+      "modality": "ASSERTED",
+      "speech_act": "STATEMENT",
+      "evidence": [
+        {
+          "source_binding_id": "S1",
+          "resource_id": "mw:content:quran:37:30:ar-uthmani",
+          "source_class": "PRIMARY_TEXT",
+          "derivation_type": "COMPOSITIONAL",
+          "selector": {
+            "type": "TEXT_QUOTE",
+            "exact": "وَمَا كَانَ لَنَا عَلَيْكُم مِّن سُلْطَـٰنٍۭ"
+          },
+          "notes": ["Relation combines negation, holder, target, and the authority expression."]
+        }
+      ],
+      "confidence": {
+        "policy_id": "wsi:confidence/baseline-v0",
+        "policy_version": "0.1.0",
+        "components": {
+          "source_directness": 0.98,
+          "lexical_sense_fit": 0.98,
+          "syntax_support": 0.95,
+          "context_consistency": 0.96,
+          "ontology_fit": 0.97
+        },
+        "aggregate": 0.97
+      },
+      "review_status": "RESEARCHED"
+    },
+    {
+      "id": "F2",
+      "utterance_id": "U1",
+      "frame_type": "STATE",
+      "predicate_relation_id": "wsi:relation/has-state",
+      "role_bindings": [
+        { "role": "STATE_BEARER", "participant_id": "P2" }
+      ],
+      "concept_ids": ["wsi:concept/transgression"],
+      "polarity": "AFFIRMED",
+      "modality": "ASSERTED",
+      "speech_act": "STATEMENT",
+      "evidence": [
+        {
+          "source_binding_id": "S1",
+          "resource_id": "mw:content:quran:37:30:ar-uthmani",
+          "source_class": "PRIMARY_TEXT",
+          "derivation_type": "COMPOSITIONAL",
+          "selector": {
+            "type": "TEXT_QUOTE",
+            "exact": "كُنتُمْ قَوْمًا طَـٰغِينَ"
+          },
+          "notes": []
+        }
+      ],
+      "confidence": {
+        "policy_id": "wsi:confidence/baseline-v0",
+        "policy_version": "0.1.0",
+        "components": {
+          "source_directness": 1.0,
+          "lexical_sense_fit": 0.99,
+          "syntax_support": 0.96,
+          "context_consistency": 0.98,
+          "ontology_fit": 0.99
+        },
+        "aggregate": 0.98
+      },
+      "review_status": "RESEARCHED"
+    }
+  ],
+  "discourse_relations": [
+    {
+      "id": "D1",
+      "from_frame_id": "F1",
+      "relation_id": "wsi:relation/discourse-retraction",
+      "to_frame_id": "F2",
+      "evidence": [
+        {
+          "source_binding_id": "S1",
+          "resource_id": "mw:content:quran:37:30:ar-uthmani",
+          "source_class": "PRIMARY_TEXT",
+          "derivation_type": "DIRECT",
+          "selector": {
+            "type": "TEXT_QUOTE",
+            "exact": "بَلْ"
+          },
+          "notes": ["Discourse operator is represented separately from semantic concepts."]
+        }
+      ],
+      "confidence": {
+        "policy_id": "wsi:confidence/baseline-v0",
+        "policy_version": "0.1.0",
+        "components": {
+          "source_directness": 1.0,
+          "context_consistency": 0.96,
+          "ontology_fit": 0.95
+        },
+        "aggregate": 0.97
+      },
+      "review_status": "RESEARCHED"
+    }
+  ],
+  "concept_refs": [
+    {
+      "concept_id": "wsi:concept/authority",
+      "usage": "SOURCE",
+      "review_status": "RESEARCHED"
+    },
+    {
+      "concept_id": "wsi:concept/transgression",
+      "usage": "SOURCE",
+      "review_status": "RESEARCHED"
+    },
+    {
+      "concept_id": "wsi:concept/boundary-alignment",
+      "usage": "DERIVED_TARGET",
+      "review_status": "CANDIDATE"
+    }
+  ],
+  "assessments": [
+    {
+      "id": "A1",
+      "target": { "type": "FRAME", "id": "F1" },
+      "assessment_type": "SOURCE_DIRECTION",
+      "result": "NEUTRAL",
+      "method_id": "wsi:assessment/source-direction-v0",
+      "evidence": [
+        {
+          "source_binding_id": "S1",
+          "resource_id": "mw:content:quran:37:30:ar-uthmani",
+          "source_class": "HUMAN_ANALYSIS",
+          "derivation_type": "INTERPRETIVE",
+          "selector": { "type": "RESOURCE_ONLY" },
+          "notes": ["Authority as a concept is not treated as intrinsically positive or negative; this assessment remains provisional."]
+        }
+      ],
+      "confidence": {
+        "policy_id": "wsi:confidence/direction-v0",
+        "policy_version": "0.1.0",
+        "components": {
+          "context_consistency": 0.90,
+          "non_contradiction": 0.95
+        },
+        "aggregate": 0.92
+      },
+      "review_status": "CANDIDATE"
+    },
+    {
+      "id": "A2",
+      "target": { "type": "FRAME", "id": "F2" },
+      "assessment_type": "SOURCE_DIRECTION",
+      "result": "NEGATIVE",
+      "method_id": "wsi:assessment/source-direction-v0",
+      "evidence": [
+        {
+          "source_binding_id": "S1",
+          "resource_id": "mw:content:quran:37:30:ar-uthmani",
+          "source_class": "HUMAN_ANALYSIS",
+          "derivation_type": "INTERPRETIVE",
+          "selector": {
+            "type": "TEXT_QUOTE",
+            "exact": "قَوْمًا طَـٰغِينَ"
+          },
+          "notes": []
+        }
+      ],
+      "confidence": {
+        "policy_id": "wsi:confidence/direction-v0",
+        "policy_version": "0.1.0",
+        "components": {
+          "context_consistency": 0.99,
+          "non_contradiction": 0.99
+        },
+        "aggregate": 0.99
+      },
+      "review_status": "RESEARCHED"
+    },
+    {
+      "id": "A3",
+      "target": {
+        "type": "RECORD",
+        "id": "wsi:analysis/7d5cf6d7-93a6-4a1f-ae6b-37c30f1a0001"
+      },
+      "assessment_type": "SOURCE_DIRECTION_SUMMARY",
+      "result": "NEGATIVE",
+      "method_id": "wsi:assessment/source-direction-summary-v0",
+      "evidence": [
+        {
+          "source_binding_id": "S1",
+          "resource_id": "mw:passage:quran:37:30",
+          "source_class": "HUMAN_ANALYSIS",
+          "derivation_type": "DERIVED",
+          "selector": { "type": "RESOURCE_ONLY" },
+          "notes": ["Derived summary from frame-level analysis; not a primitive source fact."]
+        }
+      ],
+      "confidence": {
+        "policy_id": "wsi:confidence/direction-v0",
+        "policy_version": "0.1.0",
+        "components": {
+          "frame_consistency": 0.96,
+          "context_consistency": 0.98
+        },
+        "aggregate": 0.97
+      },
+      "review_status": "CANDIDATE"
+    }
+  ],
+  "witnesses": [
+    {
+      "id": "W1",
+      "observed_frame_ids": ["F2"],
+      "pattern_id": "wsi:witness-pattern/boundary-violation",
+      "labels": [
+        { "language": "en", "label": "OFFSIDE", "type": "METAPHOR" },
+        { "language": "id", "label": "OFFSIDE", "type": "METAPHOR" }
+      ],
+      "response": {
+        "response_id": "wsi:response/return-to-boundary",
+        "label": "Return to the valid boundary",
+        "status": "RESOLVED"
+      },
+      "positive_direction": {
+        "target_concept_id": "wsi:concept/boundary-alignment",
+        "direction": "POSITIVE",
+        "derivation_type": "DERIVED",
+        "status": "RESOLVED"
+      },
+      "confidence": {
+        "policy_id": "wsi:confidence/witness-baseline-v0",
+        "policy_version": "0.1.0",
+        "components": {
+          "semantic_fit": 0.90,
+          "non_contradiction": 0.95,
+          "intuitiveness": 0.90,
+          "localization_fit": 0.88
+        },
+        "aggregate": 0.91
+      },
+      "review_status": "CANDIDATE"
+    }
+  ],
+  "provenance": {
+    "framework_version": "3.0-draft",
+    "contract_version": "0.2.0",
+    "registry_version": "0.2.0",
+    "ontology_version": "0.1.0",
+    "analyzer_version": "manual-research-example-v2",
+    "created_at": "2026-10-05T22:30:00+07:00",
+    "created_by": "WSI research bootstrap",
+    "model": null
+  },
+  "review": {
+    "status": "RESEARCHED",
+    "reviewer": null,
+    "notes": [
+      "Non-normative worked example only.",
+      "Canonical source identity and text are owned by rocksoul-rgbl, not WSI.",
+      "The RGBL provider revision is pinned for reproducibility.",
+      "Direction is represented as Assessment, not an intrinsic Frame field.",
+      "Witness and positive direction remain candidate derivations until separately reviewed."
+    ]
+  }
+}

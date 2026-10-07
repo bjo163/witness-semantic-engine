@@ -1,0 +1,28 @@
+{
+  "registry_id": "wsi:witness-pattern-registry/core-v0",
+  "registry_version": "0.1.0",
+  "status": "research-draft",
+  "patterns": [
+    {
+      "id": "wsi:witness-pattern/boundary-violation",
+      "status": "CANDIDATE",
+      "definition": "A witnessed pattern in which a participant is represented as exceeding or violating a valid boundary.",
+      "trigger_concepts": ["wsi:concept/transgression"],
+      "localized_labels": [
+        {"language": "en", "label": "OFFSIDE", "type": "METAPHOR"},
+        {"language": "id", "label": "OFFSIDE", "type": "METAPHOR"}
+      ],
+      "allowed_responses": [
+        {
+          "id": "wsi:response/return-to-boundary",
+          "label": "Return to the valid boundary",
+          "target_concept_id": "wsi:concept/boundary-alignment"
+        }
+      ],
+      "notes": [
+        "A Witness Pattern is machine-stable; OFFSIDE is a presentation/localization label, not canonical ontology identity.",
+        "The positive target is a derived layer and must not be presented as direct source meaning."
+      ]
+    }
+  ]
+}

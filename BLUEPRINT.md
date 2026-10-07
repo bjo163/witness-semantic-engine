@@ -1,458 +1,265 @@
 # Witness Semantic Engine — Blueprint
 
-**Status:** Normative research/engineering blueprint  
-**Repository:** `bjo163/witness-semantic-engine`  
-**Specification line:** `0.x` research phase  
-**Initial repository version:** `0.1.0`
+**Status:** normative research/engineering blueprint  
+**Blueprint revision:** `3.2-draft`  
+**Machine Contract:** `0.2.0`  
+**Architecture:** source-provider-neutral downstream semantic analysis engine  
+**First Source Provider integration:** `rocksoul-rgbl`
 
 ---
+
+# 0. Normative language
+
+The words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT**, **MAY**, and **OPTIONAL** are normative requirements.
+
+WSI is **spec-first**. Code, prompts, models, databases, workers, APIs, and UIs are subordinate to this Blueprint and the versioned Machine Contract.
+
+A source corpus, scripture, language, edition, translation, canon, numbering system, or textual tradition MUST NOT define the universal semantic core.
+
+---
+
+# PART I — MISSION AND BOUNDARY
 
 ## 1. Purpose
 
-Witness Semantic Engine (WSE) is a **spec-first semantic research system** for transforming source text into auditable semantic propositions and then, in a strictly separate derivation layer, producing a **Witness** and a **positive direction**.
+Witness Semantic Engine (WSI) is a downstream semantic-analysis engine.
 
-The project is intentionally not defined as a translation engine, tafsir engine, keyword extractor, sentiment classifier, or generic LLM prompt collection. Those may contribute evidence or context, but they are not the canonical product contract.
-
-The core research question is:
-
-> **What does the source explicitly assert, what semantic structure is supported by evidence, what can be witnessed from that structure, and what positive direction follows without rewriting the source?**
-
-The canonical transformation is:
+It consumes addressable resources from a Source Provider and produces auditable analysis:
 
 ```text
-SOURCE
+SOURCE PROVIDER RESOURCE(S)
   ↓
-LINGUISTIC EVIDENCE
+SOURCE BINDING
   ↓
-PARTICIPANTS
+EVIDENCE ANCHORS
   ↓
-SEMANTIC FRAMES
+LINGUISTIC / CONTEXTUAL SENSE ANALYSIS
   ↓
-CONCEPTS + RELATIONS
+DISCOURSE + PARTICIPANTS
   ↓
-POLARITY + MODALITY
+SEMANTIC FRAMES / PROPOSITIONS
   ↓
-SOURCE DIRECTION
+CONCEPT + RELATION MAPPING
   ↓
-PROVENANCE + CONFIDENCE
+ASSESSMENTS
   ↓
-BASE SEMANTICS LOCK
+CONFIDENCE + ANALYSIS PROVENANCE
   ↓
-WITNESS
+REVIEW
   ↓
-CORRECTION
+WITNESS PATTERN
+  ↓
+LOCALIZED WITNESS LABEL
+  ↓
+RESPONSE / CORRECTION
   ↓
 POSITIVE DIRECTION
 ```
 
----
+The primary semantic unit is a **Frame/Proposition**, not a keyword, verse, ayah, paragraph, book, or corpus.
 
-# PART I — RESEARCH CONTRACT
+## 2. What WSI does not own
 
-## 2. Design principles
-
-### 2.1 Source first
-
-The original source is immutable evidence. Interpretation may explain it but may never silently replace it.
-
-For Qur'anic research:
-
-- Arabic is the primary textual source.
-- Translation is a presentation/interpretation aid.
-- English is allowed as a technical ontology label.
-- Canonical concept identity must remain language-neutral.
-
-### 2.2 Frames before keywords
-
-A semantic keyword by itself loses the most important information: **who, does/is what, toward whom/what, under which polarity and modality**.
-
-Therefore the primary unit is the **semantic frame/proposition**.
-
-A key such as `[AUTHORITY]` is a concept node inside a proposition, not the full proposition.
-
-### 2.3 Separation of concerns
-
-The following are distinct and must not be collapsed:
+WSI does **not** own:
 
 ```text
-SOURCE
-TOKEN
-LEMMA
-ROOT
-PARTICIPANT
-DISCOURSE ROLE
-SEMANTIC ROLE
-FRAME
-RELATION
-CONCEPT
-POLARITY
-MODALITY
-SOURCE DIRECTION
-CONFIDENCE
-WITNESS
-CORRECTION
-POSITIVE DIRECTION
+canonical source text
+corpus/dataset identity
+work/expression/edition identity
+source artifact identity
+passage/fragment/content identity
+citation/reference schemes
+source rights/license metadata
+source checksums
+source acquisition provenance
+source variants/textual alignments
 ```
 
-### 2.4 Evidence over forced completeness
+These belong to the Source Provider.
 
-The system is allowed to return:
+## 3. What WSI owns
+
+WSI owns downstream analysis only:
 
 ```text
-UNKNOWN
-UNRESOLVED
-UNDETERMINED
-```
-
-A missing answer is preferable to an invented semantic claim.
-
-### 2.5 Positive direction does not rewrite negative source
-
-A negative source state remains negative when evidence supports it.
-
-The framework does **not** transform:
-
-```text
-NEGATIVE SOURCE → “actually positive”
-```
-
-Instead:
-
-```text
-NEGATIVE SOURCE
-→ WITNESS
-→ CORRECTION
-→ POSITIVE DIRECTION
-```
-
-This distinction is foundational.
-
----
-
-## 3. Normative terminology
-
-The words below have precise meanings in this project.
-
-### SOURCE
-Original textual evidence.
-
-### TOKEN
-Stable segment of the source text.
-
-### LINGUISTIC EVIDENCE
-Morphology, lemma, root, POS, syntax, grammatical features, and related analysis.
-
-### PARTICIPANT
-An entity participating in a semantic frame.
-
-### DISCOURSE ROLE
-Position in discourse, e.g. `SPEAKER`, `ADDRESSEE`, `REFERENT`.
-
-### SEMANTIC ROLE
-Role inside a frame, e.g. `AGENT`, `PATIENT`, `HOLDER`, `TARGET`, `STATE_BEARER`.
-
-### FRAME
-A semantic proposition representing an action, state, relation, event, or attribute.
-
-### RELATION
-The semantic connection between frame elements.
-
-### CONCEPT
-A language-neutral semantic identity.
-
-### SEMANTIC KEY
-A human-readable display label for a canonical concept, e.g. `[TRANSGRESSION]`.
-
-### POLARITY
-Whether a proposition is affirmed or negated.
-
-### MODALITY
-The assertion mode: asserted, possible, conditional, command, etc.
-
-### SOURCE DIRECTION
-Evaluative orientation supported by source context.
-
-### WITNESS
-A derived, human-readable observation or metaphor that captures a semantic pattern.
-
-### CORRECTION
-A derived description of what must be realigned after the Witness.
-
-### POSITIVE DIRECTION
-A derived positive target after correction.
-
-### PROVENANCE
-Traceability information connecting an assertion to its source, tokens, method, versions, and review state.
-
-### CONFIDENCE
-Operational research confidence—not theological truth percentage.
-
----
-
-## 4. Layer model
-
-### L0 — Source
-
-Must contain, at minimum:
-
-```text
-source_id
-source_type
-language
-canonical_reference
-text
-```
-
-Example:
-
-```json
-{
-  "id": "quran:37:30",
-  "source_type": "quran",
-  "language": "ar",
-  "canonical_reference": "37:30",
-  "text": "..."
-}
-```
-
-The source layer is immutable after ingestion except for explicitly versioned source corrections.
-
----
-
-### L1 — Linguistic evidence
-
-Each token should eventually support:
-
-```text
-token_id
-surface
-lemma
-root
-pos
-morphology
-syntax
-source_span
-analysis_source
-```
-
-Rules:
-
-```text
-TOKEN ≠ CONCEPT
-ROOT ≠ CONCEPT
-LEMMA ≠ CONCEPT
-POS ≠ CONCEPT
-```
-
-A lemma/root may support concept linking, but it does not automatically determine a concept.
-
----
-
-### L2 — Participants
-
-Participants represent entities, not semantic concepts.
-
-Recommended fields:
-
-```text
-participant_id
-surface_reference
-entity_type
-discourse_role
-resolved_identity
-resolution_status
-resolution_evidence
-```
-
-Example:
-
-```json
-{
-  "id": "P1",
-  "surface_reference": "WE",
-  "discourse_role": "SPEAKER",
-  "resolved_identity": null,
-  "resolution_status": "UNRESOLVED"
-}
-```
-
-A contextual interpretation may populate `resolved_identity`, but must never overwrite the surface reference.
-
----
-
-### L3 — Semantic frames
-
-Canonical frame types for the first version:
-
-```text
-ACTION
-STATE
-RELATION
-EVENT
-ATTRIBUTE
-```
-
-Minimal frame structure:
-
-```text
-frame_id
-frame_type
-predicate_or_relation
-participants
-concepts
+source bindings
+analysis targets
+analysis-local evidence anchors
+lexical/contextual sense candidates
+utterance/discourse analysis
+analysis participants
+semantic frames
+semantic-role bindings
+concept mappings
+relation mappings
 polarity
 modality
-evidence
-confidence
+speech-act analysis
+semantic assessments
+analysis confidence
+analysis provenance
+review state
+Witness Pattern instances
+localized Witness labels
+response/correction
+positive direction
+cross-analysis semantic mappings
 ```
 
-Conceptual representation:
+Core invariant:
 
 ```text
-P1 ── RELATION ──▶ P2
-```
-
-or:
-
-```text
-P2 ── HAS_STATE ──▶ CONCEPT
-```
-
-Frames may link to other frames through discourse relations.
-
----
-
-### L4 — Concepts and ontology
-
-Canonical concept IDs are language-neutral URIs/identifiers.
-
-Example:
-
-```text
-wsi:concept/authority
-wsi:concept/transgression
-```
-
-Human labels are metadata:
-
-```json
-{
-  "id": "wsi:concept/transgression",
-  "labels": {
-    "en": "Transgression",
-    "id": "Melampaui batas",
-    "ar": "طغيان"
-  },
-  "display_key": "TRANSGRESSION"
-}
-```
-
-Normative rule:
-
-```text
-CONCEPT ID = IDENTITY
-LABEL = PRESENTATION
-```
-
-A label may change without changing concept identity.
-
-Synonyms must not automatically create duplicate concepts. Sense resolution must occur first.
-
----
-
-### L5 — Polarity and modality
-
-#### Polarity
-
-Initial controlled vocabulary:
-
-```text
-AFFIRMED
-NEGATED
-```
-
-Potential future value:
-
-```text
-UNDETERMINED
-```
-
-#### Modality
-
-Initial controlled vocabulary:
-
-```text
-ASSERTED
-POSSIBLE
-CONDITIONAL
-HYPOTHETICAL
-COMMAND
-PROHIBITION
-QUESTION
-```
-
-Rules:
-
-```text
-POLARITY ≠ DIRECTION
-MODALITY ≠ DIRECTION
-```
-
-Do not encode negation into concept identity.
-
-Wrong:
-
-```text
-wsi:concept/no-authority
-```
-
-Correct:
-
-```text
-concept = wsi:concept/authority
-polarity = NEGATED
+SOURCE PROVIDER DATA != WSI ANALYSIS DATA
 ```
 
 ---
 
-### L6 — Source direction
+# PART II — SOURCE PROVIDER CONTRACT
 
-Source direction describes evaluative orientation supported by the source context.
+## 4. Provider neutrality
 
-Initial vocabulary:
+WSI MUST NOT contain semantic branches such as:
 
 ```text
-POSITIVE
-NEGATIVE
-NEUTRAL
-MIXED
-UNDETERMINED
+if corpus == quran
+if corpus == torah
+if corpus == gospels
 ```
 
-Direction should primarily be attached to a frame/assertion. A verse-level direction is a **derived summary** and therefore optional.
+Source/corpus-specific ingestion belongs upstream.
 
-Do not force every verse to have one global direction.
+WSI consumes a generic **Source Provider Contract**.
+
+The first provider is:
+
+```text
+provider   = rocksoul-rgbl
+namespace  = mw
+repository = bjo163/rocksoul-rgbl
+```
+
+A future provider MAY be supported if it satisfies the same minimum contract.
+
+## 5. Minimum provider capability
+
+A provider integration MUST be able to resolve:
+
+```text
+stable resource ID
+resource kind/type
+pinned provider revision or immutable release
+content or content linkage
+language/script when available
+source provenance
+source integrity/checksum when available
+resource relationships needed to interpret scope
+```
+
+WSI references this information; it does not redefine it.
+
+## 6. Source Binding
+
+Every analysis MUST contain one or more Source Bindings.
+
+A Source Binding pins the external snapshot against which analysis was produced.
+
+Minimum fields:
+
+```text
+id
+provider
+provider_contract
+provider_revision
+primary_resource_id
+resource_ids[]
+resolution_status
+```
+
+Reviewed or locked analysis MUST NOT rely only on a moving provider ref such as `main` or `latest`.
+
+## 7. Analysis Target
+
+Every WSI record identifies its primary external target:
+
+```text
+analysis_target = source_binding_id + resource_id
+```
+
+The target may be a passage, paragraph, fragment, manuscript segment, content object, commentary passage, or another addressable provider resource.
+
+WSI MUST NOT assume the universal target is a verse/ayah.
+
+## 8. No canonical source copy
+
+Canonical primary text MUST NOT be duplicated into WSI as source authority.
+
+WSI MAY retain small quote/range/token selectors for evidence anchoring.
+
+```text
+QUOTE / RANGE / TOKEN SELECTOR = EVIDENCE ANCHOR
+EVIDENCE ANCHOR != SOURCE AUTHORITY
+```
+
+If an anchor conflicts with the pinned provider content, provider content wins and the WSI analysis becomes stale until reviewed.
+
+## 9. Runtime SourceProvider boundary
+
+The machine-level provider boundary MUST remain transport-neutral.
+
+Conceptually a runtime provider supports:
+
+```text
+verifyRevision(revision)
+currentRevision()
+resolveResource(revision, resourceId, hints?)
+```
+
+WSI semantic code MUST NOT depend directly on:
+
+```text
+provider repository layout
+provider HTTP route layout
+provider database tables
+provider SDK implementation classes
+```
+
+A repository, SDK, API, or database connector MAY implement the same logical interface.
+
+Provider-specific metadata MAY be used as a resolution hint, but a hint MUST NOT become semantic identity.
 
 ---
 
-### L7 — Evidence and provenance
+# PART III — EVIDENCE
 
-Every canonical semantic assertion must be traceable.
+## 10. Evidence dimensions
 
-Minimum provenance:
+Every semantic assertion MUST be traceable to evidence.
+
+Evidence records:
 
 ```text
-source_id
-evidence_token_ids
-evidence_type
-extractor_or_researcher
-framework_version
-ontology_version
-extractor_version
-review_status
+source_binding_id
+resource_id
+source_class
+derivation_type
+selector
+notes
 ```
 
-Initial evidence types:
+### Source classes
+
+```text
+PRIMARY_TEXT
+TRANSLATION
+LEXICON
+GRAMMAR
+COMMENTARY
+CROSS_REFERENCE
+MODEL_SUGGESTION
+HUMAN_ANALYSIS
+```
+
+### Derivation types
 
 ```text
 DIRECT
@@ -462,398 +269,209 @@ INTERPRETIVE
 DERIVED
 ```
 
-Definitions:
+These dimensions are independent.
 
-- `DIRECT` — lexical evidence supports the concept/state directly.
-- `COMPOSITIONAL` — supported by multiple tokens and grammatical structure.
-- `CONTEXTUAL` — requires neighboring text or discourse context.
-- `INTERPRETIVE` — research interpretation/hypothesis.
-- `DERIVED` — algorithmically or logically derived from previously locked semantic data.
+## 11. Selectors
 
-Canonical extraction should prefer `DIRECT` and `COMPOSITIONAL` assertions.
+Initial selectors:
+
+```text
+RESOURCE_ONLY
+TEXT_QUOTE
+CHAR_RANGE
+TOKEN_IDS
+```
+
+Selectors are provider-relative.
+
+A local token number MUST NOT be treated as globally stable unless the tokenizer/analyzer identity is recorded in analysis provenance.
+
+A `TEXT_QUOTE` used as live primary-source proof MUST match the pinned provider representation literally. Unicode normalization, fuzzy matching, stemming, translation, or reconstructed spelling MUST NOT silently substitute for source proof.
+
+If a normalized linguistic form is needed, store it in the analysis layer while retaining an exact provider-relative evidence anchor.
 
 ---
 
-### L8 — Confidence
+# PART IV — ANALYSIS MODEL
 
-Confidence must remain decomposable.
+## 12. Lexical/contextual sense
 
-Initial dimensions:
-
-```text
-source_directness
-lexical_alignment
-syntax_support
-context_consistency
-ontology_fit
-```
-
-Initial suggested weighting:
+A lexical form is not a concept.
 
 ```text
-0.30 source_directness
-0.25 lexical_alignment
-0.20 syntax_support
-0.15 context_consistency
-0.10 ontology_fit
+SURFACE FORM
+→ LEMMA / LEXEME
+→ CONTEXTUAL SENSE
+→ FRAME ROLE
+→ OPTIONAL CONCEPT MAPPING
 ```
 
-Derived formula:
+Rules:
 
 ```text
-confidence =
-  0.30*S +
-  0.25*L +
-  0.20*G +
-  0.15*C +
-  0.10*O
+TOKEN != LEXEME
+LEXEME != SENSE
+LEMMA != CONCEPT
+ROOT != CONCEPT
+TRANSLATION STRING != CONCEPT ID
 ```
 
-The weighting is versioned policy, not eternal truth. It must later be calibrated against reviewed golden data.
+A sense MAY remain unmapped.
 
-Confidence means:
+## 13. Discourse scope
 
-> How strongly does the current evidence and ontology mapping support this research assertion?
-
-It must never be described as a percentage of religious or theological truth.
-
----
-
-## 5. Base semantics lock
-
-The system must distinguish **draft extraction** from **locked base semantics**.
-
-Suggested states:
+Utterance scope SHOULD be represented when meaning depends on speaker, addressee, narration, quotation, or reported speech.
 
 ```text
-DRAFT
-REVIEWED
-LOCKED
-DEPRECATED
+SPEAKER != AGENT
+ADDRESSEE != PATIENT
 ```
 
-Witness generation is allowed only after the relevant base semantic frame is at least `REVIEWED`; production Witness data should require `LOCKED`.
+Nested utterances MAY be represented explicitly.
 
-This prevents later positive-direction logic from contaminating source extraction.
+## 14. Participants
 
----
+Participants are analysis-local discourse/semantic referents.
 
-# PART II — WITNESS CONTRACT
-
-## 6. Witness definition
-
-A Witness is a derived observation that makes a semantic condition recognizable without claiming that the Witness label itself appears in the source.
-
-Example:
+A participant MAY link to an external entity when available, but unresolved identity is valid:
 
 ```text
-Canonical concept: TRANSGRESSION
-Witness: OFFSIDE
+surface_reference = WE
+resolved_identity = null
+resolution_status = UNRESOLVED
 ```
 
-`OFFSIDE` is useful because it captures the pattern “crossing a valid boundary,” but it is not a translation and is not a synonym entry in the canonical ontology.
+Contextual resolution MUST NOT overwrite the source surface reference.
 
-Witness record should eventually contain:
+## 15. Semantic Frames
+
+Frames are the canonical structural unit of WSI.
+
+Initial frame classes:
 
 ```text
-witness_id
-observed_frame_ids
-label
-type
-mapped_concepts
-reasoning_summary
-confidence
-provenance
-review_status
+ACTION
+STATE
+RELATION
+EVENT
+ATTRIBUTE
 ```
 
-Possible Witness types:
+A Frame may contain:
 
 ```text
-METAPHOR
-PATTERN
-ANALOGY
-OBSERVATION
-```
-
----
-
-## 7. Correction
-
-Correction is generated **after** a Witness has been established.
-
-It answers:
-
-> What must change, stop, return, align, restore, or develop in response to the witnessed condition?
-
-Correction is not automatically the lexical opposite of the source concept.
-
-For example:
-
-```text
-TRANSGRESSION
-→ OFFSIDE
-→ RETURN_TO_BOUNDARY
-```
-
-The framework must distinguish a linguistically supported opposite from a derived practical correction.
-
----
-
-## 8. Positive direction
-
-Positive direction is the desired semantic target after correction.
-
-Example:
-
-```text
-RETURN_TO_BOUNDARY
-→ BOUNDARY_ALIGNMENT
-→ POSITIVE
-```
-
-A positive direction record should include:
-
-```text
-target_concept_or_state
-direction = POSITIVE
-derivation_type
-derivation_confidence
-source_witness_id
-```
-
-Rule:
-
-```text
-POSITIVE_DIRECTION ≠ SOURCE_DIRECTION
-```
-
-The source direction may be negative while the derived target direction is positive.
-
----
-
-## 9. Witness transformation contract
-
-Canonical flow:
-
-```text
-SOURCE STATE
-    ↓
-OBSERVATION
-    ↓
-WITNESS
-    ↓
-CORRECTION
-    ↓
-TARGET STATE
-    ↓
-POSITIVE DIRECTION
-```
-
-A Witness transformation must fail closed if the system cannot justify the correction.
-
-Allowed result:
-
-```text
-WITNESS = OFFSIDE
-CORRECTION = UNRESOLVED
-POSITIVE_DIRECTION = UNRESOLVED
-```
-
-This is preferable to hallucinating a positive prescription.
-
----
-
-# PART III — EXAMPLE CONTRACT
-
-## 10. As-Saffat 37:30 reference example
-
-This verse is the initial research example because it exposes several distinctions at once: speaker/addressee, negated authority relation, retraction/correction discourse structure, and a negative transgression state.
-
-Conceptual structure:
-
-```text
-P1 = WE / SPEAKER
-P2 = YOU / ADDRESSEE / GROUP
-
-F1:
-P1 ── AUTHORITY_OVER [NEGATED] ──▶ P2
-
-DISCOURSE:
-F1 ── RETRACTION/CORRECTION ──▶ F2
-
-F2:
-P2 ── HAS_STATE ──▶ [TRANSGRESSION]
-
-F2 SOURCE DIRECTION = NEGATIVE
-```
-
-Canonical concept IDs:
-
-```text
-wsi:concept/authority
-wsi:concept/transgression
-```
-
-Witness derivation:
-
-```text
-[TRANSGRESSION]
-→ OFFSIDE
-→ RETURN_TO_BOUNDARY
-→ BOUNDARY_ALIGNMENT
-→ POSITIVE
-```
-
-Important exclusions from canonical direct keys unless separately evidenced:
-
-```text
-CHOICE
-RESPONSIBILITY
-BOUNDARY
-```
-
-Those may be useful derived/contextual concepts, but they must not be silently promoted to direct source concepts.
-
----
-
-# PART IV — MACHINE CONTRACT
-
-## 11. Canonical machine representation
-
-The first implementation contract is JSON validated by JSON Schema.
-
-Conceptual top-level document:
-
-```json
-{
-  "id": "quran:37:30",
-  "spec_version": "...",
-  "source": {},
-  "tokens": [],
-  "participants": [],
-  "frames": [],
-  "discourse_relations": [],
-  "concept_refs": [],
-  "derived_summaries": {},
-  "witnesses": [],
-  "provenance": {},
-  "review": {}
-}
-```
-
-The future schema must enforce structural separation rather than relying on prompt discipline.
-
----
-
-## 12. Stable identifiers
-
-Recommended ID namespaces:
-
-```text
-quran:<surah>:<ayah>
-quran:<surah>:<ayah>:<token>
-wsi:concept/<slug>
-wsi:relation/<slug>
-wsi:witness/<slug-or-uuid>
-wsi:frame/<source-id>/<local-id>
-wsi:participant/<source-id>/<local-id>
-```
-
-Examples:
-
-```text
-quran:37:30
-quran:37:30:10
-wsi:concept/transgression
-wsi:relation/authority-over
-wsi:frame/quran:37:30/F2
-```
-
-Stable IDs must survive label changes.
-
----
-
-## 13. Controlled vocabularies
-
-The project should maintain explicit registries rather than free-text enum values.
-
-Initial registries:
-
-```text
-frame_types
-entity_types
-discourse_roles
-semantic_roles
-relations
+predicate/relation candidate
+semantic-role bindings
+concept mappings
 polarity
 modality
-directions
-evidence_types
-review_statuses
-witness_types
+speech act
+source evidence
+confidence
+review status
 ```
 
-Any new controlled value should require:
+Frames MUST support n-ary argument structures.
 
-1. definition;
-2. examples;
-3. non-examples;
-4. migration consideration;
-5. ontology/spec version impact assessment.
-
----
-
-## 14. Validation invariants
-
-The first machine validator must eventually enforce at least:
+Example:
 
 ```text
-I01 SOURCE_IS_IMMUTABLE
-I02 STABLE_CONCEPT_ID_REQUIRED
-I03 SEMANTIC_ASSERTION_REQUIRES_EVIDENCE
-I04 PARTICIPANT_IS_NOT_CONCEPT
-I05 DISCOURSE_ROLE_IS_NOT_SEMANTIC_ROLE
-I06 RELATION_IS_NOT_CONCEPT
-I07 POLARITY_IS_NOT_DIRECTION
-I08 MODALITY_IS_NOT_DIRECTION
-I09 WITNESS_IS_NOT_CANONICAL_CONCEPT
-I10 CORRECTION_IS_NOT_SOURCE_ASSERTION
-I11 POSITIVE_DIRECTION_IS_NOT_SOURCE_DIRECTION
-I12 CONTEXT_CANNOT_OVERWRITE_SURFACE_EVIDENCE
-I13 TRANSLATION_CANNOT_CREATE_DIRECT_EVIDENCE_ALONE
-I14 MASTER_CONCEPT_IS_OPTIONAL
-I15 VERSE_DIRECTION_IS_DERIVED_AND_OPTIONAL
-I16 UNRESOLVED_IS_VALID
-I17 CONFIDENCE_COMPONENTS_MUST_BE_RETAINED
-I18 BASE_MUST_LOCK_BEFORE_PRODUCTION_WITNESS
-I19 WITNESS_MUST_EXIST_BEFORE_POSITIVE_DIRECTION
-I20 VERSIONED_PROVENANCE_REQUIRED
+GIVE
+  AGENT      → P1
+  THEME      → P2
+  RECIPIENT  → P3
+  LOCATION   → P4
 ```
 
----
+A Frame MUST NOT be reduced to one generic subject-predicate-object triple when information would be lost.
 
-## 15. Master concept policy
-
-A “Master Key” is useful for human summarization but is not fundamental semantic data.
-
-Therefore:
+## 16. Concept / relation separation
 
 ```text
-master_concept_id = optional
+CONCEPT  = AUTHORITY
+RELATION = AUTHORITY_OVER
+POLARITY = NEGATED
 ```
 
-If a verse has no clearly dominant concept, the correct output is `null`.
+Do not canonicalize composites such as:
 
-The system must never force a master concept merely to satisfy presentation expectations.
+```text
+NO_AUTHORITY_OVER_YOU
+```
+
+## 17. Polarity
+
+Initial values:
+
+```text
+AFFIRMED
+NEGATED
+UNDETERMINED
+```
+
+Polarity is a proposition property.
+
+## 18. Modality
+
+Initial values:
+
+```text
+ASSERTED
+POSSIBLE
+PROBABLE
+NECESSARY
+HYPOTHETICAL
+COUNTERFACTUAL
+UNDETERMINED
+```
+
+Modality is not speech act.
+
+## 19. Speech act
+
+Initial values:
+
+```text
+STATEMENT
+COMMAND
+PROHIBITION
+QUESTION
+OATH
+REQUEST
+PROMISE
+WARNING
+SUPPLICATION
+OTHER
+UNDETERMINED
+```
 
 ---
 
-## 16. Verse direction policy
+# PART V — ASSESSMENTS
 
-A verse-level direction is a derived summary over one or more frame directions.
+## 20. Evaluation is separate from Frame structure
 
-Possible values:
+An evaluative judgement MUST NOT be silently embedded as intrinsic semantic structure.
+
+Therefore source direction is represented as an **Assessment**.
+
+Wrong:
+
+```text
+frame.source_direction = NEGATIVE
+```
+
+Preferred:
+
+```text
+FRAME F2
+  ↓
+ASSESSMENT A2
+  assessment_type = SOURCE_DIRECTION
+  result          = NEGATIVE
+```
+
+## 21. Direction vocabulary
 
 ```text
 POSITIVE
@@ -863,645 +481,748 @@ MIXED
 UNDETERMINED
 ```
 
-If frame directions conflict or cannot be fairly summarized, use `MIXED` or `UNDETERMINED` rather than forcing a single polarity-like label.
-
----
-
-# PART V — ENGINE ARCHITECTURE
-
-## 17. Implementation language strategy
-
-The specification is implementation-independent.
-
-### Phase 1 — Python
-
-Python is preferred initially because the project is research-heavy and will require rapid iteration around:
-
-- Arabic NLP;
-- morphology/tokenization integrations;
-- ontology experimentation;
-- JSON Schema validation;
-- RDF/JSON-LD experiments;
-- golden dataset tooling;
-- analysis notebooks/scripts where appropriate.
-
-### Phase 2 — Rust, optional
-
-Rust becomes attractive once contracts stabilize for:
-
-- strict typed validators;
-- deterministic CLI;
-- high-throughput batch compilation/indexing;
-- embeddable core library;
-- stronger runtime guarantees.
-
-Rust must consume the same canonical schema; it must not become a separate semantic implementation with divergent rules.
-
-### Application layer — TypeScript/JavaScript
-
-Suitable later for:
-
-- API gateway;
-- semantic explorer;
-- graph visualization;
-- review interface;
-- annotation UI.
-
-### Go
-
-Go remains viable for infrastructure/services but is not the preferred research implementation because it contributes less to the difficult early work: Arabic linguistic analysis and semantic/ontology iteration.
-
----
-
-## 18. Planned module boundaries
-
-Future implementation should preserve clear boundaries:
-
 ```text
-source/
-linguistics/
-participants/
-frames/
-ontology/
-polarity/
-modality/
-direction/
-provenance/
-confidence/
-validation/
-witness/
-correction/
-positive_direction/
-export/
+POLARITY != DIRECTION
+MODALITY != DIRECTION
+SPEECH_ACT != DIRECTION
 ```
 
-The Witness module must consume locked semantic output rather than directly inspecting raw text whenever possible.
+## 22. Assessment contract
 
----
-
-## 19. No-LLM lock-in rule
-
-LLMs may be used as research assistants or candidate generators, but the canonical data contract must not depend on one model/provider.
-
-Any AI-generated assertion should record:
+An Assessment SHOULD contain:
 
 ```text
-model/provider if applicable
-prompt/spec version
-candidate status
-human review status
-supporting evidence
+target
+assessment_type
+result
+method_id
+evidence
+confidence
+review_status
 ```
 
-The system must allow deterministic validators and human-reviewed golden data to override model suggestions.
+A whole-record direction summary is OPTIONAL and derived from local assessments.
 
 ---
 
-# PART VI — GOLDEN DATASET AND TESTING
+# PART VI — ONTOLOGY
 
-## 20. Golden records
+## 23. Language-neutral identity
 
-Reviewed examples are the foundation for trustworthy evolution.
-
-A future golden corpus should contain:
-
-- source;
-- token evidence;
-- participants;
-- semantic frames;
-- concepts;
-- polarity/modality;
-- source direction;
-- provenance;
-- confidence components;
-- Witness;
-- correction;
-- positive direction;
-- review notes.
-
-As-Saffat 37:30 should be one of the first golden records.
-
----
-
-## 21. Test categories
-
-### Schema tests
-
-Validate structural correctness.
-
-### Invariant tests
-
-Validate framework rules.
-
-### Golden tests
-
-Compare extractor output against approved semantic records.
-
-### Ontology tests
-
-Detect duplicate IDs, orphan references, cyclic constraints where prohibited, and label collisions.
-
-### Migration tests
-
-Ensure old data can be migrated when schema/spec versions change.
-
-### Release tests
-
-Ensure version/changelog generation remains deterministic.
-
----
-
-# PART VII — VERSIONING
-
-## 22. Version domains
-
-The project will eventually need multiple version domains:
+Canonical concept IDs are machine identities:
 
 ```text
-repository_version
-spec_version
-schema_version
+wsi:concept/authority
+wsi:concept/transgression
+```
+
+Labels are presentation metadata.
+
+```text
+CONCEPT ID = IDENTITY
+LABEL = PRESENTATION
+LEXICAL FORM = SOURCE-LANGUAGE EVIDENCE
+```
+
+No natural language is the hidden ontology master language.
+
+## 24. Conservative concept mapping
+
+Cross-language equivalence MUST NOT be inferred from identical translation strings.
+
+Arabic, Hebrew, Greek, Pali, Sanskrit, English, Indonesian, and other expressions map to one concept only after contextual-sense evidence supports that mapping.
+
+Unmapped is preferable to false equivalence.
+
+---
+
+# PART VII — CONFIDENCE, PROVENANCE, REVIEW
+
+## 25. Confidence
+
+Confidence is operational research confidence, never theological truth percentage.
+
+It MUST be policy-versioned and decomposable:
+
+```text
+policy_id
+policy_version
+components
+aggregate
+```
+
+## 26. Analysis provenance
+
+WSI provenance describes how analysis was produced.
+
+It MUST NOT duplicate Source Provider acquisition provenance.
+
+Minimum fields:
+
+```text
+framework_version
+contract_version
+registry_version
 ontology_version
-extractor_version
+analyzer_version
+created_at
+created_by
 ```
 
-At bootstrap only the repository release version is active.
+AI-generated candidates SHOULD record model/policy metadata when available.
 
-These domains must not be conflated later.
+## 27. Review lifecycle
 
-A repository release may change documentation without changing ontology version. An ontology change may require schema migration. A model/extractor update may change candidates without changing the spec.
-
----
-
-## 23. Repository SemVer
-
-Repository releases use Semantic Versioning.
-
-Highest change class wins:
-
-```text
-BREAKING CHANGE / !   → major
-feat                   → minor
-fix/perf/refactor/...  → patch
-```
-
-During early `0.x` research the project may evolve rapidly, but breaking changes should still be explicitly declared rather than hidden.
-
-The repository version is stored in:
-
-```text
-VERSION
-```
-
-and mirrored by:
-
-```text
-Git tag: vX.Y.Z
-GitHub Release: vX.Y.Z
-CHANGELOG.md section
-```
-
----
-
-## 24. Conventional Commits policy
-
-Allowed initial types:
-
-```text
-feat
-fix
-perf
-refactor
-docs
-test
-build
-ci
-chore
-style
-revert
-```
-
-Recommended scopes:
-
-```text
-spec
-schema
-ontology
-source
-linguistics
-frame
-witness
-direction
-scoring
-provenance
-validation
-repo
-release
-```
-
-Examples:
-
-```text
-feat(ontology): add transgression concept hierarchy
-fix(frame): preserve negated relation target
-docs(spec): distinguish source and positive direction
-refactor(witness): separate correction from observation
-ci(repo): enforce dev to main promotion
-```
-
----
-
-# PART VIII — TWO-BRANCH GOVERNANCE
-
-## 25. Branch model
-
-Only two long-lived working branches are allowed:
-
-```text
-dev
-main
-```
-
-### dev
-
-Purpose:
-
-- active research;
-- documentation evolution;
-- schema/ontology development;
-- implementation work.
-
-Direct commits are allowed by design.
-
-### main
-
-Purpose:
-
-- stable integration point;
-- release source;
-- tagged history.
-
-Human direct pushes should be blocked by server-side repository rules.
-
-Promotion path:
-
-```text
-dev → pull request → main
-```
-
-No standard `feature/*`, `release/*`, `hotfix/*` workflow is used.
-
----
-
-## 26. Promotion policy
-
-A promotion from `dev` to `main` should require:
-
-- repository policy workflow passes;
-- required files valid;
-- Conventional Commit history valid;
-- PR review/checklist complete;
-- unresolved review conversations cleared;
-- no known schema/ontology invariant failures.
-
-A promotion PR may contain multiple commits. Release automation derives the bump from the highest-impact Conventional Commit in the promoted range.
-
----
-
-## 27. Release without a third branch
-
-The project deliberately does not use release PR tooling that requires additional branches.
-
-After a successful promotion reaches `main`:
-
-```text
-main push
-  ↓
-inspect promoted commits
-  ↓
-calculate SemVer
-  ↓
-update VERSION
-  ↓
-update CHANGELOG
-  ↓
-commit release metadata to main
-  ↓
-tag vX.Y.Z
-  ↓
-publish GitHub Release
-```
-
-Post-release synchronization of `dev` is allowed only when it can be performed safely without losing newer `dev` commits.
-
-Force-updating `dev` is prohibited.
-
----
-
-## 28. Required GitHub settings
-
-Workflow files alone cannot fully protect branches. Server-side repository rules should enforce:
-
-### main
-
-```text
-require pull request
-require successful checks
-require conversation resolution
-block force push
-block deletion
-restrict direct human push
-```
-
-### dev
-
-```text
-block force push
-block deletion
-```
-
-The automation may detect violations, but prevention belongs in GitHub rulesets/branch protection.
-
----
-
-# PART IX — CHANGELOG AND RELEASE NOTES
-
-## 29. Changelog policy
-
-`CHANGELOG.md` is generated from Conventional Commit history.
-
-Release sections should record:
-
-```text
-version
-date
-categorized changes
-commit references when practical
-breaking changes prominently
-```
-
-The changelog is a release artifact, not the canonical research history. Detailed semantic decisions belong in source-controlled specification/ontology records and review discussions.
-
----
-
-# PART X — SECURITY AND REPRODUCIBILITY
-
-## 30. Automation security
-
-Principles:
-
-- workflows receive minimum required permissions;
-- no repository secrets are required for basic bootstrap release flow;
-- third-party GitHub Actions should be minimized;
-- Dependabot should monitor action versions;
-- force pushes by automation are prohibited;
-- release automation must not overwrite advanced `dev` state;
-- generated releases must be traceable to immutable Git commits.
-
-Later, high-assurance mode may pin external actions to commit SHAs.
-
----
-
-## 31. Reproducibility
-
-A semantic record should ultimately be reproducible from:
-
-```text
-source version
-framework/spec version
-schema version
-ontology version
-extractor version
-configuration
-provenance
-```
-
-Two runs under the same deterministic configuration should not silently produce structurally incompatible outputs.
-
----
-
-# PART XI — RESEARCH REVIEW
-
-## 32. Review states
-
-Recommended future review workflow:
+Initial lifecycle:
 
 ```text
 CANDIDATE
 RESEARCHED
 REVIEWED
 LOCKED
+DISPUTED
 DEPRECATED
 ```
 
-AI/model output begins as `CANDIDATE` unless explicitly produced by deterministic source parsing.
+`LOCKED` means an analysis object has passed the configured review process.
 
-No AI suggestion should automatically become `LOCKED` semantic truth.
-
----
-
-## 33. Disagreement policy
-
-The architecture must permit competing interpretations without corrupting the source layer.
-
-Possible future design:
+It does **not** mean:
 
 ```text
-one immutable source
-multiple interpretation assertions
-separate provenance
-separate confidence
-separate review status
+corpus lock-in
+theological infallibility
+permanent ontology immutability
 ```
 
-This is preferable to overwriting a previous interpretation.
+`UNRESOLVED` remains a valid semantic outcome.
 
 ---
 
-# PART XII — ROADMAP
+# PART VIII — WITNESS
 
-## 34. Milestone 0 — Repository foundation
+## 28. Witness Pattern
 
-Goal: establish governance before implementation.
-
-Deliverables:
-
-- README;
-- Blueprint;
-- two-branch workflow;
-- Conventional Commit policy;
-- automatic promotion PR;
-- automated SemVer/version bump;
-- generated changelog;
-- automated tag and GitHub release;
-- action dependency updates.
-
-No semantic engine code required.
-
----
-
-## 35. Milestone 1 — Specification package
-
-Deliverables:
+A Witness Pattern is a stable derived pattern identity:
 
 ```text
-JSON Schema
-controlled vocabulary registries
-concept registry format
-relation registry format
-provenance model
-confidence model
-validation rules
+wsi:witness-pattern/boundary-violation
 ```
 
-Exit criterion:
+## 29. Witness Label
 
-At least several manually reviewed verses can be represented without ad-hoc fields.
-
----
-
-## 36. Milestone 2 — Golden corpus
-
-Start with carefully selected verses demonstrating different phenomena:
-
-- dialogue;
-- negation;
-- command/prohibition;
-- condition;
-- multiple participants;
-- temporal/event structure;
-- positive/negative/mixed directions;
-- ambiguous/coreference cases.
-
-As-Saffat 37:30 is the initial reference candidate.
-
-Exit criterion:
-
-Schema changes are driven by documented edge cases rather than speculation alone.
-
----
-
-## 37. Milestone 3 — Python research engine
-
-Initial capabilities:
+A Witness Label is localized human-facing presentation:
 
 ```text
-load source
-validate source IDs
-attach linguistic analysis
-construct candidate participants
-construct candidate frames
-link concepts
-calculate confidence
-validate invariants
-emit canonical JSON
+OFFSIDE
 ```
 
-Witness generation remains a separate pipeline stage.
-
----
-
-## 38. Milestone 4 — Witness engine
-
-Capabilities:
+Therefore:
 
 ```text
-consume LOCKED semantic frames
-produce Witness candidates
-score Witness fit
-review/lock Witness
-produce correction candidates
-produce positive direction candidates
+OFFSIDE != SOURCE TRANSLATION
+OFFSIDE != CANONICAL CONCEPT
+OFFSIDE != WITNESS PATTERN ID
 ```
 
-No positive direction should be produced directly from raw text without passing through the semantic/Witness contract.
+## 30. Witness derivation
 
----
+Production Witness generation SHOULD consume reviewed/locked Frames and relevant Assessments.
 
-## 39. Milestone 5 — Semantic web export
-
-Optional outputs:
+Research preview MAY consume `RESEARCHED` input, but resulting Witness data remains provisional.
 
 ```text
-JSON-LD
-RDF
-SHACL validation
-knowledge graph import
+WITNESS = UNRESOLVED
 ```
 
-This is an export representation, not a replacement for the project semantics.
+is valid.
 
----
+## 31. Response / correction
 
-## 40. Milestone 6 — Typed core / service layer
-
-Evaluate:
-
-- Rust core/CLI if type/performance guarantees are justified;
-- TypeScript API/review UI;
-- graph visualization;
-- batch indexing and search.
-
-Do not migrate languages merely for fashion. Migration must solve a demonstrated requirement.
-
----
-
-# PART XIII — DECISION RECORD
-
-## 41. Decisions currently locked
-
-The following baseline decisions are considered locked for the repository foundation:
-
-1. The project is spec-first.
-2. Semantic frames are primary; keywords are secondary concept references.
-3. Source and interpretation remain distinct.
-4. Concept identity is language-neutral.
-5. English is a technical label, not semantic identity.
-6. Participant, relation, concept, polarity, modality, and direction are separate fields.
-7. Source direction and positive direction are distinct.
-8. Witness is a derived layer, not source/translation/tafsir.
-9. Positive direction must pass through Witness/correction logic.
-10. Unknown/unresolved states are valid.
-11. Every canonical assertion requires evidence/provenance.
-12. Confidence is operational and decomposable.
-13. Master concept is optional.
-14. Verse-level direction is derived and optional.
-15. Initial machine contract will be JSON + JSON Schema.
-16. Python is the initial research implementation language.
-17. Rust is optional after schema stabilization.
-18. Only `dev` and `main` are long-lived working branches.
-19. Releases occur from `main` without a third release branch.
-20. SemVer and Conventional Commits govern repository releases.
-
-Any future change to these decisions should be treated as an explicit architectural change and documented through versioned repository history.
-
----
-
-# PART XIV — FINAL INVARIANT
-
-The entire project can be summarized by one discipline:
+Possible responses include:
 
 ```text
-DO NOT STORE INTERPRETATION AS IF IT WERE SOURCE.
-DO NOT STORE A SENTENCE AS ONE GIANT KEY.
-DO NOT TURN NEGATION INTO A CONCEPT.
-DO NOT TURN WITNESS INTO A TRANSLATION.
-DO NOT TURN POSITIVE DIRECTION INTO SOURCE MEANING.
+RETURN
+ALIGN
+STOP
+AVOID
+MAINTAIN
+CULTIVATE
+RESTORE
+UNRESOLVED
+```
+
+A response is derived and MUST NOT be projected backward into source wording.
+
+## 32. Positive Direction
+
+```text
+POSITIVE_DIRECTION != SOURCE_DIRECTION ASSESSMENT
+```
+
+Conceptual flow:
+
+```text
+NEGATIVE SOURCE CONDITION
+→ Witness Pattern
+→ localized Witness label
+→ response / correction
+→ positive target state
+```
+
+A positive direction MAY remain unresolved.
+
+---
+
+# PART IX — RGBL INTEROPERABILITY
+
+## 33. RGBL as first Source Provider
+
+`rocksoul-rgbl` already owns generic provenance-first source objects including:
+
+```text
+ENTITY
+RESOURCE
+ASSERTION
+EVIDENCE
+PROVENANCE
+ASSESSMENT
+```
+
+and textual-profile objects including:
+
+```text
+WORK
+EXPRESSION
+EDITION
+ARTIFACT
+PASSAGE
+CONTENT
+ALIGNMENT
+VARIANT
+```
+
+WSI SHOULD reuse RGBL canonical IDs directly instead of creating duplicate scripture/source objects.
+
+## 34. Example RGBL identifiers
+
+For the pinned Tanzil Uthmani dataset, RGBL exposes identifiers such as:
+
+```text
+mw:work:quran
+mw:expression:quran:ar-uthmani-tanzil-1.1
+mw:edition:quran:tanzil-1.1-uthmani
+mw:artifact:quran:tanzil-1.1-uthmani
+mw:passage:quran:37:30
+mw:content:quran:37:30:ar-uthmani
+```
+
+These remain RGBL-owned identities.
+
+## 35. RGBL reference connector
+
+The first runtime transport is `RgblRepositoryProvider`.
+
+It resolves resources from a local RGBL Git checkout using the exact revision pinned by the analysis rather than a moving branch.
+
+Conceptually:
+
+```text
+WSI Source Binding
+  ↓
+pinned RGBL Git commit
+  ↓
+RGBL resource partitions
+  ↓
+canonical resource ID
+  ↓
+provider content used only for source verification
+```
+
+The repository connector is a **reference transport**, not a permanent storage coupling. Future RGBL SDK/API/database connectors MAY implement the same `SourceProvider` interface.
+
+The M3 acceptance suite resolves both:
+
+```text
+mw:passage:quran:37:30
+mw:content:quran:37:30:ar-uthmani
+```
+
+and a structurally separate resource:
+
+```text
+mw:passage:hinduism:bhagavad-gita:1:1
+mw:content:hinduism:bhagavad-gita:1:1:sa
+```
+
+through the same interface.
+
+This tests interoperability only; it is not a theological-equivalence assertion.
+
+## 36. Linguistic plugins replace corpus adapters
+
+WSI does not need scripture-specific ingestion adapters.
+
+It MAY use language analyzers such as:
+
+```text
+Arabic analyzer
+Hebrew analyzer
+Greek analyzer
+Pali analyzer
+Sanskrit analyzer
+Generic/fallback analyzer
+```
+
+A language analyzer is an analysis tool, never source authority.
+
+---
+
+# PART X — MACHINE CONTRACT v0.2
+
+## 37. Canonical record
+
+```text
+record_id
+contract_version
+analysis_target
+source_bindings[]
+lexical_senses[]
+utterances[]
+participants[]
+frames[]
+discourse_relations[]
+concept_refs[]
+assessments[]
+witnesses[]
+provenance
+review
+```
+
+WSI deliberately does not contain canonical corpus/work/edition/passage/content records.
+
+## 38. Identity policy
+
+WSI-owned IDs identify WSI-owned objects only.
+
+```text
+wsi:analysis/<opaque-id>
+wsi:concept/authority
+wsi:relation/authority-over
+wsi:witness-pattern/boundary-violation
+```
+
+External Source Provider IDs remain external:
+
+```text
+mw:passage:quran:37:30
+```
+
+---
+
+# PART XI — VALIDATION AND LIVE SOURCE PROOF
+
+## 39. Deterministic validation passes
+
+The canonical offline validation order is:
+
+```text
+1. JSON_SCHEMA
+2. WSI_REGISTRY_REFERENTIAL_INTEGRITY
+3. SOURCE_BINDING_RESOLUTION
+4. EVIDENCE_SELECTOR_RESOLUTION
+5. WSI_SEMANTIC_INVARIANTS
+6. REVIEW_POLICY
+```
+
+JSON validity is not semantic correctness.
+
+## 40. Offline deterministic validator
+
+Milestone 2 implements an offline validator in TypeScript.
+
+It validates:
+
+```text
+schema shape
+controlled vocabularies
+concept/relation/Witness registries
+local and cross-object references
+Source Binding consistency
+offline pinned provider indexes
+evidence selector shape
+semantic invariants
+review lifecycle rules
+```
+
+The validator MUST NOT fetch canonical source content merely to complete ordinary CI.
+
+Pinned provider indexes under `spec/providers/` are reproducibility indexes only.
+
+```text
+PROVIDER INDEX != SOURCE AUTHORITY
+```
+
+Milestone 2 technical acceptance has passed on `dev`.
+
+## 41. Live provider resolution
+
+Milestone 3 implements live Source Provider verification as a separate runtime/CI layer.
+
+It proves:
+
+```text
+pinned revision exists
+bound provider resources exist
+analysis target resolves
+TEXT_QUOTE matches provider content literally
+CHAR_RANGE resolves against provider content
+claimed RESOLVED binding remains demonstrably resolved
+```
+
+`TOKEN_IDS` are not treated as live-verifiable until a provider transport exposes a compatible tokenizer-stable index.
+
+A moving provider `HEAD` MUST NOT by itself make a pinned analysis stale:
+
+```text
+CURRENT PROVIDER HEAD != PINNED ANALYSIS REVISION
+```
+
+If the pinned revision remains resolvable, it remains the reproducibility authority for that analysis.
+
+If required resources or selectors fail at the pinned snapshot while the binding claims `RESOLVED`, WSI emits a stale-binding finding and requires explicit review rather than silently mutating the record.
+
+M3 live acceptance has passed on `dev` for both Qur'an 37:30 and Bhagavad Gita 1:1.
+
+See:
+
+- [`spec/VALIDATION.md`](spec/VALIDATION.md)
+- [`spec/RGBL-CONNECTOR.md`](spec/RGBL-CONNECTOR.md)
+
+---
+
+# PART XII — CORE INVARIANTS
+
+## 42. Required invariants
+
+```text
+I01 WSI_DOES_NOT_OWN_PRIMARY_SOURCE
+I02 EXTERNAL_RESOURCE_ID_MUST_REMAIN_EXTERNAL
+I03 SOURCE_BINDING_MUST_PIN_PROVIDER_REVISION
+I04 ANALYSIS_TARGET_MUST_RESOLVE
+I05 CANONICAL_SOURCE_TEXT_MUST_NOT_BE_DUPLICATED_AS_WSI_AUTHORITY
+I06 EVERY_SEMANTIC_ASSERTION_REQUIRES_EVIDENCE
+I07 EVIDENCE_MUST_REFERENCE_A_SOURCE_BINDING
+I08 LEXEME_IS_NOT_SENSE
+I09 SENSE_IS_NOT_AUTOMATICALLY_CONCEPT
+I10 PARTICIPANT_IS_NOT_CONCEPT
+I11 DISCOURSE_ROLE_IS_NOT_SEMANTIC_ROLE
+I12 RELATION_IS_NOT_CONCEPT
+I13 POLARITY_IS_NOT_DIRECTION
+I14 MODALITY_IS_NOT_SPEECH_ACT
+I15 DIRECTION_IS_AN_ASSESSMENT
+I16 TRANSLATION_ALONE_CANNOT_CREATE_PRIMARY_SOURCE_AUTHORITY
+I17 COMMENTARY_CANNOT_OVERWRITE_PRIMARY_SOURCE
+I18 CONTEXT_CANNOT_OVERWRITE_SURFACE_REFERENCE
+I19 UNIVERSAL_CONCEPT_MAPPING_MAY_BE_UNRESOLVED
+I20 CONFIDENCE_POLICY_MUST_BE_VERSIONED
+I21 WITNESS_IS_NOT_CANONICAL_CONCEPT
+I22 WITNESS_LABEL_IS_NOT_WITNESS_PATTERN
+I23 RESPONSE_IS_NOT_SOURCE_ASSERTION
+I24 POSITIVE_DIRECTION_IS_NOT_SOURCE_DIRECTION
+I25 UNRESOLVED_IS_VALID
+I26 WSI_PROVENANCE_IS_NOT_SOURCE_ACQUISITION_PROVENANCE
+I27 LOCK_IS_ASSERTION_REVIEW_STATE_NOT_CORPUS_AUTHORITY
+I28 PROVIDER_INDEX_IS_NOT_PROVIDER_AUTHORITY
+I29 OFFLINE_VALIDATION_MUST_NOT_REQUIRE_NETWORK
+I30 LIVE_PROVIDER_RESOLUTION_MUST_NOT_CHANGE_SEMANTIC_RULES
+I31 PROVIDER_TRANSPORT_MUST_NOT_DEFINE_SEMANTIC_IDENTITY
+I32 EXACT_PRIMARY_SOURCE_ANCHOR_MUST_MATCH_PINNED_PROVIDER_CONTENT
+I33 PROVIDER_HEAD_MOVEMENT_ALONE_DOES_NOT_INVALIDATE_PINNED_ANALYSIS
+```
+
+---
+
+# PART XIII — WORKED EXAMPLE POLICY
+
+## 43. As-Saffat 37:30
+
+As-Saffat 37:30 is a **non-normative worked example** only.
+
+```text
+TARGET: mw:passage:quran:37:30
+
+F1
+P1 ── AUTHORITY_OVER [NEGATED] ──▶ P2
+
+F2
+P2 ── HAS_STATE ──▶ TRANSGRESSION
+
+A2
+F2 ── SOURCE_DIRECTION ──▶ NEGATIVE
+
+W1
+F2
+→ BOUNDARY_VIOLATION
+→ OFFSIDE
+→ RETURN / ALIGN
+→ BOUNDARY_ALIGNMENT
+```
+
+It tests the contract; it does not define the universal contract.
+
+The exact source anchors for this candidate are live-verified against the pinned RGBL/Tanzil representation. Analytic `surface`, `lemma`, or gloss fields MAY remain linguistically normalized, but exact primary-text evidence selectors MUST preserve provider text as represented at the pinned revision.
+
+Future goldens MUST include structurally and linguistically different provider resources so the architecture is not optimized around this one example.
+
+---
+
+# PART XIV — IMPLEMENTATION STRATEGY
+
+## 44. TypeScript
+
+Preferred for:
+
+```text
+Source Provider integration
+canonical WSI model
+schema/registry validation
+orchestration
+CLI/API
+review tooling
+Witness pipeline
+```
+
+The deterministic validator and first live Source Provider connector are implemented in TypeScript.
+
+## 45. Python
+
+Preferred for optional linguistic/research workers:
+
+```text
+Arabic NLP
+Hebrew NLP
+Greek NLP
+other language NLP
+embeddings/reranking experiments
+research evaluation
+```
+
+Python workers MUST communicate through versioned analysis contracts rather than become a second source-of-truth model.
+
+## 46. Rust
+
+Optional later only when demonstrated performance/type-safety needs justify it.
+
+The Machine Contract remains implementation-language independent.
+
+## 47. Module boundaries
+
+```text
+source-provider/
+linguistics/
+senses/
+discourse/
+participants/
+frames/
+relations/
+ontology/
+polarity/
+modality/
+speech_act/
+assessments/
+evidence/
+confidence/
+provenance/
+review/
+witness/
+response/
+positive_direction/
+validation/
+export/
+```
+
+Provider-specific transports remain implementations behind `source-provider/`, not semantic branches.
+
+---
+
+# PART XV — VERSIONING AND MILESTONES
+
+## 48. Pre-1.0 release policy
+
+The repository remains in initial-development `0.x` status until the architecture is deliberately declared stable.
+
+Automatic release policy is:
+
+```text
+0.x breaking change → next MINOR
+0.x feature         → next MINOR
+0.x fix/docs/etc.   → next PATCH
+>=1.0 breaking      → next MAJOR
+```
+
+A breaking research-contract change MUST NOT automatically imply architectural `1.0` maturity.
+
+Detailed live milestone status is maintained in [`ROADMAP.md`](ROADMAP.md).
+
+## 49. M0 — Repository foundation
+
+**Status: DONE**
+
+Repository governance, branch model, release/version plumbing, README, and Blueprint foundation.
+
+## 50. M1 — Provider-bound Machine Contract
+
+**Status: IMPLEMENTED / REVIEW PENDING**
+
+Delivered on `dev`:
+
+```text
+Source Provider Contract
+RGBL binding specification
+WSI JSON Schema v0.2
+ID grammar
+registries
+worked example using real RGBL IDs
+```
+
+## 51. M2 — Deterministic validator
+
+**Status: IMPLEMENTED / REVIEW PENDING — CI GREEN**
+
+Delivered on `dev`:
+
+```text
+TypeScript validator runtime
+JSON Schema pass
+registry pass
+offline Source Binding pass
+selector pass
+semantic invariant pass
+review-policy pass
+mutation tests
+CLI
+offline RGBL provider index
+CI npm run check gate
+```
+
+Technical acceptance is green; review/promotion to `main` is the remaining milestone gate.
+
+## 52. M3 — Live RGBL connector
+
+**Status: IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN**
+
+Delivered on `dev`:
+
+```text
+generic SourceProvider runtime interface
+repository-backed RGBL reference connector
+pinned revision proof
+canonical resource resolution
+literal TEXT_QUOTE proof
+CHAR_RANGE proof
+stale-binding detection
+verify-source CLI
+live provider CI
+Qur'an + non-Qur'an integration fixtures
+```
+
+Live verification exposed and corrected non-exact Uthmani evidence anchors in the worked example, demonstrating that the source-proof layer is enforcing the Source Provider boundary rather than merely accepting locally plausible strings.
+
+## 53. M4 — Linguistic plugins + stratified golden analyses
+
+**Status: IMPLEMENTED / REVIEW PENDING**
+
+Define a language-neutral analyzer contract, add reference analyzers/adapters, and build a structurally diverse golden set independent of scripture identity.
+
+## 54. M5 — Semantic frame engine
+
+**Status: IMPLEMENTED / REVIEW PENDING**
+
+M5 introduces a deterministic semantic candidate compiler over versioned linguistic analysis plus evidence-backed semantic proposals.
+
+Normative M5 separations:
+
+```text
+LINGUISTIC OUTPUT != SEMANTIC CANDIDATE
+SEMANTIC CANDIDATE != REVIEWED SEMANTIC TRUTH
+PARTICIPANT REFERENCE != SEMANTIC KEY
+FUNCTION WORD != SEMANTIC KEY
+RAW TOKEN IMPORTANCE != SEMANTIC KEY
+```
+
+A semantic key is emitted only for a registered concept candidate whose source role is `CONTENT`. Participant references, function words, structural markers, unknown roles, unresolved mappings, and unregistered concepts remain explicit but are not promoted into semantic keys.
+
+The reference compiler fails closed on broken token/local-reference structure while preserving research ambiguity through candidate states and `UNRESOLVED` outputs. M5 does not produce Witness or positive direction.
+
+## 55. M6 — Witness engine
+
+**Status: PLANNED**
+
+Witness Pattern matching, localization, response/correction, and positive-direction derivation.
+
+## 56. M7 — Scale / reproducible batch processing
+
+**Status: PLANNED**
+
+Apply one semantic contract across eligible Source Provider resources without corpus-specific semantic branches, with idempotent jobs, resume/retry behavior, stale queues, and provenance-preserving exports.
+
+Full-Qur'an processing MAY be a major workload but MUST NOT become a separate semantic mode.
+
+## 57. M8 — Production hardening
+
+**Status: PLANNED**
+
+Harden reproducible builds, dependency locking, compatibility/migrations, observability, security, failure isolation, performance, provider-outage behavior, API/CLI stability, and backup/recovery policy.
+
+Operational convenience MUST NOT weaken evidence provenance or source ownership boundaries.
+
+## 58. M9 — Release candidate → v1.0
+
+**Status: PLANNED**
+
+Run a representative multi-language/multi-resource release-candidate suite covering ambiguous/unresolved semantics, nested discourse, provider failures, stale bindings, batch reproducibility, and migration compatibility.
+
+`v1.0` means the supported contracts are production-stable. It does not claim that every language, corpus, or interpretation is solved.
+
+---
+
+# PART XVI — FINAL DISCIPLINE
+
+```text
+DO NOT INGEST THE WORLD TWICE.
+DO NOT DUPLICATE SOURCE AUTHORITY.
+DO NOT TURN AN EXTERNAL PASSAGE INTO A WSI PASSAGE OBJECT.
+DO NOT STORE A QUOTE ANCHOR AS CANONICAL SOURCE TEXT.
+DO NOT NORMALIZE AN EXACT SOURCE ANCHOR AND CALL IT VERBATIM.
+DO NOT STORE A LEMMA AS A CONCEPT.
+DO NOT STORE A PARTICIPANT AS A CONCEPT.
+DO NOT STORE A RELATION AS A CONCEPT.
+DO NOT STORE NEGATION AS DIRECTION.
+DO NOT STORE DIRECTION AS AN INTRINSIC FRAME FACT.
+DO NOT STORE WITNESS AS TRANSLATION.
+DO NOT STORE POSITIVE DIRECTION AS SOURCE MEANING.
+DO NOT FORCE AN ANSWER WHERE EVIDENCE IS UNRESOLVED.
 ```
 
 Instead:
 
 ```text
-DECOMPOSE
-→ RELATE
-→ NORMALIZE
-→ EVIDENCE
-→ SCORE
+RESOLVE SOURCE
+→ PIN PROVIDER REVISION
+→ PROVE EVIDENCE ANCHORS
+→ ANALYZE LANGUAGE
+→ RESOLVE CONTEXTUAL SENSE
+→ RESOLVE DISCOURSE
+→ IDENTIFY PARTICIPANTS
+→ BUILD FRAMES
+→ MAP CONCEPTS CONSERVATIVELY
+→ ASSESS
+→ ATTACH CONFIDENCE + PROVENANCE
 → VALIDATE
-→ LOCK
+→ REVIEW
 → WITNESS
-→ CORRECT
-→ MOVE POSITIVELY
+→ RESPOND
+→ DERIVE A DEFENSIBLE POSITIVE DIRECTION
 ```
 
-That sequence is the architectural identity of Witness Semantic Engine.
+That sequence is the architectural identity of **Witness Semantic Engine**.

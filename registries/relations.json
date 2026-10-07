@@ -1,0 +1,25 @@
+{
+  "registry_id": "wsi:relation-registry/core-v0",
+  "registry_version": "0.1.0",
+  "status": "research-draft",
+  "relations": [
+    {
+      "id": "wsi:relation/authority-over",
+      "kind": "SEMANTIC",
+      "label": "authority over",
+      "definition": "Relates an authority holder to the target over which authority is asserted or denied."
+    },
+    {
+      "id": "wsi:relation/has-state",
+      "kind": "SEMANTIC",
+      "label": "has state",
+      "definition": "Relates a state bearer to a semantic state concept."
+    },
+    {
+      "id": "wsi:relation/discourse-retraction",
+      "kind": "DISCOURSE",
+      "label": "retraction / corrective contrast",
+      "definition": "Links a prior frame to a subsequent frame that retracts, corrects, or replaces an expected discourse continuation."
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "contract_name": "WSI Machine Contract",
+  "contract_version": "0.2.0",
+  "status": "research-draft",
+  "blueprint_revision": "3.2-draft",
+  "schema_dialect": "https://json-schema.org/draft/2020-12/schema",
+  "canonical_schema": "spec/wsi-record.schema.json",
+  "source_provider_contract": "spec/SOURCE-PROVIDER-CONTRACT.md",
+  "validation_spec": "spec/VALIDATION.md",
+  "id_grammar": "spec/ID-GRAMMAR.md",
+  "linguistic_analyzer_contract": "spec/LINGUISTIC-ANALYZER-CONTRACT.md",
+  "linguistic_analysis_schema": "spec/linguistic-analysis.schema.json",
+  "linguistic_golden_profiles": "data/linguistic-goldens/profiles.json",
+  "validator": {
+    "implementation": "src/validation/validator.ts",
+    "cli": "src/cli.ts",
+    "mode": "offline-deterministic",
+    "provider_indexes": [
+      "spec/providers/rocksoul-rgbl.v0.1.json"
+    ]
+  },
+  "linguistics": {
+    "contract_version": "0.1.0",
+    "runtime": "src/linguistics",
+    "schema": "spec/linguistic-analysis.schema.json",
+    "golden_profiles": "data/linguistic-goldens/profiles.json",
+    "reference_analyzers": [
+      "wsi:linguistic-analyzer/arabic-baseline",
+      "wsi:linguistic-analyzer/hebrew-baseline",
+      "wsi:linguistic-analyzer/greek-baseline",
+      "wsi:linguistic-analyzer/generic-baseline"
+    ]
+  },
+  "registries": [
+    "registries/controlled-vocabularies.json",
+    "registries/concepts.json",
+    "registries/relations.json",
+    "registries/witness-patterns.json"
+  ],
+  "worked_example": "data/golden-candidates/quran/037/030.json",
+  "first_source_provider": {
+    "name": "rocksoul-rgbl",
+    "repository": "bjo163/rocksoul-rgbl",
+    "provider_contract": "moonwitness-corpus/v0.1"
+  },
+  "validation_order": [
+    "JSON_SCHEMA",
+    "REGISTRY_REFERENTIAL_INTEGRITY",
+    "SOURCE_BINDING_RESOLUTION",
+    "EVIDENCE_SELECTOR_RESOLUTION",
+    "WSI_SEMANTIC_INVARIANTS",
+    "REVIEW_POLICY"
+  ],
+  "principles": [
+    "WSI_DOES_NOT_OWN_PRIMARY_SOURCE",
+    "EXTERNAL_SOURCE_IDENTITIES_REMAIN_EXTERNAL",
+    "SOURCE_BINDINGS_PIN_PROVIDER_REVISIONS",
+    "LINGUISTIC_ANALYZER_OUTPUT_IS_CANDIDATE_NOT_SEMANTIC_TRUTH",
+    "UNSUPPORTED_LINGUISTIC_FEATURES_MUST_NOT_BE_INVENTED",
+    "LEXICAL_SENSE_PRECEDES_UNIVERSAL_CONCEPT_MAPPING",
+    "PARTICIPANT_RELATION_CONCEPT_POLARITY_MODALITY_ASSESSMENT_ARE_SEPARATE",
+    "DIRECTION_IS_AN_ASSESSMENT_NOT_INTRINSIC_FRAME_STRUCTURE",
+    "WITNESS_IS_DERIVED_NOT_SOURCE",
+    "POSITIVE_DIRECTION_IS_DERIVED_NOT_SOURCE_DIRECTION",
+    "UNRESOLVED_IS_VALID",
+    "EVERY_CANONICAL_ASSERTION_REQUIRES_SOURCE_ANCHORED_EVIDENCE_AND_ANALYSIS_PROVENANCE",
+    "SEMANTIC_CANDIDATE_IS_NOT_REVIEWED_TRUTH",
+    "PARTICIPANT_REFERENCE_IS_NOT_SEMANTIC_KEY",
+    "FUNCTION_WORD_IS_NOT_SEMANTIC_KEY"
+  ],
+  "semantic_candidate_contract": "spec/SEMANTIC-CANDIDATE-CONTRACT.md",
+  "semantic_candidate_schema": "spec/semantic-candidate.schema.json",
+  "semantics": {
+    "contract_version": "0.1.0",
+    "runtime": "src/semantics",
+    "schema": "spec/semantic-candidate.schema.json",
+    "test": "test/semantics.test.ts",
+    "compiler": "wsi:semantic-compiler/reference"
+  }
+}

@@ -1,291 +1,396 @@
 # Witness Semantic Engine
 
-> **Spec-first semantic research infrastructure for turning source text into auditable semantic frames, Witness observations, and positive-direction outputs.**
+> **Downstream semantic analysis for source resources: frames → assessments → Witness → positive direction.**
 
-[![Status](https://img.shields.io/badge/status-research--design-blue)](#project-status)
-[![Version](https://img.shields.io/badge/version-0.1.0-informational)](VERSION)
-[![Branch model](https://img.shields.io/badge/branches-dev%20%E2%86%92%20main-success)](#development-and-release-model)
+## Project status
 
-## Why this repository exists
-
-Most text research stops at **source → translation → interpretation**. Witness Semantic Engine adds a separate, machine-readable layer that asks:
-
-1. What does the source explicitly contain?
-2. What semantic propositions are actually asserted?
-3. Who or what participates in those propositions?
-4. Which language-neutral concepts are instantiated?
-5. What polarity, modality, and evaluative direction are supported by evidence?
-6. What can be **witnessed** from that semantic state?
-7. What correction or alignment follows from that witness?
-8. What is the resulting **positive direction**?
-
-The project is designed to keep those questions separate. A translation is not a semantic key. A participant is not a concept. Negation is not direction. A Witness label is not source text. Positive direction must never overwrite the source state.
-
-## Core model
+Current development position:
 
 ```text
-SOURCE
+Machine Contract: v0.2.0
+Blueprint:       3.2-draft
+Milestone 0:     DONE
+Milestone 1:     IMPLEMENTED / REVIEW PENDING
+Milestone 2:     IMPLEMENTED / REVIEW PENDING — CI GREEN
+Milestone 3:     IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN
+Milestone 4:     IMPLEMENTED / REVIEW PENDING — LIVE CI GREEN
+Milestone 5:     IMPLEMENTED / REVIEW PENDING — semantic candidate compiler
+Milestone 6:     NEXT — Witness engine
+```
+
+M2 passes deterministic validation CI. M3 resolves and verifies real resources against the exact RGBL Git revision pinned by each Source Binding. M4 passes one language-neutral `LinguisticAnalyzer` contract across Arabic, Hebrew, Greek, and a Sanskrit generic-fallback profile. M5 now compiles evidence-backed semantic proposals into deterministic participant, concept/semantic-key, and Frame candidates without promoting candidates to reviewed truth.
+
+The canonical milestone tracker is [`ROADMAP.md`](ROADMAP.md). Architecture remains normative in [`BLUEPRINT.md`](BLUEPRINT.md).
+
+## What this repository owns
+
+Witness Semantic Engine (WSI) does **not** own canonical scripture/corpus text.
+
+Its job begins after a source resource already exists in a provenance-aware provider.
+
+Current first provider:
+
+- [`bjo163/rocksoul-rgbl`](https://github.com/bjo163/rocksoul-rgbl) — canonical source/corpus identity, exact text, editions, passages, content, provenance, rights, variants, and alignments.
+
+WSI owns downstream analysis:
+
+```text
+SOURCE RESOURCE REFERENCE
   ↓
-LINGUISTIC EVIDENCE
+LINGUISTIC ANALYSIS CANDIDATE
   ↓
-PARTICIPANTS
+LEXICAL / CONTEXTUAL SENSE
   ↓
-SEMANTIC FRAMES / PROPOSITIONS
+DISCOURSE + PARTICIPANTS
   ↓
-CONCEPTS + RELATIONS
+SEMANTIC FRAMES
   ↓
-POLARITY + MODALITY
+CONCEPT + RELATION MAPPING
   ↓
-SOURCE DIRECTION
+ASSESSMENTS
   ↓
-EVIDENCE + CONFIDENCE
+REVIEW
   ↓
-LOCKED BASE SEMANTICS
+WITNESS PATTERN
   ↓
-WITNESS
+WITNESS LABEL
   ↓
-CORRECTION
+RESPONSE / CORRECTION
   ↓
 POSITIVE DIRECTION
 ```
 
-The **semantic frame**, not the keyword, is the primary unit of meaning.
+## Repository boundary
 
-## Non-negotiable separation
+### RGBL / Source Provider
 
-| Layer | Question | Example |
-| --- | --- | --- |
-| Source | What is written? | Original Arabic text |
-| Linguistic | What form does the language take? | token, lemma, root, POS, syntax |
-| Participant | Who/what is involved? | speaker, addressee, group |
-| Frame | What is happening? | `P1 → AUTHORITY_OVER → P2` |
-| Concept | What universal concept is instantiated? | `wsi:concept/authority` |
-| Polarity | Is it affirmed or negated? | `NEGATED` |
-| Source direction | How is the state evaluated in context? | `NEGATIVE` |
-| Witness | What pattern is observed? | `OFFSIDE` |
-| Correction | What needs realignment? | `RETURN_TO_BOUNDARY` |
-| Positive direction | Where should the correction move? | `BOUNDARY_ALIGNMENT` |
+Owns questions such as:
 
-## Canonical identity vs human labels
+- What exact text is this?
+- Which work/expression/edition/artifact does it belong to?
+- Which passage/content resource identifies it?
+- What is the source provenance and checksum?
+- What rights/license govern the source?
 
-Concept identity is language-neutral.
+### WSI
 
-```text
-Machine identity:  wsi:concept/transgression
-English label:     TRANSGRESSION
-Indonesian label:  Melampaui batas
-Arabic label:      طغيان
-Display key:       [TRANSGRESSION]
+Owns questions such as:
+
+- What linguistic candidates can be derived from the provider text?
+- What contextual senses are supported?
+- Who/what participates in the proposition?
+- What semantic frames are asserted?
+- What concepts and relations are defensibly mapped?
+- What polarity/modality/speech act applies?
+- What evaluative direction is supported as an **assessment**?
+- What Witness Pattern can be derived?
+- What response/correction follows?
+- What positive direction can be derived without rewriting source meaning?
+
+## Source bindings, not source copies
+
+WSI references provider resources rather than creating duplicate scripture objects.
+
+Example:
+
+```json
+{
+  "provider": "rocksoul-rgbl",
+  "provider_contract": "moonwitness-corpus/v0.1",
+  "provider_revision": "df00706c98e21fb3fb0146b8389b0f2978f3d833",
+  "primary_resource_id": "mw:passage:quran:37:30",
+  "resource_ids": [
+    "mw:passage:quran:37:30",
+    "mw:content:quran:37:30:ar-uthmani"
+  ]
+}
 ```
 
-English is a technical label, **not** the ontology identity. For Qur'anic research, Arabic remains the primary source evidence.
+Canonical text remains owned by the provider. WSI may keep quote/selectors or analysis-local token surfaces only as evidence/analysis anchors.
 
-## Example: As-Saffat 37:30
+## Why this is more universal
 
-The conceptual result can be represented as:
+WSI does not need a Qur'an adapter, Torah adapter, Psalms adapter, Gospel adapter, or similar scripture-specific semantic branch.
+
+If a Source Provider exposes a stable addressable resource, WSI analyzes that resource through the same contract. Corpus-specific ingestion belongs upstream; language-specific analysis belongs in optional linguistic plugins.
+
+M3 deliberately resolves both Qur'an and Bhagavad Gita resources through the same `SourceProvider` interface. M4 goes further: Arabic Qur'an, Hebrew OSHB/WLC, Greek SBLGNT, and Sanskrit Bhagavad Gita resources pass the same language-analysis contract. These are interoperability tests, not claims of theological equivalence.
+
+## Semantic frame, not keyword
+
+The primary semantic unit is a Frame/Proposition.
 
 ```text
-P1 (WE / SPEAKER)
-   ── AUTHORITY_OVER [NEGATED] ──▶
-P2 (YOU / ADDRESSEE / GROUP)
+P1 ── AUTHORITY_OVER [NEGATED] ──▶ P2
+P2 ── HAS_STATE ──▶ [TRANSGRESSION]
+```
 
-P2
-   ── HAS_STATE ──▶
+A frame can be n-ary and may contain multiple semantic-role bindings.
+
+## Assessment is separate from source structure
+
+Direction is not embedded as a hidden fact inside a Frame.
+
+```text
+FRAME F2
+  ↓
+ASSESSMENT A2
+  type   = SOURCE_DIRECTION
+  result = NEGATIVE
+```
+
+This keeps polarity, modality, speech act, and direction separate.
+
+## Witness boundary
+
+Witness is downstream interpretation/derivation, not translation.
+
+```text
 [TRANSGRESSION]
-
-SOURCE DIRECTION: NEGATIVE
-WITNESS:          OFFSIDE
-CORRECTION:       RETURN_TO_BOUNDARY
-POSITIVE DIRECTION: BOUNDARY_ALIGNMENT
+  ↓
+BOUNDARY_VIOLATION
+  ↓
+OFFSIDE
+  ↓
+RETURN / ALIGN
+  ↓
+BOUNDARY_ALIGNMENT
 ```
 
-The key distinction is that **OFFSIDE is a Witness label**, not a translation of the source and not a canonical ontology concept.
+The source condition is not rewritten to become positive.
 
-## Research integrity rules
+## Current worked example
 
-The engine must preserve the following invariants:
+As-Saffat 37:30 remains a **non-normative worked example** only. It binds to real RGBL identities:
 
-- Source text is immutable.
-- Every canonical concept has a stable ID.
-- Every semantic assertion has provenance/evidence.
-- Participant ≠ concept.
-- Discourse role ≠ semantic role.
-- Relation ≠ concept.
-- Polarity ≠ direction.
-- Modality ≠ direction.
-- Witness ≠ source, translation, tafsir, or canonical concept.
-- Correction ≠ source assertion.
-- Positive direction ≠ source direction.
-- Context may resolve ambiguity but may not overwrite surface evidence.
-- `UNKNOWN`, `UNRESOLVED`, and `UNDETERMINED` are valid outputs.
-- Base semantics must be locked before Witness derivation.
-- Witness must be established before positive-direction derivation.
+```text
+mw:passage:quran:37:30
+mw:content:quran:37:30:ar-uthmani
+```
 
-See **[BLUEPRINT.md](BLUEPRINT.md)** for the normative architecture and implementation plan.
+Its evidence anchors are verified literally against the pinned RGBL/Tanzil Uthmani source snapshot. It tests the semantic contract; it does not define the universal schema.
 
-## Project status
+## Machine Contract
 
-**Research / architecture phase.**
+Current research contract:
 
-The repository intentionally starts **spec-first**. The first milestone is not an NLP model; it is a stable contract for evidence, semantic frames, ontology IDs, provenance, scoring, validation, Witness derivation, and release governance.
+```text
+WSI Machine Contract v0.2.0
+Linguistic Analyzer Contract v0.1.0
+```
 
-No production extractor should be built until the specification and golden examples are stable enough to test deterministically.
+Core semantic record:
 
-## Intended implementation path
+```text
+analysis_target
+source_bindings
+lexical_senses
+utterances
+participants
+frames
+discourse_relations
+concept_refs
+assessments
+witnesses
+analysis_provenance
+review
+```
 
-The specification is language-independent. The planned implementation order is:
+Linguistic analyzer output is a separate candidate artifact and is **not** automatically promoted into the reviewed semantic record.
 
-1. **Python** — research engine, Arabic NLP integration, schema validation, ontology experiments, golden-test tooling.
-2. **Canonical JSON / JSON Schema** — contract shared across languages.
-3. **JSON-LD / RDF / SHACL** — optional semantic-web export and graph validation.
-4. **Rust** — optional phase-2 deterministic core/CLI when schemas stabilize and performance/type guarantees justify it.
-5. **JavaScript/TypeScript** — API, explorer, visualization, and application layer when needed.
+See:
 
-The repository must never become “a Python project that happens to contain a specification.” The **specification is the product contract**; implementations are replaceable.
+- [`BLUEPRINT.md`](BLUEPRINT.md)
+- [`ROADMAP.md`](ROADMAP.md)
+- [`spec/README.md`](spec/README.md)
+- [`spec/SOURCE-PROVIDER-CONTRACT.md`](spec/SOURCE-PROVIDER-CONTRACT.md)
+- [`spec/RGBL-CONNECTOR.md`](spec/RGBL-CONNECTOR.md)
+- [`spec/LINGUISTIC-ANALYZER-CONTRACT.md`](spec/LINGUISTIC-ANALYZER-CONTRACT.md)
+- [`spec/VALIDATION.md`](spec/VALIDATION.md)
+- [`spec/ID-GRAMMAR.md`](spec/ID-GRAMMAR.md)
+
+## Deterministic validator — M2
+
+The offline validator checks:
+
+```text
+1. JSON Schema
+2. WSI registry integrity
+3. Source-binding resolution against pinned offline indexes
+4. Evidence-selector validation
+5. WSI semantic invariants
+6. Review policy
+```
+
+Run:
+
+```bash
+npm install
+npm run check
+```
+
+## Live Source Provider — M3
+
+M3 implements the runtime `SourceProvider` contract and a repository-backed RGBL reference connector. Canonical content is resolved from the exact Git revision pinned by the WSI Source Binding.
+
+Live verification checks:
+
+```text
+pinned revision exists
+resource exists at that revision
+analysis target resolves
+TEXT_QUOTE matches provider text literally
+CHAR_RANGE resolves against provider text
+claimed RESOLVED bindings are not stale
+```
+
+Run locally with an RGBL checkout:
+
+```bash
+npm run verify:source -- data/golden-candidates/quran/037/030.json \
+  --provider-root /path/to/rocksoul-rgbl
+```
+
+CI also verifies a non-Qur'an Bhagavad Gita fixture through the same connector.
+
+## Linguistic Analyzer — M4
+
+M4 defines one provider-neutral language-analysis interface:
+
+```text
+provider content
+→ LinguisticAnalyzer
+→ linguistic candidate
+→ later semantic/review layer
+```
+
+Each output is bound to the provider/resource/revision plus exact content SHA-256 and analyzer/ruleset version. Token spans use Unicode code points.
+
+Capabilities are explicit:
+
+```text
+TOKENIZATION
+NORMALIZATION
+SENTENCE_SEGMENTATION
+LEMMA
+POS
+MORPHOLOGY
+SYNTAX
+DISCOURSE_CUES
+```
+
+The baseline reference plugins intentionally support only deterministic tokenization + NFC analysis normalization. Unsupported morphology, syntax, lemma, POS, and discourse structure remain `UNSUPPORTED` rather than being guessed.
+
+Reference analyzers:
+
+```text
+Arabic baseline
+Hebrew baseline
+Greek baseline
+Generic fallback
+```
+
+Live linguistic profiles:
+
+```text
+Arabic / Arab   — Qur'an 37:30
+Hebrew / Hebr   — OSHB/WLC Genesis 1:1
+Greek / Grek    — SBLGNT John 1:1
+Sanskrit / Deva — Bhagavad Gita 1:1 via generic fallback
+```
+
+Run the live profile suite with a pinned RGBL checkout:
+
+```bash
+RGBL_REPO_PATH=/path/to/rocksoul-rgbl npm run test:linguistics:live
+```
+
+## Semantic candidate engine — M5
+
+M5 is implemented as a deterministic candidate compiler on top of the source + linguistic boundaries.
+
+```text
+SOURCE PROVIDER
+→ LINGUISTIC CANDIDATE
+→ EVIDENCE-BACKED SEMANTIC PROPOSALS
+→ SEMANTIC CANDIDATE
+→ REVIEW
+→ CANONICAL WSI SEMANTIC RECORD
+```
+
+The compiler separates participants from concepts. A participant reference such as “WE / نا” may identify a participant but is not a semantic key. Function words and structural markers are also excluded from semantic keys by default.
+
+Semantic keys are presentation handles for registered source-semantic concepts; they are not raw-token importance scores.
+
+See `spec/SEMANTIC-CANDIDATE-CONTRACT.md`, `spec/semantic-candidate.schema.json`, `src/semantics/`, and `test/semantics.test.ts`.
+
+## What comes next — M6
+
+M6 consumes reviewed/eligible semantic state to derive Witness candidates, response/correction candidates, and positive direction without back-projecting those derived layers into source meaning.
+
+## Implementation direction
+
+The contract remains language-independent.
+
+### TypeScript
+
+Use for Source Provider integration, canonical WSI objects, validation, orchestration, CLI/API, review tooling, and Witness pipeline.
+
+### Python
+
+Use as optional linguistic/research workers for Arabic, Hebrew, Greek, other language NLP, embeddings, reranking, and evaluation.
+
+### Rust
+
+Optional later for demonstrated performance/type-safety needs.
+
+## Production path
+
+WSI does not call itself production-stable merely because one corpus can be processed. The planned path is:
+
+```text
+M6 Witness engine
+M7 scale / reproducible batch processing
+M8 production hardening
+M9 release candidate → v1.0
+```
+
+See `ROADMAP.md` for acceptance gates.
+
+## Research integrity
+
+WSI must preserve these separations:
+
+- external source identity ≠ WSI identity;
+- source text ≠ analysis;
+- linguistic candidate ≠ reviewed semantic truth;
+- normalized analysis view ≠ provider source replacement;
+- lexeme ≠ sense;
+- sense ≠ universal concept;
+- participant ≠ concept;
+- discourse role ≠ semantic role;
+- relation ≠ concept;
+- polarity ≠ direction;
+- assessment ≠ source structure;
+- Witness ≠ translation;
+- Witness label ≠ Witness Pattern;
+- response ≠ source assertion;
+- positive direction ≠ source direction;
+- analysis provenance ≠ source-acquisition provenance;
+- `UNRESOLVED` and `UNSUPPORTED` are valid outcomes.
 
 ## Development and release model
 
-Only two long-lived working branches are allowed:
+Only two long-lived branches:
 
 ```text
-dev  ───── promotion PR ─────▶  main
- ↑                              │
- active research                └─ version + changelog + tag + release
+dev → promotion PR → main
 ```
 
-### `dev`
+Conventional Commits drive automated versioning, changelog generation, tags, and GitHub Releases.
 
-- Active research and implementation branch.
-- Direct development happens here.
-- Every commit must follow **Conventional Commits**.
-- CI/policy validation runs on every push.
-- A promotion PR from `dev` to `main` is created/maintained automatically when meaningful differences exist.
-
-### `main`
-
-- Stable, releasable branch.
-- Changes arrive through `dev → main` promotion.
-- A push/merge to `main` triggers automated semantic versioning and release generation.
-- Release metadata is committed directly to `main`; no release branch is created.
-
-### No additional working branches
-
-The project deliberately does **not** use `feature/*`, `release/*`, or `hotfix/*` branches in the normal workflow. This keeps research state obvious and prevents ontology/schema work from fragmenting across long-lived branches.
-
-## Commit convention
-
-Use Conventional Commits:
-
-```text
-feat(ontology): add participant role model
-fix(scoring): correct confidence normalization
-docs(blueprint): clarify witness derivation
-refactor(frame): separate relation from concept
-chore(repo): update repository governance
-```
-
-Breaking change:
-
-```text
-feat(schema)!: replace legacy direction representation
-```
-
-or include a `BREAKING CHANGE:` footer.
-
-### Automated version policy
-
-The release workflow chooses the **highest** required bump in the promoted change set:
-
-| Change | Version bump |
-| --- | --- |
-| `!` / `BREAKING CHANGE:` | major |
-| `feat` | minor |
-| `fix`, `perf`, `refactor`, `docs`, `build`, `ci`, `test`, `style`, `chore` | patch |
-| no recognized releasable commit | no release |
-
-The current project starts at **`0.1.0`**. During `0.x`, the project should still treat breaking changes explicitly; the automation follows standard SemVer major/minor/patch arithmetic rather than silently redefining SemVer.
-
-## Release automation
-
-On a releasable push to `main`, automation will:
-
-1. inspect Conventional Commit messages in the promoted range;
-2. calculate the next SemVer;
-3. update `VERSION`;
-4. prepend the generated release section to `CHANGELOG.md`;
-5. commit release metadata to `main`;
-6. create `vX.Y.Z` tag;
-7. publish a GitHub Release;
-8. fast-forward `dev` to the release commit **only when safe**; if `dev` has advanced independently, it is left untouched rather than force-updated.
-
-No release branch is required.
-
-## Repository automation
-
-The bootstrap automation covers:
-
-- Conventional Commit validation on `dev`;
-- `dev → main` pull-request policy;
-- automatic promotion PR creation;
-- repository invariant checks;
-- automated SemVer bumping;
-- automated `CHANGELOG.md` generation;
-- automated Git tag and GitHub Release creation;
-- safe post-release `dev` synchronization;
-- Dependabot updates for GitHub Actions;
-- CODEOWNERS and a promotion-review checklist.
-
-## Recommended GitHub repository settings
-
-Some controls are repository settings rather than files and therefore must be enabled in GitHub settings:
-
-### `main`
-
-- Require a pull request before merging.
-- Require successful status checks.
-- Require conversation resolution.
-- Block force pushes and deletion.
-- Prefer **squash** or **rebase**; if merge commits are retained, Conventional Commit validation still applies to the underlying promoted commits.
-- Do not allow direct human pushes.
-
-### `dev`
-
-- Block force pushes and deletion.
-- Direct pushes are allowed for the intentionally two-branch workflow.
-- Require CI to pass before promoting to `main`.
-
-> Repository rulesets/branch protection should be configured in GitHub Settings. The committed workflows reinforce policy but cannot replace server-side protection against direct pushes.
-
-## Version sources
-
-- `VERSION` — canonical repository release version.
-- `CHANGELOG.md` — generated human-readable release history.
-- Git tags — immutable release markers (`vX.Y.Z`).
-- GitHub Releases — published release notes.
-
-Application/package metadata will later consume the canonical version rather than inventing a second independent version source.
-
-## Blueprint
-
-The normative research and engineering design is maintained in **[BLUEPRINT.md](BLUEPRINT.md)**. It defines:
-
-- source and evidence model;
-- participants and semantic roles;
-- frame/proposition representation;
-- concept registry rules;
-- polarity, modality, direction, and confidence;
-- Witness and positive-direction derivation;
-- provenance and review status;
-- machine-readable contract;
-- validation invariants;
-- golden datasets;
-- release/versioning governance;
-- phased implementation plan.
+`dev` is active research. `main` is stable release history.
 
 ## Design principle
 
-> **Do not store interpretation as if it were source. Do not store a sentence as one giant key. Decompose, relate, normalize, evidence, score, validate, lock — then Witness.**
-
----
-
-**Witness Semantic Engine** is currently a research architecture. Interfaces and ontology terms may evolve until the first stable specification release.
+> **Do not ingest the world twice. Resolve the source, pin it, anchor evidence, analyze language conservatively, review semantics, then Witness.**

@@ -1,0 +1,71 @@
+{
+  "profile_version": "0.1.0",
+  "provider": "rocksoul-rgbl",
+  "provider_revision": "df00706c98e21fb3fb0146b8389b0f2978f3d833",
+  "profiles": [
+    {
+      "id": "arabic-quran-37-30",
+      "dataset": "quran-tanzil-uthmani",
+      "resource_id": "mw:content:quran:37:30:ar-uthmani",
+      "language": "ar",
+      "script": "Arab",
+      "expected_analyzer_id": "wsi:linguistic-analyzer/arabic-baseline",
+      "expected_status": "PARTIAL",
+      "required_capabilities": {
+        "TOKENIZATION": "SUPPORTED",
+        "NORMALIZATION": "SUPPORTED",
+        "LEMMA": "UNSUPPORTED",
+        "MORPHOLOGY": "UNSUPPORTED",
+        "SYNTAX": "UNSUPPORTED"
+      }
+    },
+    {
+      "id": "hebrew-oshb-gen-1-1",
+      "dataset": "oshb-wlc",
+      "resource_id": "mw:content:oshb:wlc:gen:1:1",
+      "language": "he",
+      "script": "Hebr",
+      "expected_analyzer_id": "wsi:linguistic-analyzer/hebrew-baseline",
+      "expected_status": "PARTIAL",
+      "required_capabilities": {
+        "TOKENIZATION": "SUPPORTED",
+        "NORMALIZATION": "SUPPORTED",
+        "LEMMA": "UNSUPPORTED",
+        "MORPHOLOGY": "UNSUPPORTED",
+        "SYNTAX": "UNSUPPORTED"
+      }
+    },
+    {
+      "id": "greek-sblgnt-john-1-1",
+      "dataset": "sblgnt-v1-2",
+      "resource_id": "mw:content:sblgnt:v1-2:john:1:1",
+      "language": "grc",
+      "script": "Grek",
+      "expected_analyzer_id": "wsi:linguistic-analyzer/greek-baseline",
+      "expected_status": "PARTIAL",
+      "required_capabilities": {
+        "TOKENIZATION": "SUPPORTED",
+        "NORMALIZATION": "SUPPORTED",
+        "LEMMA": "UNSUPPORTED",
+        "MORPHOLOGY": "UNSUPPORTED",
+        "SYNTAX": "UNSUPPORTED"
+      }
+    },
+    {
+      "id": "sanskrit-bhagavad-gita-1-1",
+      "dataset": "bhagavad-gita",
+      "resource_id": "mw:content:hinduism:bhagavad-gita:1:1:sa",
+      "language": "sa",
+      "script": "Deva",
+      "expected_analyzer_id": "wsi:linguistic-analyzer/generic-baseline",
+      "expected_status": "PARTIAL",
+      "required_capabilities": {
+        "TOKENIZATION": "SUPPORTED",
+        "NORMALIZATION": "SUPPORTED",
+        "LEMMA": "UNSUPPORTED",
+        "MORPHOLOGY": "UNSUPPORTED",
+        "SYNTAX": "UNSUPPORTED"
+      }
+    }
+  ]
+}

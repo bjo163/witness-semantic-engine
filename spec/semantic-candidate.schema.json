@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wsi.example/spec/semantic-candidate.schema.json",
+  "title": "WSI Semantic Candidate Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractVersion","candidateId","status","source","participants","conceptCandidates","semanticKeys","excludedSemanticKeys","frames","findings","provenance"],
+  "properties": {
+    "contractVersion": { "const": "0.1.0" },
+    "candidateId": { "type": "string", "pattern": "^wsi:semantic-candidate/sha256-[a-f0-9]{64}$" },
+    "status": { "enum": ["COMPLETE","PARTIAL","UNRESOLVED"] },
+    "source": { "$ref": "#/$defs/source" },
+    "participants": { "type": "array", "items": { "$ref": "#/$defs/participant" } },
+    "conceptCandidates": { "type": "array", "items": { "$ref": "#/$defs/conceptCandidate" } },
+    "semanticKeys": { "type": "array", "items": { "$ref": "#/$defs/semanticKey" } },
+    "excludedSemanticKeys": { "type": "array", "items": { "$ref": "#/$defs/excludedKey" } },
+    "frames": { "type": "array", "items": { "$ref": "#/$defs/frame" } },
+    "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+    "provenance": { "$ref": "#/$defs/provenance" }
+  },
+  "$defs": {
+    "tokenId": { "type": "string", "pattern": "^T[1-9][0-9]*$" },
+    "tokenIds": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/tokenId" } },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "reviewStatus": { "const": "CANDIDATE" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider","providerRevision","resourceId","contentSha256","linguisticAnalysisId"],
+      "properties": {
+        "provider": { "type": "string", "minLength": 1 },
+        "providerRevision": { "type": "string", "minLength": 1 },
+        "resourceId": { "type": "string", "minLength": 1 },
+        "contentSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "linguisticAnalysisId": { "type": "string", "pattern": "^wsi:linguistic-analysis/sha256-[a-f0-9]{64}$" },
+        "language": { "type": "string", "minLength": 1 },
+        "script": { "type": "string", "minLength": 1 }
+      }
+    },
+    "participant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id","proposalKey","tokenIds","entityType","discourseRoles","resolutionStatus","confidence","reviewStatus"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^SP[1-9][0-9]*$" },
+        "proposalKey": { "type": "string", "minLength": 1 },
+        "tokenIds": { "$ref": "#/$defs/tokenIds" },
+        "entityType": { "enum": ["PERSON","GROUP","DIVINE_ENTITY","PLACE","OBJECT","ABSTRACT_ENTITY","EVENT","OTHER","UNDETERMINED"] },
+        "discourseRoles": { "type": "array", "uniqueItems": true, "items": { "enum": ["SPEAKER","ADDRESSEE","REFERENT","NARRATOR","OTHER"] } },
+        "resolutionStatus": { "enum": ["RESOLVED","UNRESOLVED"] },
+        "resolvedIdentity": { "type": "string", "minLength": 1 },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "reviewStatus": { "$ref": "#/$defs/reviewStatus" }
+      }
+    },
+    "conceptCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id","proposalKey","tokenIds","sourceRole","conceptId","senseGloss","confidence","registered","semanticKeyEligible","reviewStatus"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^SC[1-9][0-9]*$" },
+        "proposalKey": { "type": "string", "minLength": 1 },
+        "tokenIds": { "$ref": "#/$defs/tokenIds" },
+        "sourceRole": { "enum": ["CONTENT","PARTICIPANT_REFERENCE","FUNCTION_WORD","STRUCTURAL","UNKNOWN"] },
+        "conceptId": { "anyOf": [{"type":"string","pattern":"^wsi:concept/[a-z0-9][a-z0-9._-]*$"},{"type":"null"}] },
+        "senseGloss": { "type": "string", "minLength": 1 },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "registered": { "type": "boolean" },
+        "semanticKeyEligible": { "type": "boolean" },
+        "exclusionReason": { "enum": ["PARTICIPANT_REFERENCE","FUNCTION_WORD","STRUCTURAL_MARKER","UNKNOWN_SOURCE_ROLE","UNRESOLVED_CONCEPT","UNREGISTERED_CONCEPT"] },
+        "reviewStatus": { "$ref": "#/$defs/reviewStatus" }
+      }
+    },
+    "semanticKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id","conceptCandidateId","conceptId","displayKey","tokenIds","reviewStatus"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^SK[1-9][0-9]*$" },
+        "conceptCandidateId": { "type": "string", "pattern": "^SC[1-9][0-9]*$" },
+        "conceptId": { "type": "string", "pattern": "^wsi:concept/[a-z0-9][a-z0-9._-]*$" },
+        "displayKey": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
+        "tokenIds": { "$ref": "#/$defs/tokenIds" },
+        "reviewStatus": { "$ref": "#/$defs/reviewStatus" }
+      }
+    },
+    "excludedKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["conceptCandidateId","proposalKey","tokenIds","reason"],
+      "properties": {
+        "conceptCandidateId": { "type": "string", "pattern": "^SC[1-9][0-9]*$" },
+        "proposalKey": { "type": "string", "minLength": 1 },
+        "tokenIds": { "$ref": "#/$defs/tokenIds" },
+        "reason": { "enum": ["PARTICIPANT_REFERENCE","FUNCTION_WORD","STRUCTURAL_MARKER","UNKNOWN_SOURCE_ROLE","UNRESOLVED_CONCEPT","UNREGISTERED_CONCEPT"] }
+      }
+    },
+    "roleBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role","participantCandidateId"],
+      "properties": {
+        "role": { "enum": ["AGENT","PATIENT","THEME","HOLDER","TARGET","RECIPIENT","EXPERIENCER","STATE_BEARER","SOURCE","GOAL","LOCATION","INSTRUMENT","BENEFICIARY","OTHER"] },
+        "participantCandidateId": { "type": "string", "pattern": "^SP[1-9][0-9]*$" }
+      }
+    },
+    "frame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id","proposalKey","frameType","predicateRelationId","relationRegistered","roleBindings","conceptCandidateIds","polarity","modality","speechAct","evidenceTokenIds","confidence","reviewStatus"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^SF[1-9][0-9]*$" },
+        "proposalKey": { "type": "string", "minLength": 1 },
+        "frameType": { "enum": ["ACTION","STATE","RELATION","EVENT","ATTRIBUTE"] },
+        "predicateRelationId": { "anyOf": [{"type":"string","pattern":"^wsi:relation/[a-z0-9][a-z0-9._-]*$"},{"type":"null"}] },
+        "relationRegistered": { "type": "boolean" },
+        "roleBindings": { "type": "array", "items": { "$ref": "#/$defs/roleBinding" } },
+        "conceptCandidateIds": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^SC[1-9][0-9]*$" } },
+        "polarity": { "enum": ["AFFIRMED","NEGATED","UNDETERMINED"] },
+        "modality": { "enum": ["ASSERTED","POSSIBLE","PROBABLE","NECESSARY","HYPOTHETICAL","COUNTERFACTUAL","UNDETERMINED"] },
+        "speechAct": { "enum": ["STATEMENT","COMMAND","PROHIBITION","QUESTION","OATH","REQUEST","PROMISE","WARNING","SUPPLICATION","OTHER","UNDETERMINED"] },
+        "evidenceTokenIds": { "$ref": "#/$defs/tokenIds" },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "reviewStatus": { "$ref": "#/$defs/reviewStatus" }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["severity","code","message"],
+      "properties": {
+        "severity": { "enum": ["error","warning","info"] },
+        "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+        "message": { "type": "string", "minLength": 1 },
+        "proposalKey": { "type": "string", "minLength": 1 }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compilerId","compilerVersion","contractVersion","rulesetVersion","registryVersion","proposer"],
+      "properties": {
+        "compilerId": { "const": "wsi:semantic-compiler/reference" },
+        "compilerVersion": { "const": "0.1.0" },
+        "contractVersion": { "const": "0.1.0" },
+        "rulesetVersion": { "const": "semantic-candidate-rules-1" },
+        "registryVersion": { "type": "string", "minLength": 1 },
+        "proposer": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id","version","method"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "version": { "type": "string", "minLength": 1 },
+            "method": { "enum": ["RULE","MANUAL","MODEL","IMPORT"] },
+            "rulesetVersion": { "type": "string", "minLength": 1 },
+            "model": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id"],
+              "properties": {
+                "id": { "type": "string", "minLength": 1 },
+                "version": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
