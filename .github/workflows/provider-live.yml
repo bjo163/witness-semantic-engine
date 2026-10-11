@@ -23,10 +23,10 @@ jobs:
 
     steps:
       - name: Checkout WSI
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Checkout pinned RGBL provider snapshot
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: bjo163/rocksoul-rgbl
           ref: df00706c98e21fb3fb0146b8389b0f2978f3d833
